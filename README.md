@@ -4,18 +4,15 @@ Documentation for [timingsrc](https://webtiming.github.io/timingsrc/) hosted on 
 
 # virtualenv
 
+A Python virtual environment with sphinx and other dependencies was
+needed for project startup and is also needed for local builds.
+
+
 Create Python environment
 
 ```sh
 python3 -m venv venv
 ```
-
-or
-
-```sh
-pip install venv
-```
-
 
 Activate Python environment
 
