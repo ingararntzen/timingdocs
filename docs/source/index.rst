@@ -8,7 +8,18 @@ Welcome to timingsrc's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Timing Object
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API
+
+   axis.rst
+   sequencer.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Audio/Video
 
 
 
