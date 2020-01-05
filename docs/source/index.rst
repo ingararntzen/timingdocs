@@ -8,19 +8,13 @@ Welcome to timingsrc's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Timing Object
+   :caption: Timed Data
 
-.. toctree::
-   :maxdepth: 2
-   :caption: API
-
-   axis.rst
-   sequencer.rst
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Audio/Video
-
+   timeddata/intro
+   timeddata/usage
+   timeddata/axis
+   timeddata/sequencer
+   timeddata/example
 
 
 Indices and tables
