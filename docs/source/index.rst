@@ -12,6 +12,7 @@ Welcome to timingsrc's documentation!
 
    timeddata/intro
    timeddata/usage
+   timeddata/interval
    timeddata/axis
    timeddata/sequencer
    timeddata/example

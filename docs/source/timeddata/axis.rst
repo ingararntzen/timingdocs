@@ -91,7 +91,7 @@ This is a paragraph that contains `a link`_.
     :param string key: key of the cue
     :returns: cue object
 
-.. js:class Axis()
+.. js:class:: Axis()
 
     :returns: Axis object
 
