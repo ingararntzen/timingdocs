@@ -1,11 +1,13 @@
+..  _interval:
+
 ========================================================================
 Interval
 ========================================================================
 
-``Interval`` is used by ``Axis`` to define the validity of an object in
+``Interval`` is used by ``Axis`` to define the validity of an value in
 relation to an *axis*, either as a singular *point* or as a *range*. So,
 if the *axis* is considered to be a *time-axis* the ``Interval`` will
-define the *temporal validity* of an object.
+define the *temporal validity* of a value.
 
 Definition
 ------------------------------------------------------------------------

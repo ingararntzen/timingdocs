@@ -1,18 +1,43 @@
-====
+========================================================================
 Axis
-====
+========================================================================
+
+``Axis`` is a specific dataset used for precise and efficient
+*sequencing* of timed data, i.e. *cues*.
+
+Definition
+------------------------------------------------------------------------
+
+``Axis`` is a collection of *cues*. A *cue* is essentially a triplet: (key,
+:ref:`interval` , data), represented as a simple Javascript object.
+
+..  code-block:: javascript
+
+    let cue = {
+        key: "mykey",
+        interval: new timingsrc.Interval(2.2, 4.31),
+        data: {...}
+    }
+
+``Axis`` is similar to a ``Map`` as *cues* are indexed by a unique
+``cue.key``. Additionally, *cues* are indexed by ``cue.interval`` which
+defines the validity of the *cue* along the *axis*. This allows
+efficient lookup of *cues* valid for a particular *point* on the
+``Axis``, or valid within a continuous segment.
 
 
-This describes the ``Axis`` class, a specific dataset used by
-``Sequencers`` for precise and efficient sequencing of timed data.
+Illustration
 
 
-* high volume of cues
-* correct behaviour
-    * cue endpoint semantics
-    * state
-* batch oriented
-* efficient add, modify, remove and search
+*   high volume of cues
+*   correct behaviour
+
+    *   cue endpoint semantics
+    *   state
+
+*   batch oriented
+
+*   efficient add, modify, remove and search
 
 
 
