@@ -29,103 +29,140 @@ efficient lookup of *cues* valid for a particular *point* on the
 Illustration
 
 
-*   high volume of cues
-*   correct behaviour
-
-    *   cue endpoint semantics
-    *   state
-
-*   batch oriented
-
-*   efficient add, modify, remove and search
-
-
-
-Constructor
-===========
-
-.. code-block:: javascript
-
-    const axis = new Axis();
-
-
-Cue Manipulation
-================
-
-
-UpdateCue
+Cue manipulation
 ------------------------------------------------------------------------
 
-AddCue
--------
-
-ModifyCue
-----------
-
-RemoveCue
----------
-
-This is a subsubsection
-^^^^^^^^^^^^^^^^^^^^^^^
-
-Paragraph
-""""""""""""
+Cues are supposed *immutable*, so manipulation of cues on the ``Axis``
+involves **adding**, **modifying** or **removing** cues.
 
 
+.. note::
 
-Batch
-=====
+    *Immutability* of cues is **not** enforced by the implementation, so
+    the programmer must avoid direct modification of cues managed by the
+    ``Axis``, and instead use the designated methods. Modification of cue
+    ``Intervals`` especially may break the indexing of cues and lead to
+    unspecified behavior. Modification of cue data would imply that
+    appropriate *change events* would **not** be emitted from the ``Axis``.
 
+
+Cue manipulation is also **batch-oriented**, implying that multiple cue
+operations may be processed by the ``Axis``, as one atomic operation.
+This ``Axis`` implementation targets efficiency with high volumes of
+cues, and support for batch operations is crucial in this regard. For
+instance, with the current implementation inserting 100.000 ordered cues
+would take about 0.2 seconds in a desktop environment.
+
+
+Update
+------------------------------------------------------------------------
+
+..  js:method:: axis.update (cueOpList)
+
+    :param list cueOpList: single cue operation or list
+
+    The update operation processes a single ``cueOp`` operations, or a
+    list of such cue operations. Cue operations are structured similarly
+    to ``cues``.
+
+    ..  code-block:: javascript
+
+        let cueOp = {
+            key: "akey",
+            interval: new timingsrc.Interval(2.2, 4.31),
+            data: {...}
+        }
+
+    The update operations is asynchronous, and the will not return a result.
+    For the same reason, effects on the ``Axis`` will not be observable
+    directly after this operation.
+
+    If ``cueOp.key`` references a key which already exists in the
+    ``Axis``, the cue operation describes **modification** or
+    **removal** of the pre-existing ``cue``. Otherwise, the ``cueOp``
+    describes the **addition** of a new ``cue``. This way, a batch of
+    cue operations may include a mix of **add**, **modify**
+    and **remove** operations.
+
+
+    Unlike, ``cue`` objects, ``cueOp`` objects need not always define
+    propterties ``cueOp.interval`` and ``cueOp.data``. This gives rise
+    to four types of cue operations:
+
+    =====  =======================================  ====================
+    Type   CueOp value                              Text
+    =====  =======================================  ====================
+    A      {key: "akey"}                            no interval, no data
+    B      {key: "akey", interval: ...}             interval, no data
+    C      {key: "akey", data: ...}                 no interval, data
+    D      {key: "akey", interval: ..., data: ...}  interval, data
+    =====  =======================================  ====================
+
+    ..  note::
+
+        Note that ``{key: "akey"}`` is *type A* whereas ``{key: "akey",
+        data:undefined}`` is type C. The type evaluation employed by the
+        ``Axis`` is based on ``cueOp.hasOwnProperty("data")`` rather than
+        ``cueOp.data === undefined``. This ensures that ``undefined``
+        may be used as a data value with ``cues``.
+        The type evaluation for interval is stricter, as *type B* and *type D*
+        require ``cue.interval`` to be instance of ``timingsrc.Interval``.
+
+
+    The different types of cue operations are then interpreted
+    according to the following table.
+
+    =====  ====================  ==============================
+    Type   Key NOT pre-existing  Key pre-existing
+    =====  ====================  ==============================
+    A      NOOP                  REMOVE CUE
+    B      NOOP                  MODIFY CUE.INTERVAL
+    C      NOOP                  MODIFY CUE.DATA
+    D      ADD CUE               MODIFY CUE.INTERVAL & CUE.DATA
+    =====  ====================  ==============================
+
+    ..  note::
+
+        It is possible to include multiple cue operations regarding the
+        same key in a single batch. If so, all cue operations will be
+        applied in given order. However, as they are part of the same
+        batch, intermediate states will never be exposed. This effectively
+        means that multiple  ``cueOps`` are collapsed into one.
+        For instances, if a cue is first added and then removed,
+        the net effect is *no effect*.
+
+    ..  note::
+
+        Multiple invokations of ``update`` is fine, it will still result
+        in a single aggregate batch being applied to the ``Axis``.
+
+
+
+AddCue and RemoveCue
+------------------------------------------------------------------------
+
+
+The following methods are provided making common
+oprations more practical.
+
+..  js:method:: axis.addCue (key, interval, data)
+
+    :param object key: cue key
+    :param Interval interval: cue interval
+    :param object data: cue data
+    :returns: this
+
+..  js:method:: axis.removeCue (key)
+
+    :param object key: Remove cue.
+    :returns: this
+
+
+Events
+------------------------------------------------------------------------
 
 Search
-======
-
-
-======
-Events
-======
-
-
-
-
-word
-*emphasis*
-**strong emphasis**
-
-
-    quote line 1
-
-    quote line 2
-
-
-This is literal block::
-
-    > Hey
-
-    > Ho
-
-link `Link text <https://webtiming.github.com/>`_
-
-This is a paragraph that contains `a link`_.
-
-.. _a link: https://domain.invalid/
-
-
-.. js:function:: get(key)
-
-    :param string key: key of the cue
-    :returns: cue object
-
-.. js:class:: Axis()
-
-    :returns: Axis object
-
-
-
-.. js:function:: a.get(key)
-
-    :param string key: key of the cue
-    :returns: cue object
+------------------------------------------------------------------------
 
 
 
