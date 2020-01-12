@@ -108,9 +108,11 @@ Update
         The type evaluation for interval is stricter, as *type B* and *type D*
         require ``cue.interval`` to be instance of ``timingsrc.Interval``.
 
-
     The different types of cue operations are then interpreted
-    according to the following table.
+    according to the following table. For cue operations which modify only
+    the interval (type B), the pre-existing value for ``cue.data`` will be
+    preserved. Similarly, when modifying only the data (type C), the
+    pre-existing ``cue.interval`` will be preserved.
 
     =====  ====================  ==============================
     Type   Key NOT pre-existing  Key pre-existing
@@ -141,9 +143,9 @@ Update
 AddCue and RemoveCue
 ------------------------------------------------------------------------
 
-
-The following methods are provided making common
-oprations more practical.
+The following methods are provided making common operations more
+practical. These methods are trivial wrappers around the ``update``
+method. They simply encapsulate cueOp creation and may be chained.
 
 ..  js:method:: axis.addCue (key, interval, data)
 
@@ -152,14 +154,95 @@ oprations more practical.
     :param object data: cue data
     :returns: this
 
+    This method will either add a new cue or modify an existing.
+    Partial modification (modifying only interval or only data) will not be
+    possible using this method.
+
+    ..  code-block:: javascript
+
+        addCue(key, interval, data) {
+            this.update({key:key, interval:interval, data:data});
+            return this;
+        };
+
 ..  js:method:: axis.removeCue (key)
 
-    :param object key: Remove cue.
+    :param object key: cue key
     :returns: this
+
+    This method will remove a cue.
+
+    ..  code-block:: javascript
+
+        removeCue(key) {
+            this.update({key:key});
+            return this;
+        };
 
 
 Events
 ------------------------------------------------------------------------
+
+The ``Axis`` offers a ``change`` event after every ``update`` batch has
+been processed. This allows multiple observers to monitor state changes
+of the ``Axis`` dynamically.
+
+..  js:method:: axis.on (type, callback[, ctx])
+
+    :param string type: event type
+    :param function callback: event callback
+    :param object ctx: set *this* object to be used during callback
+        invokation. If not provided, *this* will be ``Axis``.
+
+    Register a callback for events of given type.
+
+    ..  code-block:: javascript
+
+        let handler = function(e){}
+        axis.on("change", handler)
+
+
+..  js:method:: axis.off (type, callback)
+
+    :param string type: event type
+    :param function callback: event callback
+
+    Un-register a callback from given event type
+
+    ..  code-block:: javascript
+
+        axis.off("change", handler)
+
+
+..  js:method:: callback (batchMap)
+
+    :param Map batchMap: state changes
+
+    The callback is invoked by ``Axis`` after each ``update`` has been
+    completed. The parameter is a ``Map`` object describing state changes
+    for each affected cue, indexed by key. State changes include the
+    **new** cue value and the **old** cue value. The ``Axis`` creates the
+    batch map as follows:
+
+    ..  code-block:: javascript
+
+        let batchMap = new Map();
+
+        // new cue added
+        batchMap.set(key, {new:added_cue, old:undefined})
+
+        // existing cue modified
+        batchMap.set(key, {new:new_cue, old:old_cue})
+
+        // cue removed
+        batchMap.set(key, {new:undefined, old:removed_cue})
+
+
+
+
+
+
+
 
 Search
 ------------------------------------------------------------------------
