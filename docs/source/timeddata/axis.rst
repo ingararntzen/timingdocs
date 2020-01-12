@@ -1,3 +1,6 @@
+
+..  _axis:
+
 ========================================================================
 Axis
 ========================================================================
@@ -17,7 +20,7 @@ Introduction
 
     let cue = {
         key: "mykey",
-        interval: new timingsrc.Interval(2.2, 4.31),
+        interval: new Interval(2.2, 4.31),
         data: {...}
     }
 
@@ -79,7 +82,7 @@ Cue operations are structured similarly to ``cues``.
 
     let cueOp = {
         key: "akey",
-        interval: new timingsrc.Interval(2.2, 4.31),
+        interval: new Interval(2.2, 4.31),
         data: {...}
     }
 
@@ -116,7 +119,7 @@ D      {key: "akey", interval: ..., data: ...}  interval, data
     ``cueOp.data === undefined``. This ensures that ``undefined``
     may be used as a data value with ``cues``.
     The type evaluation for interval is stricter, as *type B* and *type D*
-    require ``cue.interval`` to be instance of ``timingsrc.Interval``.
+    require ``cue.interval`` to be instance of ``Interval``.
 
 The different types of cue operations are then interpreted
 according to the following table. For cue operations which modify only
@@ -150,7 +153,7 @@ D      ADD CUE               MODIFY CUE.INTERVAL & CUE.DATA
 
 
 
-Methods
+Api
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:method:: axis.update (cueOpList)
@@ -158,12 +161,18 @@ Methods
     :param list cueOpList: single cue operation or list
 
 
+..  js:method:: axis.clear()
+
+    Clears all cues of the ``Axis``. More effective than iterating
+    through cues and removing them.
+
+
 ..  js:method:: axis.addCue (key, interval, data)
 
     :param object key: cue key
     :param Interval interval: cue interval
     :param object data: cue data
-    :returns: this
+    :returns object: this
 
     This method will either add a new cue or modify an existing.
     Partial modification (modifying only interval or only data) will not be
@@ -179,7 +188,7 @@ Methods
 ..  js:method:: axis.removeCue (key)
 
     :param object key: cue key
-    :returns: this
+    :returns object: this
 
     This method will remove a cue.
 
@@ -199,12 +208,17 @@ Get Cues
 A selection of ``Map``-like methods are available for accessing the
 state of the ``Axis``.
 
-Methods
+Api
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+..  js:attribute:: size
+
+    :returns int: number of cues
+
 ..  js:method:: axis.has(key)
 
     :param object key: cue key
-    :returns boolean: True if cue key exists, else false
+    :returns boolean: true if cue key exists, else false
 
 ..  js:method:: axis.get(key)
 
@@ -213,16 +227,13 @@ Methods
 
 ..  js:method:: axis.keys()
 
-    :returns: list of all keys
+    :returns Array: list of all keys
 
 ..  js:method:: axis.cues()
 
-    :returns: list of all cues
+    :returns Array: list of all cues
 
-..  js:method:: axis.clear()
 
-    Clears all cues of the ``Axis``. More effective than iterating
-    through cues and removing them.
 
 
 .. axis-lookup:
@@ -308,28 +319,28 @@ algorithm relates to resolving the COVERS group without resorting to
 linear search.
 
 
-Methods
+Api
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:method:: axis.lookup(interval[, mode])
 
     :param Interval interval: search interval
     :param int mode: search mode
-    :returns: list of cues
+    :returns Array: list of cues
 
     Returns all cues for a given interval on ``Axis``. Search mode
     specifies which cues to include.
 
 
-..  js:method:: axis.remove(interval[, mode])
+..  js:method:: axis.lookup_remove(interval[, mode])
 
     :param Interval interval: search interval
     :param int mode: search mode
-    :returns: list of cues
+    :returns Array: list of removed cues
 
     Removes all cues for a given interval on ``Axis``. Search mode
     specifies which cues to include. More effective than iterating
-    through cues and removing them.
+    through cues and removing them iteratively.
 
 
 ..  _axis-events:
@@ -358,7 +369,7 @@ The ``Axis`` creates the batch map as follows:
     batchMap.set(key, {new:undefined, old:removed_cue})
 
 
-Methods
+Api
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:method:: axis.on (type, callback[, ctx])
