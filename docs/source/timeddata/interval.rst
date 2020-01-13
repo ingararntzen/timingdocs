@@ -30,8 +30,7 @@ Definition
 
 
 Api
-------------------------------------------------------------------------
-
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:class:: timingsrc.Interval(low[, high[, lowInclude[, highInclude]]])
 
@@ -84,7 +83,7 @@ Api
 
 
 Example
-------------------------------------------------------------------------
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: javascript
 
@@ -97,3 +96,55 @@ Example
     // specify endpoint semantics
     let itv_3 = new timingsrc.Interval(4.0, 6.1, false, true);
 
+
+Interval Ordering
+------------------------------------------------------------------------
+
+The ordering of intervals is not well defined in general, since
+intervals may overlap partly or fully. However, *interval endpoints* may
+be ordered, and intervals may therefor be ordered by their **low**
+endpoints, or alternatively by their **high** endpoints.
+
+This is straight forward, but a small complication arises when intervals
+share endpoints. Correct ordering then depends on whether the endpoints
+are open or closed. For instance, consider the natural ordering of
+**low** endpoints for intervals with the same **low** endpoint.
+
+==========  ==========  ==========
+interval A  interval B  ordering
+==========  ==========  ==========
+[4,..       [4,..       A == B
+[4,..       <4,..       A < B
+<4,..       <4,..       A == B
+==========  ==========  ==========
+
+To sort intervals according to these rules, two compare functions are
+provided, one for ordering by **low** endpoint and one for ordering
+by **high** endpoint. The compare function may be used with
+``Array.sort()`` and provides ascending sorting.
+
+Api
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+..  js:function:: cmp_interval_low(interval_a, interval_b)
+
+    :param Interval interval_a: interval A
+    :param Interval interval_b: interval B
+    :returns int: diff
+        diff == 0: A == B
+        diff > 0: A < B
+        diff < 0: A > B
+
+
+..  js:function:: cmp_interval_high(interval_a, interval_b)
+
+    :param Interval interval_a: interval A
+    :param Interval interval_b: interval B
+    :returns int: diff
+        diff == 0: A == B
+        diff > 0: A < B
+        diff < 0: A > B
+
+
+Interval Comparison
+------------------------------------------------------------------------

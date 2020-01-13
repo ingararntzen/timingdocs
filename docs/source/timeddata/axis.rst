@@ -264,14 +264,14 @@ as illustrated below.
     Illustration!
 
 
-==============  ======================================================
-Group           Descriptions
-==============  ======================================================
-INSIDE          all points of cue interval *inside* search interval
-PARTIAL         one endpoint of cue interval *inside* search interval
-COVERS          all points of search interval *inside* cue interval
-OUTSIDE         no points in cue interval are *inside* search interval
-==============  ======================================================
+=======  ======================================================
+Group    Descriptions
+=======  ======================================================
+INSIDE   all points of cue interval *inside* search interval
+PARTIAL  one endpoint of cue interval *inside* search interval
+COVERS   all points of search interval *inside* cue interval
+OUTSIDE  no points in cue interval are *inside* search interval
+=======  ======================================================
 
 The lookup operation allows *match* to be controlled by selectively
 including groups INSIDE, PARTIAL and/or COVERS. This gives rise
