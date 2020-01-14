@@ -242,69 +242,42 @@ Lookup Cues
 ------------------------------------------------------------------------
 
 The basic function of the lookup operation is to take a *search
-interval* and return all cues where **cue.interval** *matches* **search
-interval**. There are, however, multiple ways to define a *match*
+interval* and return all cues where **cue.interval** *matches* the
+**search interval**. There are, however, multiple ways to define a *match*
 between two intervals, and this is controlled by *lookup modes*.
 
 ..  note::
 
     Since ``Intervals`` may also be used to represent singular points
-    (see :ref:`interval`), the lookup operation readily supports lookup for
+    (see :ref:`interval-definition`), the lookup operation readily supports lookup for
     cues that cover a single point.
 
 
 Lookup Modes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Given a *search interval* cue intervals fall into 4 distinct groups,
-as illustrated below.
-
-..  note::
-
-    Illustration!
-
-
-=======  ======================================================
-Group    Descriptions
-=======  ======================================================
-INSIDE   all points of cue interval *inside* search interval
-PARTIAL  one endpoint of cue interval *inside* search interval
-COVERS   all points of search interval *inside* cue interval
-OUTSIDE  no points in cue interval are *inside* search interval
-=======  ======================================================
+Comparison between a *search interval* and a set of *cue intervals* yields
+five distinct groups of cues, based on the five five distinct comparison
+relations defined for intervals: COVERED, PARTIAL, COVERS, OUTSIDE,
+EQUAL (see :ref:`interval-comparison`).
 
 The lookup operation allows *match* to be controlled by selectively
-including groups INSIDE, PARTIAL and/or COVERS. This gives rise
-to the following *modes* for the lookup operation:
+including above groups (except OUTSIDE). This gives rise
+to the following *modes* for the lookup operation, i.e. a bitmask
+indicating which groups to include in the lookup result.
 
 =============  =======================
-Mode           Included groups
+mask           included groups
 =============  =======================
-1              INSIDE
+1              COVERS
 2              PARTIAL
-3              INSIDE, PARTIAL
 4              COVERS
-5              INSIDE, COVERS
-6              PARTIAL, COVERS
-7 (default)    INSIDE, PARTIAL, COVERS
+8              EQUAL
 =============  =======================
 
-Endpoint Subtleties
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-A correct implementations of *lookup modes* depend on precise
-definitions of groups INSIDE, PARTIAL, COVERS and OUTSIDE. When *search
-interval* and *cue interval* share one (or both) endpoints, some
-subtleties arise concerning the definition of :ref:`interval`, and how
-inteval endpoints may be closed ([]) or open (<>). For example,
-consider the following cases, where the same cue is sorted into
-different groups, depending on slight variations of the search interval.
-
-Search interval   Cue interval  Cue group
-[2,4]             [2,4>         INSIDE
-<2,4]             [2,4>         PARTIAL
-[2,4>             [2,4>         INSIDE
-<2,4>             [2,4>         COVERS
+Typically, when looking up cues on an axis, the desire is to lookup
+all cues which are *valid* somewhere within the *search interval*.
+If so, all groups must be included, and the appropriate lookup mode is 15.
 
 
 Lookup Efficiency

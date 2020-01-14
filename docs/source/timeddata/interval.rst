@@ -9,6 +9,8 @@ relation to an *axis*, either as a singular *point* or as a *range*. So,
 if the *axis* is considered to be a *time-axis* the ``Interval`` will
 define the *temporal validity* of a value.
 
+.. _interval-definition:
+
 Definition
 ------------------------------------------------------------------------
 
@@ -96,6 +98,7 @@ Example
     // specify endpoint semantics
     let itv_3 = new timingsrc.Interval(4.0, 6.1, false, true);
 
+..  _interval-ordering:
 
 Interval Ordering
 ------------------------------------------------------------------------
@@ -126,7 +129,7 @@ by **high** endpoint. The compare function may be used with
 Api
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-..  js:function:: cmp_interval_low(interval_a, interval_b)
+..  js:function:: cmp_interval_low (interval_a, interval_b)
 
     :param Interval interval_a: interval A
     :param Interval interval_b: interval B
@@ -136,7 +139,7 @@ Api
         diff < 0: A > B
 
 
-..  js:function:: cmp_interval_high(interval_a, interval_b)
+..  js:function:: cmp_interval_high (interval_a, interval_b)
 
     :param Interval interval_a: interval A
     :param Interval interval_b: interval B
@@ -145,6 +148,116 @@ Api
         diff > 0: A < B
         diff < 0: A > B
 
+..  _interval-comparison:
 
 Interval Comparison
 ------------------------------------------------------------------------
+
+One interval may overlap another interval, and if it does, the overlap
+may be full or only partial::
+
+    More formally, **CMP(A,B)** means comparing **interval B** to
+    **interval A**. The comparison yields one of five possible
+    relasions: COVERED, PARTIAL, COVERS, OUTSIDE, EQUAL
+
+The comparison operator **CMP(A,B)** is defined in terms of the simpler
+operator **INSIDE(P,I)** between a point P and an interval I. The
+following table defines the value of the **INSIDE** operator for
+intervals with closed and open endpoints.
+
+======================  =============================
+operator                evaluation
+======================  =============================
+INSIDE(p, [low, high])  (low <= p && p <= high)
+INSIDE(p, [low, high>)  (low <= p && p < high)
+INSIDE(p, <low, high])  (if low < p && p <= high)
+INSIDE(p, <low, high>)  (if low < p && p < high)
+======================  =============================
+
+This leads to the following definitions for the **cmp(A,B)** operator
+between intervals.
+
++----------+--------------------------------------------------------+
+| CMP(A,B) | Descriptions                                           |
++==========+========================================================+
+| COVERED  | B is covered by A                                      |
+|          | all points of interval B are *inside* interval A       |
+|          | some points of interval A are not *inside* interval B  |
++----------+--------------------------------------------------------+
+| PARTIAL  | B partially covers A                                   |
+|          | one endpoint of interval B is *inside* interval A      |
+|          | one endpoint of interval A is *inside* interval B      |
++----------+--------------------------------------------------------+
+| COVERS   | B covers A                                             |
+|          | some points of interval B are *inside* interval A      |
+|          | all points of interval A are *inside* interval B       |
++----------+--------------------------------------------------------+
+| OUTSIDE  | B is outside A                                         |
+|          | no points in interval B are *inside* interval A        |
++----------+--------------------------------------------------------+
+| EQUAL    | B is equal to A                                        |
+|          | all points of interval B are *inside* interval A       |
+|          | all points of interval A are *inside* interval B       |
++----------+--------------------------------------------------------+
+
+..  note::
+
+    Illustration!
+
+..  note::
+
+    EQUAL, OUTSIDE and PARTIAL are *symmetric* realationships, while
+    COVERS and COVERED are opposites.
+
+..  note::
+
+    The CMP(A,B) operation may also be use for comparisons between a
+    point and an interval, or between points, provided the values
+    are represented as ``Interval`` objects
+    (see :ref:`singular points <interval-definition>`)
+
+
+Here are a few examples of comparison between intervals A and B, where
+A and B also share endpoints.
+
+======  ======  ==============================
+A       B       CMP(A,B)
+======  ======  ==============================
+[2,4>   [2,4]   COVERS: B covers A
+[2,4>   <2,4]   PARTIAL: B partially covers A
+[2,4>   [2,4>   EQUAL: B is equal to A
+[2,4>   <2,4>   COVERED: B is covered by A
+======  ======  ==============================
+
+
+Api
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+The five comparison relations are represented by integer values as follows:
+
+========  =====
+relation  value
+========  =====
+COVERED   1
+PARTIAL   2
+COVERS    3
+OUTSIDE   4
+EQUAL     5
+========  =====
+
+
+..  js:method:: interval.inside(p)
+
+    :param number p: point p
+    :returns boolean: True if point p is inside interval
+
+    Test if point p is inside interval
+
+..  js:method:: interval.compare(other)
+
+    :param Interval other: interval to compare with
+    :returns int: comparison relation
+
+    Compares interval to other, i.e. CMP(other, interval).
+    E.g. returns COVERS if *interval* COVERS *other*
+
