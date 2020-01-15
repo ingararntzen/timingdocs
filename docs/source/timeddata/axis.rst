@@ -258,26 +258,28 @@ Lookup Modes
 
 Comparison between a *search interval* and a set of *cue intervals* yields
 five distinct groups of cues, based on the five five distinct comparison
-relations defined for intervals: COVERED, PARTIAL, COVERS, OUTSIDE,
-EQUAL (see :ref:`interval-comparison`).
+relations defined for intervals: COVERED, PARTIAL_LEFT, PARTIAL_RIGHT,
+COVERS, OUTSIDE_LEFT, OUTSIDE_RIGHT, EQUAL (see :ref:`interval-comparison`).
 
 The lookup operation allows *match* to be controlled by selectively
-including above groups (except OUTSIDE). This gives rise
-to the following *modes* for the lookup operation, i.e. a bitmask
-indicating which groups to include in the lookup result.
+including above groups (except OUTSIDE_LEFT and OUTSIDE_RIGHT).
+This gives rise to the following *modes* for the lookup operation,
+i.e. a bitmask indicating which groups to include in the lookup result.
 
 =============  =======================
 mask           included groups
 =============  =======================
-1              COVERS
-2              PARTIAL
-4              COVERS
-8              EQUAL
+b'00001 (1)    COVERS
+b'00010 (2)    PARTIAL_LEFT
+b'00100 (4)    PARTIAL_RIGHT
+b'01000 (8)    COVERS
+b'10000 (16)   EQUAL
 =============  =======================
 
 Typically, when looking up cues on an axis, the desire is to lookup
 all cues which are *valid* somewhere within the *search interval*.
-If so, all groups must be included, and the appropriate lookup mode is 15.
+If so, all groups must be included, and the appropriate lookup mode is
+b'11111 (31).
 
 
 Lookup Efficiency
