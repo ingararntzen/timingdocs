@@ -4,188 +4,135 @@
 Interval
 ========================================================================
 
-``Interval`` is used by ``Axis`` to define the validity of an value in
-relation to an *axis*, either as a singular *point* or as a *range*. So,
-if the *axis* is considered to be a *time-axis* the ``Interval`` will
-define the *temporal validity* of a value.
+``Interval`` is used by ``Axis`` to define the validity of values or
+objects in relation to an *axis*. Validity is either limited to a
+singular *point* on the axis, or to a continuous *line segment*. In media,
+the axis is often thought of as a *time-axis* and intervals therefor
+define the *temporal validity* of media content relative to this axis.
+
+
+Definitions
+------------------------------------------------------------------------
 
 .. _interval-definition:
 
-Definition
-------------------------------------------------------------------------
-
-``Interval`` is expressed by two floating point values [**low**,
-**high**>, where **low <= high**.
-
-
-*   Following standard mathematical notation, an ``Interval`` may be
-    open or closed, e.g. **[a,b], [a,b>, <b,a], <a,b>**.
-
-*   Infinity values may be used to create an un-bounded
-    interval, e.g. **[0, Infinity>** or **<-Infinity, 0]**.
-
-*   If **low == high** the ``Interval`` is said to represent a *singular*
-    point **[low]**.
-
-*   ``Interval`` objects are *immutable*
-
-
-
-Api
+Interval
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-..  js:class:: timingsrc.Interval(low[, high[, lowInclude[, highInclude]]])
 
-    :param float low: Leftmost endpoint of interval
-    :param float high: Rightmost endpoint of interval
-    :param boolean lowInclude: True by default
-        Leftmost endpoint is included or excluded from interval.
-        True means left-closed: **([)**.
-        False means left-open: **(<)**.
-    :param boolean highInclude: False by default
-        Rightmost endpoint is included or excluded from interval.
-        True means right-closed: **(])**.
-        False means right-open: **(>)**.
+Following standard mathematical notation intervals are expressed by two
+endpoint number values **low** and **high**, where **low <= high**. In
+addition, interval endpoints are *open* or *closed*, as indicated with
+brackets below:
 
-    If only **low** is given, or if **low == high**, the interval is singular.
-    In this case **lowInclude** and **highInclude** are both True (params ignored).
+    e.g.: **[a,b]  [a,b)  (b,a]  (a,b)**
 
+If **low == high** the interval is said to represent a
+*singular* point **[low]**, in which case the interval must be
+*closed*.
 
-..  js:attribute:: interval.low
+    e.g.: **[a,a]**, or simply **[a]** for short.
 
-    float: left endpoint value
+*Infinity* values may be used to create un-bounded intervals.
 
-..  js:attribute:: interval.high
-
-    float: right endpoint value
-
-..  js:attribute:: interval.lowInclude
-
-    boolean: True if interval is left-closed
-
-..  js:attribute:: interval.highInclude
-
-    boolean: True if interval is right-closed
-
-..  js:attribute:: interval.singular
-
-    boolean: True if interval is singular
-
-..  js:attribute:: interval.finite
-
-    boolean: True if both **low** and **high** are finite values
-
-..  js:attribute:: interval.length
-
-    float: interval length (**high-low**)
-
-..  js:method:: interval.toString ()
-
-    :returns: String representation of interval
+    e.g.: **[a, Infinity]  [-Infinity, a]  [-Infinity, Infinity]**.
 
 
-Example
+..  _interval-mediastate:
+
+Media State
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-.. code-block:: javascript
+Intervals associate media content to a media timeline. By adopting this
+mathematical representation of intervals, *media state* can easily be well
+defined (without ambiguities) along the entire timeline. Furthermore,
+this is a basis for consistent media playback and media navigation.
 
-    // singular point
-    let itv_1 = new timingsrc.Interval(4.0);
+    At any given point **p** on the timeline, the **media state** at point
+    **p** is given by the set of all intervals which are valid for point **p**.
 
-    // default endpoint semantics
-    let itv_2 = new timingsrc.Interval(4.0, 6.1);
+For instance, we may use back-to-back intervals **... [a,b), [b,c), ...**
+to ensure that the entire timeline is covered by media content, and the
+use of endpoint brackets removes any ambiguities regarding the media
+state at point **b**.
 
-    // specify endpoint semantics
-    let itv_3 = new timingsrc.Interval(4.0, 6.1, false, true);
+
+.. _interval-endpoint:
+
+Endpoint
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Interval endpoints may also be discussed in isolation. The table
+below shows that there are four distinct types of endpoints, and
+that endpoints are defined by three distinct properties
+**(value, closed, direction)**:
+
+    ======  ============  ======  ======  =========
+    symbol  type          value   closed  direction
+    ======  ============  ======  ======  =========
+    **[a**  left-closed   a       true     left
+    **(a**  left-open     a       false    left
+    **a]**  right-closed  a       true     right
+    **a)**  right-open    a       false    right
+    ======  ============  ======  ======  =========
+
 
 ..  _interval-ordering:
 
-Interval Ordering
-------------------------------------------------------------------------
-
-The ordering of intervals is not well defined in general, since
-intervals may overlap partly or fully. However, *interval endpoints* may
-be ordered, and intervals may therefor be ordered by their **low**
-endpoints, or alternatively by their **high** endpoints.
-
-This is straight forward, but a small complication arises when intervals
-share endpoints. Correct ordering then depends on whether the endpoints
-are open or closed. For instance, consider the natural ordering of
-**low** endpoints for intervals with the same **low** endpoint.
-
-==========  ==========  ==========
-interval A  interval B  ordering
-==========  ==========  ==========
-[4,..       [4,..       A == B
-[4,..       <4,..       A < B
-<4,..       <4,..       A == B
-==========  ==========  ==========
-
-To sort intervals according to these rules, two compare functions are
-provided, one for ordering by **low** endpoint and one for ordering
-by **high** endpoint. The compare function may be used with
-``Array.sort()`` and provides ascending sorting.
-
-Api
+Endpoint Ordering
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-..  js:function:: cmp_interval_low (interval_a, interval_b)
+Ordering of points/endpoints is important for consistency of media
+state and media playback. This is straight forward as long as
+point/endpoint values are not equal. For instance, *2.2] left of (3.1*
+because *2.2 < 3.1*. However, in case of equality ordering rules based
+on properties **closed** and **direction** is required to avoid ambiguities.
 
-    :param Interval interval_a: interval A
-    :param Interval interval_b: interval B
-    :returns int: diff
-        diff == 0: A == B
-        diff > 0: A < B
-        diff < 0: A > B
+    The ordering of point **p** and the four endpoint types with value **p** is,
+    from left to right:
+
+        **p), [p, p, p], (p**.
+
+    Or, in words; *right-open, left-closed, value, right-closed, left-open*.
 
 
-..  js:function:: cmp_interval_high (interval_a, interval_b)
+Based on this ordering we may define the comparison operators **LEFTOF (E1, E2)**
+and **RIGHTOF (E1, E2)**, where **E1** and **E2** are either endpoints or
+regular points.
 
-    :param Interval interval_a: interval A
-    :param Interval interval_b: interval B
-    :returns int: diff
-        diff == 0: A == B
-        diff > 0: A < B
-        diff < 0: A > B
+    **LEFTOF (E1, E2)** returns true if **E1** is *leftof* **E2**,
+    and false if **E1** is *equalto* or *rightof* **E2**.
+
+    **RIGHTOF (E1, E2)** returns true if **E1** is *rightof* **E2**,
+    and false if **E1** is *equalto* or *leftof* **E2**.
+
+These operators are the basis for :ref:`interval-comparison`.
+
+
 
 ..  _interval-comparison:
 
 Interval Comparison
-------------------------------------------------------------------------
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 One interval may overlap another interval, and if it does, the overlap
-may be full or only partial::
+may be full or only partial:
 
     More formally, **CMP (A, B)** means comparing **interval B** to
     **interval A**. The comparison yields one of seven possible
     relasions: COVERED, PARTIAL_LEFT, PARTIAL_RIGHT, COVERS,
-    OUTSIDE_LEFT, OUTSIDE_RIGHT, EQUAL. The operator is defined
-    in terms of simpler operators **LT**, **GT** and **INSIDE**.
+    OUTSIDE_LEFT, OUTSIDE_RIGHT or EQUAL. The operator is defined
+    in terms of simpler operators **LEFTOF**, **RIGHTOF** and **INSIDE**.
 
 
-The operator **LT (P, E)** is true if **P** is less than **E**.
-**P** is a number and **E** is an interval endpoint, e.g.,
-**[low, <low, high], high>**. Similarly, operator **GT (P, E)** is
-true if **P** is greater than **E**. Here is a table showing how
-the two operators evaluate for different endpoints.
+The operator **INSIDE** evaluates if a point or an endpoint is *inside* an
+interval. Given point/endpoint **E** and an interval **I** defined by two
+endpoints **I.low** and **I.high**, **INSIDE(E, I)** is defined as follows:
 
-===============  ===========  ===============  ===========
-operator         evaluation   operator         evaluation
-===============  ===========  ===============  ===========
-LT ( p, [low )   (p < low)    GT ( p, [low )   (p > low)
-LT ( p, <low )   (p <= low)   GT ( p, <low )   (p > low)
-LT ( p, high] )  (p < high)   GT ( p, high] )  (p > high)
-LT ( p, high> )  (p < high)   GT ( p, high> )  (p >= high)
-===============  ===========  ===============  ===========
+    **INSIDE (E, I)** = **!LEFTOF(E, I.low)** & **!RIGHTOF(E, I.high)**
 
-The operator **INSIDE (P, I)** is true is point **P** is inside
-interval **I**, or equal to one of the endpoints **I.low**
-or **I.high**.::
-
-    **INSIDE (P, I)** = **!LT(P, I.low)** & **!GT(P, I.high)**
-
-The following table defines the evaluation of the **INSIDE** operator for
-intervals with closed and open endpoints.
+The following table defines the effective evaluation of the
+**INSIDE** operator for regular point values.
 
 ======================  =============================
 operator                evaluation
@@ -196,37 +143,37 @@ INSIDE(p, <low, high])  (low < p && p <= high)
 INSIDE(p, <low, high>)  (low < p && p < high)
 ======================  =============================
 
-This leads to the following definitions for the **CMP (A, B)**
-operator.
+This leads to the following definitions for the interval comparison
+of the **CMP (A, B)** operator.
 
 +------------+--------------------------------------------------------+
 | CMP (A, B) | description                                            |
 +============+========================================================+
-| COVERED    | B is covered by A                                      |
-|            | B.low and B.high are **INSIDE** A                      |
-|            | A.low **LT** B.low or A.high **GT** B.high             |
+| | COVERED  | | B is covered by A                                    |
+|            | | B.low and B.high are *inside* interval A             |
+|            | | A.low *leftof* B.low OR A.high *rightof* B.high      |
 +------------+--------------------------------------------------------+
-| PARTIAL    | B partially covers A from left                         |
-| LEFT       | B.high is **INSIDE** A                                 |
-|            | B.low is **LT** A.low                                  |
+| | PARTIAL  | | B partially covers A from left                       |
+| | LEFT     | | B.high is *inside* A                                 |
+|            | | B.low is *leftof* A.low                              |
 +------------+--------------------------------------------------------+
-| PARTIAL    | B partially covers A from right                        |
-| RIGHT      | B.low is **INSIDE** A                                  |
-|            | B.high is **GT** A.high                                |
+| | PARTIAL  | | B partially covers A from right                      |
+| | RIGHT    | | B.low is *inside* A                                  |
+|            | | B.high is *rightof* A.high                           |
 +------------+--------------------------------------------------------+
-| COVERS     | B covers A                                             |
-|            | A.low and A.high are **INSIDE** B                      |
-|            | B.low **LT** A.low or B.high **GT** A.high             |
+| | COVERS   | | B covers A                                           |
+|            | | A.low and A.high are *inside* B                      |
+|            | | B.low *leftof* A.low OR B.high *rightof* A.high      |
 +------------+--------------------------------------------------------+
-| OUTSIDE    | B is outside A on the left                             |
-| LEFT       | B.high **LT** A.low                                    |
+| | OUTSIDE  | | B is outside A on the left                           |
+| | LEFT     | | B.high *leftof* A.low                                |
 +------------+--------------------------------------------------------+
-| OUTSIDE    | B is outside A on the right                            |
-| RIGHT      | B.low **GT** A.high                                    |
+| | OUTSIDE  | | B is outside A on the right                          |
+| | RIGHT    | | B.low *rightof* A.high                               |
 +------------+--------------------------------------------------------+
-| EQUAL      | B is equal to A                                        |
-|            | B.low and B.high are **INSIDE** A                      |
-|            | A.low and A.high are **INSIDE** B                      |
+| | EQUAL    | | B is equal to A                                      |
+|            | | B.low and B.high are *inside* A                      |
+|            | | A.low and A.high are *inside* B                      |
 +------------+--------------------------------------------------------+
 
 ..  note::
@@ -235,7 +182,7 @@ operator.
 
 ..  note::
 
-    The **CMP (A, B)** operation may also be use for comparisons between a
+    The **CMP (A, B)** operation may also be used for comparisons between a
     point and an interval, or between points, provided the values
     are represented as ``Interval`` objects
     (see :ref:`singular points <interval-definition>`)
@@ -255,11 +202,7 @@ A       B       CMP (A, B)
 [2,4>   [4]     OUTSIDE_RIGHT: B is outside A on the right
 ======  ======  ===============================================
 
-
-Api
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-The seven comparison relations defined by **CMP (A, B)** are
+The comparison relations defined by **CMP (A, B)** are
 represented by integer values as follows:
 
 ==============  =====
@@ -275,6 +218,89 @@ EQUAL           7
 ==============  =====
 
 
+Api
+------------------------------------------------------------------------
+
+..  js:class:: Interval(low[, high[, lowInclude[, highInclude]]])
+
+    :param float low: leftmost endpoint of interval
+
+    :param float high: rightmost endpoint of interval
+
+    :param boolean lowInclude:
+
+        | low endpoint value included in interval
+        | true means **left-closed**
+        | false means **left-open**
+        | true by default
+
+    :param boolean highInclude:
+
+        | high endpoint value included in interval
+        | true means **right-closed**
+        | false means **right-open**
+        | false by default
+
+    If only **low** is given, or if **low == high**, the interval is singular.
+    In this case **lowInclude** and **highInclude** are both true (params ignored).
+
+
+..  js:attribute:: interval.low
+
+    float: left endpoint value
+
+..  js:attribute:: interval.high
+
+    float: right endpoint value
+
+..  js:attribute:: interval.lowInclude
+
+    boolean: true if interval is left-closed
+
+..  js:attribute:: interval.highInclude
+
+    boolean: true if interval is right-closed
+
+..  js:attribute:: interval.singular
+
+    boolean: true if interval is singular
+
+..  js:attribute:: interval.finite
+
+    boolean: true if both **low** and **high** are finite values
+
+..  js:attribute:: interval.length
+
+    float: interval length (**high-low**)
+
+..  js:method:: interval.toString ()
+
+    :returns: String representation of interval
+
+
+..  ::
+
+    ..  js:function:: cmp_interval_low (interval_a, interval_b)
+
+        :param Interval interval_a: interval A
+        :param Interval interval_b: interval B
+        :returns int: diff
+            diff == 0: A == B
+            diff > 0: A < B
+            diff < 0: A > B
+
+
+    ..  js:function:: cmp_interval_high (interval_a, interval_b)
+
+        :param Interval interval_a: interval A
+        :param Interval interval_b: interval B
+        :returns int: diff
+            diff == 0: A == B
+            diff > 0: A < B
+            diff < 0: A > B
+
+
+
 ..  js:method:: interval.inside(p)
 
     :param number p: point p
@@ -282,11 +308,30 @@ EQUAL           7
 
     Test if point p is inside interval
 
-..  js:method:: interval.comparison(other)
+..  js:method:: interval.compare(other)
 
     :param Interval other: interval to compare with
     :returns int: comparison relation
 
     Compares interval to other, i.e. CMP(other, interval).
     E.g. returns COVERS if *interval* COVERS *other*
+
+
+
+
+
+Example
+------------------------------------------------------------------------
+
+.. code-block:: javascript
+
+    // singular point
+    let itv_1 = new Interval(4.0);
+
+    // default endpoint semantics
+    let itv_2 = new Interval(4.0, 6.1);
+
+    // specify endpoint semantics
+    let itv_3 = new Interval(4.0, 6.1, false, true);
+
 
