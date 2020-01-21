@@ -115,24 +115,24 @@ These operators are the basis for :ref:`interval-comparison`.
 Interval Comparison
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-One interval may overlap another interval, and if it does, the overlap
+One interval may overlap another interval, and if it does the overlap
 may be full or only partial:
 
     More formally, **CMP (A, B)** means comparing **interval B** to
     **interval A**. The comparison yields one of seven possible
-    relasions: COVERED, PARTIAL_LEFT, PARTIAL_RIGHT, COVERS,
-    OUTSIDE_LEFT, OUTSIDE_RIGHT or EQUAL. The operator is defined
+    relasions: OUTSIDE_LEFT, PARTIAL_LEFT, COVERED, EQUAL, COVERS,
+    PARTIAL_RIGHT, or OUTSIDE_RIGHT. The operator is defined
     in terms of simpler operators **LEFTOF**, **RIGHTOF** and **INSIDE**.
 
 
-The operator **INSIDE** evaluates if a point or an endpoint is *inside* an
-interval. Given point/endpoint **E** and an interval **I** defined by two
-endpoints **I.low** and **I.high**, **INSIDE(E, I)** is defined as follows:
+The operator **INSIDE (E, I)** evaluates if a point or an endpoint is *inside* an
+interval. **E** is point or endpoint and **I** is interval, defined by two
+endpoints **I.low** and **I.high**, **INSIDE (E, I)** is defined as follows:
 
-    **INSIDE (E, I)** = **!LEFTOF(E, I.low)** & **!RIGHTOF(E, I.high)**
+    **INSIDE (E, I)** = **!LEFTOF (E, I.low)** && **!RIGHTOF (E, I.high)**
 
-The following table defines the effective evaluation of the
-**INSIDE** operator for regular point values.
+For example, the following table illustrates the effective evaluation of the
+**INSIDE (p, I)** operator, where **p** is a regular point value.
 
 ======================  =============================
 operator                evaluation
@@ -143,37 +143,37 @@ INSIDE(p, <low, high])  (low < p && p <= high)
 INSIDE(p, <low, high>)  (low < p && p < high)
 ======================  =============================
 
-This leads to the following definitions for the interval comparison
-of the **CMP (A, B)** operator.
+The comparison operator for intervals, **CMP (A, B)**, is defined as
+follows:
 
 +------------+--------------------------------------------------------+
 | CMP (A, B) | description                                            |
 +============+========================================================+
-| | COVERED  | | B is covered by A                                    |
-|            | | B.low and B.high are *inside* interval A             |
-|            | | A.low *leftof* B.low OR A.high *rightof* B.high      |
+| | OUTSIDE  | | B is outside A on the left                           |
+| | LEFT     | | B.high *leftof* A.low                                |
 +------------+--------------------------------------------------------+
 | | PARTIAL  | | B partially covers A from left                       |
 | | LEFT     | | B.high is *inside* A                                 |
 |            | | B.low is *leftof* A.low                              |
 +------------+--------------------------------------------------------+
-| | PARTIAL  | | B partially covers A from right                      |
-| | RIGHT    | | B.low is *inside* A                                  |
-|            | | B.high is *rightof* A.high                           |
+| | COVERED  | | B is covered by A                                    |
+|            | | B.low and B.high are *inside* interval A             |
+|            | | A.low *leftof* B.low OR A.high *rightof* B.high      |
++------------+--------------------------------------------------------+
+| | EQUAL    | | B is equal to A                                      |
+|            | | B.low and B.high are *inside* A                      |
+|            | | A.low and A.high are *inside* B                      |
 +------------+--------------------------------------------------------+
 | | COVERS   | | B covers A                                           |
 |            | | A.low and A.high are *inside* B                      |
 |            | | B.low *leftof* A.low OR B.high *rightof* A.high      |
 +------------+--------------------------------------------------------+
-| | OUTSIDE  | | B is outside A on the left                           |
-| | LEFT     | | B.high *leftof* A.low                                |
+| | PARTIAL  | | B partially covers A from right                      |
+| | RIGHT    | | B.low is *inside* A                                  |
+|            | | B.high is *rightof* A.high                           |
 +------------+--------------------------------------------------------+
 | | OUTSIDE  | | B is outside A on the right                          |
 | | RIGHT    | | B.low *rightof* A.high                               |
-+------------+--------------------------------------------------------+
-| | EQUAL    | | B is equal to A                                      |
-|            | | B.low and B.high are *inside* A                      |
-|            | | A.low and A.high are *inside* B                      |
 +------------+--------------------------------------------------------+
 
 ..  note::
@@ -197,7 +197,7 @@ A       B       CMP (A, B)
 [2,4>   <2,4]   PARTIAL_RIGHT: B partially covers A from right
 [2,4>   [2,4>   EQUAL: B is equal to A
 [2,4>   <2,4>   COVERED: B is covered by A
-[2,4>   <1,3>   PARTIAL_LEFT: B partially covers A from lef
+[2,4>   <1,3>   PARTIAL_LEFT: B partially covers A from left
 [2,4>   <1,2>   OUTSIDE_LEFT: B is outside A on the left
 [2,4>   [4]     OUTSIDE_RIGHT: B is outside A on the right
 ======  ======  ===============================================
@@ -208,13 +208,13 @@ represented by integer values as follows:
 ==============  =====
 relation        value
 ==============  =====
-COVERED         1
+OUTSIDE_LEFT    1
 PARTIAL_LEFT    2
-PARTIAL_RIGHT   3
-COVERS          4
-OUTSIDE_LEFT    5
-OUTSIDE_RIGHT   6
-EQUAL           7
+COVERED         3
+EQUAL           4
+COVERS          5
+PARTIAL_RIGHT   6
+OUTSIDE_RIGHT   7
 ==============  =====
 
 
