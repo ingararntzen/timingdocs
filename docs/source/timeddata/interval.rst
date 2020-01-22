@@ -180,14 +180,6 @@ follows:
 
     Illustration!
 
-..  note::
-
-    The **CMP (A, B)** operation may also be used for comparisons between a
-    point and an interval, or between points, provided the values
-    are represented as ``Interval`` objects
-    (see :ref:`singular points <interval-definition>`)
-
-
 Here are a few examples of comparison between intervals A and B.
 
 ======  ======  ===============================================
@@ -233,6 +225,8 @@ Api
     In this case **lowInclude** and **highInclude** are both true (params ignored).
 
 
+Class Attributes
+
 ..  js:attribute:: interval.low
 
     float: left endpoint value
@@ -261,41 +255,39 @@ Api
 
     float: interval length (**high-low**)
 
+
+
+Class Methods
+
 ..  js:method:: interval.toString ()
 
     :returns: String representation of interval
 
+..  js:method:: interval.compare(other)
 
-..  ::
+    :param Interval other: interval to compare with
+    :returns int: comparison relation
 
-    ..  js:function:: cmp_interval_low (interval_a, interval_b)
+    The **CMP (A, B)** operation may also be used for comparisons between a
+    point and an interval, or between points, provided the values
+    are represented as ``Interval`` objects
+    (see :ref:`singular points <interval-definition>`)
 
-        :param Interval interval_a: interval A
-        :param Interval interval_b: interval B
-        :returns int: diff
-            diff == 0: A == B
-            diff > 0: A < B
-            diff < 0: A > B
+    Compares interval to other, i.e. CMP(interval, other).
+    E.g. returns COVERS if *interval* COVERS *other*
 
+..  js:method:: interval.equals(other)
 
-    ..  js:function:: cmp_interval_high (interval_a, interval_b)
+..  js:method:: interval.outside(other)
 
-        :param Interval interval_a: interval A
-        :param Interval interval_b: interval B
-        :returns int: diff
-            diff == 0: A == B
-            diff > 0: A < B
-            diff < 0: A > B
+..  js:method:: interval.overlap(other)
 
+..  js:method:: interval.covered(other)
+
+..  js:method:: interval.covers(other)
 
 
-..  js:method:: interval.inside(p)
-
-    :param number p: point p
-    :returns boolean: True if point p is inside interval
-
-    Test if point p is inside interval
-
+Static class members
 
 Interval relations available as static variables on the Interval class.
 
@@ -308,13 +300,46 @@ Interval relations available as static variables on the Interval class.
 ..  js:attribute:: Interval.OUTSIDE_RIGHT
 
 
-..  js:method:: interval.compare(other)
+Static class functions
 
-    :param Interval other: interval to compare with
-    :returns int: comparison relation
+..  js:method:: Interval.pointInside(p, interval)
 
-    Compares interval to other, i.e. CMP(interval, other).
-    E.g. returns COVERS if *interval* COVERS *other*
+    :param number p: point
+    :param Interval interval; interval
+    :returns boolean: True if point p is inside interval
+
+    Test if point p is inside interval.
+
+
+
+
+..  js:function:: Interval.cmpLow (interval_a, interval_b)
+
+    :param Interval interval_a: interval A
+    :param Interval interval_b: interval B
+    :returns int: diff
+        diff == 0: A == B
+        diff > 0: A < B
+        diff < 0: A > B
+
+
+..  js:function:: Interval.cmpHigh (interval_a, interval_b)
+
+    :param Interval interval_a: interval A
+    :param Interval interval_b: interval B
+    :returns int: diff
+        diff == 0: A == B
+        diff > 0: A < B
+        diff < 0: A > B
+
+
+
+
+
+
+
+
+
 
 
 
