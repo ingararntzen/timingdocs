@@ -322,6 +322,7 @@ Static class functions
         diff > 0: A < B
         diff < 0: A > B
 
+    Use with Array.sort() to sort Intervals by their low endpoint.
 
 ..  js:function:: Interval.cmpHigh (interval_a, interval_b)
 
@@ -332,6 +333,7 @@ Static class functions
         diff > 0: A < B
         diff < 0: A > B
 
+    Use with Array.sort() to sort Intervals by their high endpoint.
 
 
 
