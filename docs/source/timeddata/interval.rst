@@ -118,16 +118,16 @@ Interval Comparison
 One interval may overlap another interval, and if it does the overlap
 may be full or only partial:
 
-    More formally, **CMP (A, B)** means comparing **interval B** to
-    **interval A**. The comparison yields one of seven possible
-    relasions: OUTSIDE_LEFT, PARTIAL_LEFT, COVERED, EQUAL, COVERS,
-    PARTIAL_RIGHT, or OUTSIDE_RIGHT. The operator is defined
+    More formally, **CMP (A, B)** means comparing **interval A** to
+    **interval B**. The comparison yields one of seven possible
+    relasions: OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL, COVERS,
+    OVERLAP_RIGHT, or OUTSIDE_RIGHT. The operator is defined
     in terms of simpler operators **LEFTOF**, **RIGHTOF** and **INSIDE**.
 
 
 The operator **INSIDE (E, I)** evaluates if a point or an endpoint is *inside* an
 interval. **E** is point or endpoint and **I** is interval, defined by two
-endpoints **I.low** and **I.high**, **INSIDE (E, I)** is defined as follows:
+endpoints **I.low** and **I.high**.
 
     **INSIDE (E, I)** = **!LEFTOF (E, I.low)** && **!RIGHTOF (E, I.high)**
 
@@ -143,37 +143,37 @@ INSIDE(p, <low, high])  (low < p && p <= high)
 INSIDE(p, <low, high>)  (low < p && p < high)
 ======================  =============================
 
-The comparison operator for intervals, **CMP (A, B)**, is defined as
+The comparison operator for intervals, **CMP (A, B)**, is then defined as
 follows:
 
 +------------+--------------------------------------------------------+
 | CMP (A, B) | description                                            |
 +============+========================================================+
-| | OUTSIDE  | | B is outside A on the left                           |
-| | LEFT     | | B.high *leftof* A.low                                |
+| | OUTSIDE  | | A is outside B on the left                           |
+| | LEFT     | | A.high *leftof* B.low                                |
 +------------+--------------------------------------------------------+
-| | PARTIAL  | | B partially covers A from left                       |
-| | LEFT     | | B.high is *inside* A                                 |
-|            | | B.low is *leftof* A.low                              |
+| | OVERLAP  | | A overlaps B from left                               |
+| | LEFT     | | A.high is *inside* B                                 |
+|            | | A.low is *leftof* B.low                              |
 +------------+--------------------------------------------------------+
-| | COVERED  | | B is covered by A                                    |
-|            | | B.low and B.high are *inside* interval A             |
-|            | | A.low *leftof* B.low OR A.high *rightof* B.high      |
+| | COVERED  | | A is covered by B                                    |
+|            | | A.low *inside* B && A.high *inside* B                |
+|            | | B.low *!inside* A OR B.high *!inside* A              |
 +------------+--------------------------------------------------------+
-| | EQUAL    | | B is equal to A                                      |
-|            | | B.low and B.high are *inside* A                      |
-|            | | A.low and A.high are *inside* B                      |
+| | EQUAL    | | A is equal to B                                      |
+|            | | A.low *inside* B && A.high *inside* B                |
+|            | | B.low *inside* A && B.high *inside* A                |
 +------------+--------------------------------------------------------+
-| | COVERS   | | B covers A                                           |
-|            | | A.low and A.high are *inside* B                      |
-|            | | B.low *leftof* A.low OR B.high *rightof* A.high      |
+| | COVERS   | | A covers B                                           |
+|            | | A.low *!inside* B || A.high *!inside* B              |
+|            | | B.low *inside* A && B.high *inside* A                |
 +------------+--------------------------------------------------------+
-| | PARTIAL  | | B partially covers A from right                      |
-| | RIGHT    | | B.low is *inside* A                                  |
-|            | | B.high is *rightof* A.high                           |
+| | OVERLAP  | | A overlaps B from right                              |
+| | RIGHT    | | A.low is *inside* B                                  |
+|            | | A.high is *rightof* B.high                           |
 +------------+--------------------------------------------------------+
-| | OUTSIDE  | | B is outside A on the right                          |
-| | RIGHT    | | B.low *rightof* A.high                               |
+| | OUTSIDE  | | A is outside B on the right                          |
+| | RIGHT    | | A.low *rightof* B.high                               |
 +------------+--------------------------------------------------------+
 
 ..  note::
@@ -193,29 +193,17 @@ Here are a few examples of comparison between intervals A and B.
 ======  ======  ===============================================
 A       B       CMP (A, B)
 ======  ======  ===============================================
-[2,4>   [2,4]   COVERS: B covers A
-[2,4>   <2,4]   PARTIAL_RIGHT: B partially covers A from right
-[2,4>   [2,4>   EQUAL: B is equal to A
-[2,4>   <2,4>   COVERED: B is covered by A
-[2,4>   <1,3>   PARTIAL_LEFT: B partially covers A from left
-[2,4>   <1,2>   OUTSIDE_LEFT: B is outside A on the left
-[2,4>   [4]     OUTSIDE_RIGHT: B is outside A on the right
+[2,4>   [4]     OUTSIDE_LEFT: A is outside B on the left
+[2,4>   <2,4]   OVERLAP_LEFT: A overlaps B from left
+[2,4>   [2,4]   COVERED: A is covered by B
+[2,4>   [2,4>   EQUAL: A is equal to B
+[2,4>   <2,4>   COVERS: A covers B
+[2,4>   <1,3>   OVERLAP_RIGHT: A overlaps B from right
+[2,4>   <1,2>   OUTSIDE_RIGHT: A is outside B on the right
 ======  ======  ===============================================
 
-The comparison relations defined by **CMP (A, B)** are
-represented by integer values as follows:
 
-==============  =====
-relation        value
-==============  =====
-OUTSIDE_LEFT    1
-PARTIAL_LEFT    2
-COVERED         3
-EQUAL           4
-COVERS          5
-PARTIAL_RIGHT   6
-OUTSIDE_RIGHT   7
-==============  =====
+
 
 
 Api
@@ -308,12 +296,24 @@ Api
 
     Test if point p is inside interval
 
+
+Interval relations available as static variables on the Interval class.
+
+..  js:attribute:: Interval.OUTSIDE_LEFT
+..  js:attribute:: Interval.OVERLAP_LEFT
+..  js:attribute:: Interval.COVERED
+..  js:attribute:: Interval.EQUAL
+..  js:attribute:: Interval.COVERS
+..  js:attribute:: Interval.OVERLAP_RIGHT
+..  js:attribute:: Interval.OUTSIDE_RIGHT
+
+
 ..  js:method:: interval.compare(other)
 
     :param Interval other: interval to compare with
     :returns int: comparison relation
 
-    Compares interval to other, i.e. CMP(other, interval).
+    Compares interval to other, i.e. CMP(interval, other).
     E.g. returns COVERS if *interval* COVERS *other*
 
 
