@@ -164,36 +164,44 @@ These operators are the basis for :ref:`interval-comparison`.
 Interval Comparison
 ------------------------------------------------------------------------
 
-One interval may overlap or cover another interval, or they may be
-disjunct:
+An interval may overlap partly with another interval, or not overlap at
+all. An interval may also cover an other interval, or be covered.
 
     More formally, **cmp(a, b)** means comparing interval **a** to
     interval **b**. The comparison yields one of seven possible
     relasions: OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL, COVERS,
-    OVERLAP_RIGHT, or OUTSIDE_RIGHT. The operator is defined
-    in terms of simpler operators **leftof**, **rightof** and **inside**.
+    OVERLAP_RIGHT, or OUTSIDE_RIGHT.
+
+..  figure:: interval_compare.png
+
+    This illustrates the different interval relations yielded by
+    **cmp(a,b)** when seven diffent intervals A are compared to a single
+    interval B.
 
 
-The operator **inside(e, i)** evaluates to true if a point or an
-endpoint is inside an interval. **e** is a point or an endpoint and **i**
-is interval, defined by two endpoints **i.low** and **i.high**.
+The **cmp(a,b)** operator is defined in terms of simpler
+operators **leftof**, **rightof** and **inside**. The operator
+**inside(e, i)** evaluates to true if a point or an endpoint is inside
+an interval. **e** is a point or an endpoint and **i** is interval,
+defined by two endpoints **i.low** and **i.high**.
 
     **inside(e, i)** = **!leftof(e, i.low) && !rightof(e, i.high)**
 
-For example, the following table illustrates the effective evaluation of the
-**inside(p, i)** operator, where **p** is a regular point value.
 
-======================  =============================
-operator                evaluation
-======================  =============================
-inside(p, [low, high])  (low <= p && p <= high)
-inside(p, [low, high>)  (low <= p && p < high)
-inside(p, <low, high])  (low < p && p <= high)
-inside(p, <low, high>)  (low < p && p < high)
-======================  =============================
+..  For example, the following table illustrates the effective evaluation of the
+    **inside(p, i)** operator, where **p** is a regular point value.
 
-The comparison operator for intervals, **cmp(a, b)**, is then defined as
-follows:
+    ======================  =============================
+    operator                evaluation
+    ======================  =============================
+    inside(p, [low, high])  (low <= p && p <= high)
+    inside(p, [low, high>)  (low <= p && p < high)
+    inside(p, <low, high])  (low < p && p <= high)
+    inside(p, <low, high>)  (low < p && p < high)
+    ======================  =============================
+
+Interval relations OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL, COVERS,
+OVERLAP_RIGHT and OUTSIDE_RIGHT are then defined as follows:
 
 +------------+--------------------------------------------------------+
 | cmp(a, b)  | description                                            |
@@ -225,9 +233,6 @@ follows:
 | | RIGHT    | | a.low *rightof* b.high                               |
 +------------+--------------------------------------------------------+
 
-..  note::
-
-    Illustration!
 
 Here are a few examples of comparisons between intervals a and b.
 
