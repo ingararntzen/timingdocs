@@ -7,7 +7,7 @@ Interval
 ``Interval`` is used by ``Axis`` and ``Sequencer`` to define the
 validity of objects or values in relation to an *axis*. Intervals
 describe either a continuous *line segment* or a singular *point*. In media,
-the axis is often thought of as a *time-axis* and in this context intervals
+the axis is often thought of as a *timeline* and in this context intervals
 define the *temporal validity* of media content.
 
 
@@ -17,19 +17,18 @@ Definition
 ------------------------------------------------------------------------
 
 Following standard mathematical notation intervals are expressed by two
-endpoint values **low** and **high**, where **low <= high**. In
-addition, interval endpoints are **open** or **closed**, as indicated with
-brackets below.
+endpoint values **low** and **high**, where **low <= high**. Interval
+endpoints are either **open** or **closed**, as indicated with
+brackets below:
 
-    e.g.: **[a,b]  [a,b)  (b,a]  (a,b)**
+    e.g.: **[a,b]  [a,b)  (a,b]  (a,b)**
 
-If **low == high** the interval is said to represent a
-*singular* point **[low]**, in which case the interval must be
-closed in both directions.
+If **low == high** the interval is said to represent a *singular* point
+**[low, low]**, or simply **[low]** for short. Endpoints of singular
+point intervals are always closed.
 
-    e.g.: **[a,a]**, or simply **[a]** for short.
-
-*Infinity* values may be used to create un-bounded intervals.
+*Infinity* values may be used to create un-bounded intervals. Endpoints
+with infinite values are always closed.
 
     e.g.: **[a, Infinity]  [-Infinity, a]  [-Infinity, Infinity]**.
 
@@ -68,52 +67,54 @@ How to create intervals.
 
 ..  note::
 
-    Programmers working with ``Axis`` and ``Sequencer`` need not know
-    much about intervals, except how to create them. The rest of this
-    section is intended mainly for reference or advanced usage.
+    Knowledge of how to create intervals is likely sufficient for basic usage
+    of ``Axis`` and ``Sequencer``. The rest of this section serves
+    mainly as a reference for advanced users interested in the details
+    concerning ordering and lookup of intervals on a timeline.
+
 
 ..  _interval-mediastate:
 
 Background
 ------------------------------------------------------------------------
 
-This focus on intervals and their mathematical definition may seem
-odd, given that the topic isn't mathematics but media. Still, when it
-comes to discrete media, points and intervals are fundamental to the
-definition of *media state*. In particular, we often want media state to
-be well defined (without ambiguities) along the entire timeline.
-For example, by using back-to-back intervals **... [a,b), [b,c), ...**
-we may ensure that the entire timeline is covered by media content, and the
-use of brackets removes any ambiguity regarding the media
-state at interval endpoint **b**.
+This focus on intervals and their mathematical definition may seem odd,
+given that the topic is media, not mathematics. Still, continuous media
+experiences require *media state* to be well defined along its timeline.
+For *discrete* media content, points and intervals offer a simple and
+elegant mechanism for achieving this goal:
 
     At any given point **p** on the timeline, the **media state**
-    at point **p** is given by the set of all intervals covering point
-    **p** and their associated media objects.
+    at point **p** is given by the set of all objects with an
+    interval covering point **p**.
 
-The above definition makes a solid basis for implementing media navigation
-and playback. For example, skipping on the timeline requires a quick
-transition from one media state to another. Typically this involves
+The mathematical model for points and intervals is attractive in this
+context. For example, by using back-to-back intervals **... [a,b),
+[b,c), ...** one may ensure that the entire timeline is covered by media
+content, and the use of brackets removes any ambiguity regarding the
+media state at interval endpoints.
+
+Importantly, the above definition also makes a solid basis for
+implementing *navigation* and *playback* within the *media state*. For
+example, jumping from one point to another on the timeline requires a quick
+transition between two different media states, possibly involving
 deactivation of some media objects and activation of others. Furthermore,
-during continuous playback state transitions must be implemented dynamically
-and at the correct time. A brute force solution of repeatedly destroying and
-recreating the entire state may be detrimental to user experiences as well
-as battery levels.
-
+during continuous media playback, state transitions must be implemented
+dynamically, at the correct time and in the correct order.
 
 .. _interval-endpoint:
 
-Endpoint
+Endpoint Types
 ------------------------------------------------------------------------
 
 
-Interval endpoints may also be discussed in isolation. The table
+Intervals are defined as a pair of interval endpoints. The table
 below shows that there are four distinct types of endpoints, and
-that endpoints are defined by three distinct properties
+that endpoints have three distinct properties
 
-*   **value** numerical value
-*   **direction** left or right
-*   **bracket** closed or open
+*   **value**: numerical value
+*   **direction**: left or right
+*   **bracket**: closed or open
 
 
     ======  ============  ======  =========  =======
@@ -132,18 +133,20 @@ Endpoint Ordering
 ------------------------------------------------------------------------
 
 Correct ordering of points and endpoints is important for consistency of
-media state, navigation and playback. This is straight forward as long as
-endpoint values are not equal. For instance, *2.2]* is before *(3.1*
-because *2.2 < 3.1*. However, in case of equality ordering rules based
-on endpoint **bracket** and **direction** is required to avoid ambiguities.
+media state, media navigation and playback. Ordering is straight forward
+as long as endpoint values are different in value. For instance, *2.2]*
+is ordered before *(3.1* because *2.2 < 3.1*. However, in case of
+equality, sensitivity to properties **bracket** and **direction**
+is required to avoid ambiguities.
 
-    The internal ordering of point **p** and the four endpoint types
-    with value **p** is, from left to right:
+The internal ordering of point **p** and the four endpoint types
+with value **p** is, from left to right:
 
-        **p), [p, p, p], (p**.
+    **p), [p, p, p], (p**
 
-    Or, in words; *right-open, left-closed, value, right-closed, left-open*.
+Or, by name:
 
+    *right-open, left-closed, value, right-closed, left-open*
 
 Based on this ordering we may define the comparison operators **leftof(e1, e2)**
 and **rightof(e1, e2)**, where **e1** and **e2** are either endpoints or
@@ -155,19 +158,16 @@ regular points values.
     **rightof(e1, e2)** returns true if **e1** is after **e2**,
     and false if **e1** is equal to or before **e2**.
 
-These operators are the basis for :ref:`interval-comparison`.
-
-
 
 ..  _interval-comparison:
 
 Interval Comparison
 ------------------------------------------------------------------------
 
-An interval may overlap partly with another interval, or not overlap at
-all. An interval may also cover an other interval, or be covered.
+Intervals may overlap partly, fully, or not at all. More formally,
+we define interval comparison as follows:
 
-    More formally, **cmp(a, b)** means comparing interval **a** to
+    The operator **cmp(a, b)** compares interval **a** to
     interval **b**. The comparison yields one of seven possible
     relasions: OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL, COVERS,
     OVERLAP_RIGHT, or OUTSIDE_RIGHT.
@@ -175,63 +175,43 @@ all. An interval may also cover an other interval, or be covered.
 ..  figure:: interval_compare.png
 
     This illustrates the different interval relations yielded by
-    **cmp(a,b)** when seven diffent intervals A are compared to a single
+    **cmp(a,b)** when seven diffent intervals A are compared to the same
     interval B.
 
 
-The **cmp(a,b)** operator is defined in terms of simpler
+The **cmp(a,b)** operator is then defined in terms of simpler
 operators **leftof**, **rightof** and **inside**. The operator
-**inside(e, i)** evaluates to true if a point or an endpoint is inside
-an interval. **e** is a point or an endpoint and **i** is interval,
-defined by two endpoints **i.low** and **i.high**.
+**inside(e, i)** evaluates to true if a point or an endpoint **e** is inside
+interval **i**. Interval **i** is in turn defined by its two endpoints
+**i.low** and **i.high**.
 
     **inside(e, i)** = **!leftof(e, i.low) && !rightof(e, i.high)**
 
-
-..  For example, the following table illustrates the effective evaluation of the
-    **inside(p, i)** operator, where **p** is a regular point value.
-
-    ======================  =============================
-    operator                evaluation
-    ======================  =============================
-    inside(p, [low, high])  (low <= p && p <= high)
-    inside(p, [low, high>)  (low <= p && p < high)
-    inside(p, <low, high])  (low < p && p <= high)
-    inside(p, <low, high>)  (low < p && p < high)
-    ======================  =============================
-
 Interval relations OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL, COVERS,
-OVERLAP_RIGHT and OUTSIDE_RIGHT are then defined as follows:
+OVERLAP_RIGHT and OUTSIDE_RIGHT are defined as follows:
 
-+------------+--------------------------------------------------------+
-| cmp(a, b)  | description                                            |
-+============+========================================================+
-| | OUTSIDE  | | a is outside b on the left                           |
-| | LEFT     | | a.high *leftof* b.low                                |
-+------------+--------------------------------------------------------+
-| | OVERLAP  | | a overlaps b from left                               |
-| | LEFT     | | a.high is *inside* b                                 |
-|            | | a.low is *leftof* b.low                              |
-+------------+--------------------------------------------------------+
-| | COVERED  | | a is covered by b                                    |
-|            | | a.low *inside* b && a.high *inside* b                |
-|            | | b.low *!inside* a || b.high *!inside* a              |
-+------------+--------------------------------------------------------+
-| | EQUAL    | | a is equal to a                                      |
-|            | | a.low *inside* b && a.high *inside* b                |
-|            | | b.low *inside* a && b.high *inside* a                |
-+------------+--------------------------------------------------------+
-| | COVERS   | | a covers b                                           |
-|            | | a.low *!inside* b || a.high *!inside* b              |
-|            | | b.low *inside* a && b.high *inside* a                |
-+------------+--------------------------------------------------------+
-| | OVERLAP  | | a overlaps b from right                              |
-| | RIGHT    | | a.low is *inside* b                                  |
-|            | | a.high is *rightof* b.high                           |
-+------------+--------------------------------------------------------+
-| | OUTSIDE  | | a is outside b on the right                          |
-| | RIGHT    | | a.low *rightof* b.high                               |
-+------------+--------------------------------------------------------+
++---------------+-----------------------------+-------------------------------------------+
+| **cmp(a, b)** | **description**             | **definition**                            |
++---------------+-----------------------------+-------------------------------------------+
+| OUTSIDE LEFT  | a is outside b on the left  | - a.high *leftof* b.low                   |
++---------------+-----------------------------+-------------------------------------------+
+| OVERLAP LEFT  | a overlaps b from left      | - a.high is *inside* b                    |
+|               |                             | - a.low is *leftof* b.low                 |
++---------------+-----------------------------+-------------------------------------------+
+| COVERED       | a is covered by b           | - a.low *inside* b && a.high *inside* b   |
+|               |                             | - b.low *!inside* a || b.high *!inside* a |
++---------------+-----------------------------+-------------------------------------------+
+| EQUAL         | a is equal to a             | - a.low *inside* b && a.high *inside* b   |
+|               |                             | - b.low *inside* a && b.high *inside* a   |
++---------------+-----------------------------+-------------------------------------------+
+| COVERS        | a covers b                  | - a.low *!inside* b || a.high *!inside* b |
+|               |                             | - b.low *inside* a && b.high *inside* a   |
++---------------+-----------------------------+-------------------------------------------+
+| OVERLAP RIGHT | a overlaps b from right     | - a.low is *inside* b                     |
+|               |                             | - a.high is *rightof* b.high              |
++---------------+-----------------------------+-------------------------------------------+
+| OUTSIDE RIGHT | a is outside b on the right | - a.low *rightof* b.high                  |
++---------------+-----------------------------+-------------------------------------------+
 
 
 Here are a few examples of comparisons between intervals a and b.
@@ -252,6 +232,10 @@ a       b       cmp(a, b)
 
 Api
 ------------------------------------------------------------------------
+
+
+Constructor
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:class:: Interval(low[, high[, lowInclude[, highInclude]]])
 
@@ -274,10 +258,14 @@ Api
         | false by default
 
     If only **low** is given, or if **low == high**, the interval is singular.
-    In this case **lowInclude** and **highInclude** are both true (params ignored).
+    In this case **lowInclude** and **highInclude** are both true.
+
+    If **low** is *-Infinity*, **lowInclude** is always true
+    If **high** is *Infinity*, **highInclude** is always true
 
 
-Class Attributes
+Instance Attributes
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:attribute:: interval.low
 
@@ -308,38 +296,49 @@ Class Attributes
     float: interval length (**high-low**)
 
 
-
-Class Methods
+Instance Methods
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:method:: interval.toString ()
 
-    :returns: String representation of interval
+    :returns string:
+
+    Human readable string
+
+
+..  js:method:: interval.inside(p)
+
+    :param number p: point
+    :returns boolean: True if point p is inside interval
+
+    Test if point p is inside interval.
+
+
+    ..  code-block:: javascript
+
+        let a = new Interval(4, 5)  // [4,5)
+        a.inside(4.0)  // true
+        a.inside(4.3)  // true
+        a.inside(5.0)  // false
 
 ..  js:method:: interval.compare(other)
 
     :param Interval other: interval to compare with
     :returns int: comparison relation
 
-    The **CMP (A, B)** operation may also be used for comparisons between a
-    point and an interval, or between points, provided the values
-    are represented as ``Interval`` objects
-    (see :ref:`singular points <interval-definition>`)
+    Compares interval to another interval, i.e. **cmp(interval, other)**.
 
-    Compares interval to other, i.e. CMP(interval, other).
-    E.g. returns COVERS if *interval* COVERS *other*
+    ..  code-block:: javascript
 
-..  js:method:: interval.equals(other)
-
-..  js:method:: interval.outside(other)
-
-..  js:method:: interval.overlap(other)
-
-..  js:method:: interval.covered(other)
-
-..  js:method:: interval.covers(other)
+        let a = new Interval(4, 5)  // [4,5)
+        let b = new Interval(4, 5, true, true)  // [4,5]
+        a.compare(b) == Interval.COVERED  // true
+        b.compare(a) == Interval.COVERS   // true
 
 
-Static class members
+
+Static Attributes
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Interval relations available as static variables on the Interval class.
 
@@ -352,15 +351,8 @@ Interval relations available as static variables on the Interval class.
 ..  js:attribute:: Interval.OUTSIDE_RIGHT
 
 
-Static class functions
-
-..  js:method:: Interval.pointInside(p, interval)
-
-    :param number p: point
-    :param Interval interval: interval
-    :returns boolean: True if point p is inside interval
-
-    Test if point p is inside interval.
+Static Functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
 
@@ -369,23 +361,44 @@ Static class functions
 
     :param Interval interval_a: interval A
     :param Interval interval_b: interval B
-    :returns int: diff
-        diff == 0: A == B
-        diff > 0: A < B
-        diff < 0: A > B
+    :returns int:
+        | a < b  : -1
+        | a == b : 0
+        | a > b  : 1
 
     Use with Array.sort() to sort Intervals by their low endpoint.
+
+    .. code-block:: javascript
+
+        a = [
+            new Interval(4,5),
+            new Interval(2,3),
+            new Interval(1,6)
+        ];
+        a.sort(Interval.cmpLow);
+        // [1,6), [2,3), [4,5)
 
 ..  js:function:: Interval.cmpHigh (interval_a, interval_b)
 
     :param Interval interval_a: interval A
     :param Interval interval_b: interval B
-    :returns int: diff
-        diff == 0: A == B
-        diff > 0: A < B
-        diff < 0: A > B
+    :returns int:
+        | a < b  : -1
+        | a == b : 0
+        | a > b  : 1
 
     Use with Array.sort() to sort Intervals by their high endpoint.
+
+    .. code-block:: javascript
+
+        a = [
+            new Interval(4,5),
+            new Interval(2,3),
+            new Interval(1,6)
+        ];
+        a.sort(Interval.cmpHigh);
+        // [2,3), [4,5), [1,6)
+
 
 
 
