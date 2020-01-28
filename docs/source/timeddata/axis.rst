@@ -1,19 +1,28 @@
-
 ..  _axis:
 
 ========================================================================
 Axis
 ========================================================================
 
-``Axis`` is a specific dataset used for precise and efficient
-*sequencing* of timed data, i.e. *cues*.
+``Axis`` is a dataset for *timed* data. Timed data is any value or
+object which can be related to a timeline. Typical examples include log
+data, user comments, sensor data, subtitles, images, playlists,
+transcripts, gps coordinates and much more.
 
-..  axis-intro:
+The axis implements efficient data searches on the timeline and is
+generally useful for management and visualisation of large datasets of
+timed data. Still, the main purpose of the axis is to provide a
+datastructure suitable for precise and efficient *sequencing* (playback
+and navigation) of timed data. This is achieved by connecting one or
+more ``Sequencers`` to the axis.
 
-Introduction
+
+..  axis-definition:
+
+Definition
 ------------------------------------------------------------------------
 
-``Axis`` is a collection of *cues*. A *cue* is essentially a triplet: (key,
+``Axis`` is a dataset of *cues*. A *cue* is essentially a triplet: (key,
 :ref:`interval` , data), represented as a simple Javascript object.
 
 ..  code-block:: javascript
@@ -24,16 +33,45 @@ Introduction
         data: {...}
     }
 
+
 ``Axis`` is similar to a ``Map`` as *cues* are indexed by a unique
-``cue.key``. Additionally, *cues* are indexed by ``cue.interval`` which
-defines the validity of the *cue* along the *axis*. This allows
-efficient lookup of *cues* valid for a particular *point* on the
-``Axis``, or valid within a continuous segment.
+*key*. However, *cues* are additionally indexed by *interval* which
+defines the validity of the *cue* along the *axis*. Indexing allows
+efficient lookup of *cues* valid for a particular *point* or *segment*
+on the axis.
 
 
 ..  note::
 
     Illustration!
+
+
+Example
+------------------------------------------------------------------------
+
+..  code-block:: javascript
+
+    // timed data
+    let subtitles = [
+        {
+            id: "1234",
+            start: 123.70,
+            end: 128.21,
+            text: "This is a subtitle"
+        },
+        ...
+    ];
+
+    // create axis
+    let axis = new Axis();
+
+    // load timed data into axis
+    subtitles.forEach(function (sub) {
+        let itv = new Interval(sub.start, sub.end);
+        let cue = {key: sub.id, interval: itv, data: sub};
+        axis.update(cue);
+    });
+
 
 
 .. axis-update:
