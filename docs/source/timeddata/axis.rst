@@ -4,10 +4,10 @@
 Axis
 ========================================================================
 
-``Axis`` is a dataset for *timed* data. Timed data is any value or
-object which can be related to a timeline. Typical examples include log
-data, user comments, sensor data, subtitles, images, playlists,
-transcripts, gps coordinates and much more.
+``Axis`` is a dataset for *timed* data. Timed data is essentially an
+object relatable to a timeline. Typical examples include data with
+timestamps and/or duration, such as log data, user comments, sensor
+data, subtitles, images, playlists, transcripts, gps coordinates etc.
 
 The axis implements efficient data searches on the timeline and is
 generally useful for management and visualisation of large datasets of
@@ -17,13 +17,13 @@ and navigation) of timed data. This is achieved by connecting one or
 more ``Sequencers`` to the axis.
 
 
-..  axis-definition:
+..  _axis-definition:
 
 Definition
 ------------------------------------------------------------------------
 
-``Axis`` is a dataset of *cues*. A *cue* is essentially a triplet: (key,
-:ref:`interval` , data), represented as a simple Javascript object.
+``Axis`` is a dataset of *cues*. A *cue* is essentially a triplet:
+**(key, interval, data)**, represented as a simple Javascript object.
 
 ..  code-block:: javascript
 
@@ -34,11 +34,12 @@ Definition
     }
 
 
-``Axis`` is similar to a ``Map`` as *cues* are indexed by a unique
-*key*. However, *cues* are additionally indexed by *interval* which
-defines the validity of the *cue* along the *axis*. Indexing allows
-efficient lookup of *cues* valid for a particular *point* or *segment*
-on the axis.
+The axis supports efficient lookup of *cues* by *key*. In addition,
+*cues* are indexed by their *interval* enabling effective search for cues
+on the timeline. Intervals define the validity of cues on the timeline,
+and represent either a singular point or a continuous segment (see
+:ref:`Interval <interval-definition>`). Likewise, search operations use
+intervals to describe a target point or segment on the timeline.
 
 
 ..  note::
@@ -51,6 +52,9 @@ Example
 
 ..  code-block:: javascript
 
+    // create axis
+    let axis = new Axis();
+
     // timed data
     let subtitles = [
         {
@@ -62,141 +66,169 @@ Example
         ...
     ];
 
-    // create axis
-    let axis = new Axis();
-
-    // load timed data into axis
-    subtitles.forEach(function (sub) {
+    // create cues from subtitles
+    let cues = subtitles.map(function (sub) {
         let itv = new Interval(sub.start, sub.end);
-        let cue = {key: sub.id, interval: itv, data: sub};
-        axis.update(cue);
+        return {key: sub.id, interval: itv, data: sub};
     });
 
+    // insert cues
+    axis.update(cues);
 
 
-.. axis-update:
 
-Update Cues
-------------------------------------------------------------------------
-
-The ``Axis`` provides a single *update* operation allowing all types
-of cue manipulation; **adding**, **modifying** or **removing** cues.
-
-The update operation processes a single ``cueOp`` operations, or a
-list of such cue operations.
-
-Cue Immutability
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Cues are supposed to be *immutable*, so manipulation of cues on the
-``Axis`` involves **adding**, **replacing** or **removing** cues, as
-opposed to modifying cue objects directly.
-
-However, note that *immutability* of cues is **not** enforced by the
-implementation, so the  programmer is responsible for avoiding direct
-modification of cues managed by the ``Axis``, and instead use the
-designated methods. Modification of cue ``Intervals`` especially may
-break the indexing of cues and lead to unspecified behavior.
-Modification of cue data would imply that appropriate *change events*
-(see :ref:`axis-events`) would **not** be emitted from the ``Axis``.
-
-Batch Processing
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Cue manipulation is also **batch-oriented**, implying that multiple cue
-operations may be processed by the ``Axis``, as one atomic operation.
-This ``Axis`` implementation targets efficiency with high volumes of
-cues, and support for batch operations is crucial in this regard. For
-instance, with the current implementation inserting 100.000 ordered cues
-would take about 0.2 seconds in a desktop environment.
-
+.. _axis-update:
 
 Cue Operations
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+------------------------------------------------------------------------
 
-Cue operations are structured similarly to ``cues``.
+The axis allows cues to be **inserted**, **replaced** or **deleted**.
+Cues managed by the axis should never be modified directly by application code.
+
+Cue operations **insert**, **replace** and **delete** are all
+implemented by a single operation; **update(cue)**. The parameter
+**cue** describes a cue to be inserted. If a cue already exists with the
+same key, the preexisting cue will be replaced. If the cue only includes a key (no
+interval or data), any preexisting cue will be deleted.
+
 
 ..  code-block:: javascript
 
-    let cueOp = {
-        key: "akey",
+    let axis = new Axis();
+
+    // insert
+    axis.update({
+        key: "mykey",
         interval: new Interval(2.2, 4.31),
-        data: {...}
-    }
+        data: "foo"
+    });
 
-The update operations is asynchronous, and the will not return a result.
-For the same reason, effects on the ``Axis`` will not be observable
-directly after this operation.
+    // replace
+    axis.update({
+        key: "mykey",
+        interval: new Interval(4.4, 6.9),
+        data: "bar"
+    });
 
-If ``cueOp.key`` references a key which already exists in the
-``Axis``, the cue operation describes **modification** or
-**removal** of the pre-existing ``cue``. Otherwise, the ``cueOp``
-describes the **addition** of a new ``cue``. This way, a batch of
-cue operations may include a mix of **add**, **modify**
-and **remove** operations.
+    // delete
+    axis.update({key: "mykey"})
 
 
-Unlike, ``cue`` objects, ``cueOp`` objects need not always define
-propterties ``cueOp.interval`` and ``cueOp.data``. This gives rise
-to four types of cue operations:
+For convenience there is also a distinction between *full* and *partial*
+cue replacement. *Partial* means to replace only the cue interval, or
+only the cue data. This gives rise to four types of cue operations:
 
-=====  =======================================  ====================
-Type   CueOp value                              Text
-=====  =======================================  ====================
-A      {key: "akey"}                            no interval, no data
-B      {key: "akey", interval: ...}             interval, no data
-C      {key: "akey", data: ...}                 no interval, data
-D      {key: "akey", interval: ..., data: ...}  interval, data
-=====  =======================================  ====================
+=====  ========================================  ====================
+Type   Cue parameter                             Text
+=====  ========================================  ====================
+A      {key: "mykey"}                            no interval, no data
+B      {key: "mykey", interval: ...}             interval, no data
+C      {key: "mykey", data: ...}                 no interval, data
+D      {key: "mykey", interval: ..., data: ...}  interval, data
+=====  ========================================  ====================
+
+If only the interval is replaced (*type B*), the data of the preexisting
+cue will be preserved. Similarly, if only the data is replaced (*type
+C*), the interval of the preexisting cue will be preserved.
 
 ..  note::
 
-    Note that ``{key: "akey"}`` is *type A* whereas ``{key: "akey",
-    data:undefined}`` is type C. The type evaluation employed by the
-    ``Axis`` is based on ``cueOp.hasOwnProperty("data")`` rather than
-    ``cueOp.data === undefined``. This ensures that ``undefined``
-    may be used as a data value with ``cues``.
-    The type evaluation for interval is stricter, as *type B* and *type D*
-    require ``cue.interval`` to be instance of ``Interval``.
+    Note that ``{key: "mykey"}`` is *type A* whereas ``{key: "mykey",
+    data:undefined}`` is type C. The type evaluation is based on
+    ``cue.hasOwnProperty("data")`` rather than ``cue.data ===
+    undefined``. This ensures that ``undefined`` may be used as a data
+    value with cues. The type evaluation for interval is stricter,
+    as *type B* and *type D* require interval to be instance of the
+    ``Interval`` class.
 
-The different types of cue operations are then interpreted
-according to the following table. For cue operations which modify only
-the interval (type B), the pre-existing value for ``cue.data`` will be
-preserved. Similarly, when modifying only the data (type C), the
-pre-existing ``cue.interval`` will be preserved.
+In summary, the different types of cue operations are interpreted
+according to the following table.
 
 =====  ====================  ==============================
-Type   Key NOT pre-existing  Key pre-existing
+Type   NO pre-existing cue   Pre-existing cue
 =====  ====================  ==============================
-A      NOOP                  REMOVE CUE
-B      NOOP                  MODIFY CUE.INTERVAL
-C      NOOP                  MODIFY CUE.DATA
-D      ADD CUE               MODIFY CUE.INTERVAL & CUE.DATA
+A      NOOP                  DELETE cue
+B      NOOP                  REPLACE cue.interval
+C      NOOP                  REPLACE cue.data
+D      INSERT cue            REPLACE cue
 =====  ====================  ==============================
+
+
+
+Batch Operations
+------------------------------------------------------------------------
+
+The **update** operaration is also **batch-oriented**, implying that
+multiple cue operations are processed as one atomic operation. This is
+important in regards to :ref:`efficiency <axis-efficiency>`. This way, a
+single batch may include a mix of **insert**, **replace** and **delete**
+operations. The **update(cue)** operation supports this by accepting a
+either a single cue or a list of cues as parameter.
+
+..  code-block:: javascript
+
+    let axis = new Axis();
+
+    let cues = [
+        {
+            key: "key_1",
+            interval: new Interval(2.2, 4.31),
+            data: "foo"
+        },
+        {
+            key: "mykey",
+            interval: new Interval(4.4, 6.9),
+            data: "bar"
+        }
+    ];
+
+    axis.update(cues);
 
 ..  note::
 
     It is possible to include multiple cue operations regarding the
     same key in a single batch. If so, all cue operations will be
     applied in given order. However, as they are part of the same
-    batch, intermediate states will never be exposed. This effectively
-    means that multiple  ``cueOps`` are collapsed into one.
+    update operation, intermediate states will not be exposed. This effectively
+    means that multiple cue operations are collapsed into one.
     For instances, if a cue is first added and then removed,
     the net effect is *no effect*.
 
+
+
+
+..  _axis-efficiency:
+
+Efficiency
+------------------------------------------------------------------------
+
+
+The axis implementation targets efficiency with high volumes of
+cues, and support for batch operations is crucial in this regard. For
+instance, with the current implementation inserting 100.000 ordered cues
+would take about 0.2 seconds in a desktop environment.
+
+
 ..  note::
 
-    Multiple invokations of ``update`` is fine, it will still result
-    in a single aggregate batch being applied to the ``Axis``.
-
+    More details
 
 
 Api
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+------------------------------------------------------------------------
+
 
 ..  js:method:: axis.update (cueOpList)
 
     :param list cueOpList: single cue operation or list
+
+    The update operations is asynchronous, and the will not return a result.
+    For the same reason, effects on the ``Axis`` will not be observable
+    directly after this operation.
+
+    Multiple invokations of ``update`` is fine, it will still result
+    in a single aggregate batch being applied to the ``Axis``.
+
 
 
 ..  js:method:: axis.clear()
