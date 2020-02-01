@@ -88,8 +88,8 @@ Cues managed by the axis should never be modified directly by application code.
 Cue operations **insert**, **replace** and **delete** are all
 implemented by a single operation; **update(cue)**. The parameter
 **cue** describes a cue to be inserted. If a cue already exists with the
-same key, the preexisting cue will be replaced. If the cue only includes a key (no
-interval or data), any preexisting cue will be deleted.
+same key, this pre-existing cue will be replaced. If the cue parameter includes a
+key, but no interval or data property, any pre-existing cue is deleted.
 
 
 ..  code-block:: javascript
@@ -127,9 +127,9 @@ C      {key: "mykey", data: ...}                 no interval, data
 D      {key: "mykey", interval: ..., data: ...}  interval, data
 =====  ========================================  ====================
 
-If only the interval is replaced (*type B*), the data of the preexisting
-cue will be preserved. Similarly, if only the data is replaced (*type
-C*), the interval of the preexisting cue will be preserved.
+If *only* the interval is replaced (*type B*), the data of the preexisting
+cue will be preserved. Similarly, if *only* the data is replaced (*type
+C*), the interval of the pre-existing cue will be preserved.
 
 ..  note::
 
@@ -145,7 +145,7 @@ In summary, the different types of cue operations are interpreted
 according to the following table.
 
 =====  ====================  ==============================
-Type   NO pre-existing cue   Pre-existing cue
+Type   Key NOT pre-existing  Key pre-existing
 =====  ====================  ==============================
 A      NOOP                  DELETE cue
 B      NOOP                  REPLACE cue.interval
@@ -153,13 +153,13 @@ C      NOOP                  REPLACE cue.data
 D      INSERT cue            REPLACE cue
 =====  ====================  ==============================
 
-
+.. _axis-batch:
 
 Batch Operations
 ------------------------------------------------------------------------
 
-The **update** operaration is also **batch-oriented**, implying that
-multiple cue operations are processed as one atomic operation. This is
+The **update(cue)** operaration is also *batch-oriented*, implying that
+multiple cue operations can be processed as one atomic operation. This is
 important in regards to :ref:`efficiency <axis-efficiency>`. This way, a
 single batch may include a mix of **insert**, **replace** and **delete**
 operations. The **update(cue)** operation supports this by accepting a
@@ -176,13 +176,33 @@ either a single cue or a list of cues as parameter.
             data: "foo"
         },
         {
-            key: "mykey",
+            key: "key_2",
             interval: new Interval(4.4, 6.9),
             data: "bar"
         }
     ];
 
     axis.update(cues);
+
+
+..  warning::
+
+    Repeated invocation of the update operation is an *anti-pattern*
+    with respect to efficiency! Cue operations should always be
+    aggregated and then applied together with a single update operation.
+
+    ..  code-block:: javascript
+
+        // cues
+        let cues = [...];
+
+        // NO!
+        cues.forEach(function(cue)) {
+            axis.update(cue);
+        }
+
+        // YES!
+        axis.update(cues);
 
 ..  note::
 
@@ -191,10 +211,77 @@ either a single cue or a list of cues as parameter.
     applied in given order. However, as they are part of the same
     update operation, intermediate states will not be exposed. This effectively
     means that multiple cue operations are collapsed into one.
-    For instances, if a cue is first added and then removed,
+    For instances, if a cue is first inserted and then deleted,
     the net effect is *no effect*.
 
 
+
+.. axis-lookup:
+
+Cue Lookup
+------------------------------------------------------------------------
+
+The **lookup(interval, lookupMode)** operation provides an efficient mechanism for
+identifying all cues which *match* a specific interval of the
+timeline. The parameter **interval** specifices the lookup interval, and
+**lookupMode** regulates what exactly counts as a match.
+
+The *lookup* operation is defined in terms of
+:ref:`interval-comparison`. Comparing the lookup interval to all cue
+intervals on the timeline yields seven distinct groups of cues, based on
+the comparison relations defined for intervals: OUTSIDE_LEFT,
+OVERLAP_LEFT, COVERED,  EQUAL, COVERS, OVERLAP_RIGHT, OUTSIDE_RIGHT. The
+lookup operation then allows the exact definition of *match* to be
+controlled by selectively including above cue groups in  the result set.
+
+This gives rise to the following **lookupModes** for the lookup
+operation, i.e. an integer derived from a bitmask indicating which
+groups to include in the lookup result.
+
+=======  ===  ===============
+mask     int  included groups
+=======  ===  ===============
+1000000  64   OUTSIDE_LEFT
+0100000  32   OVERLAP_LEFT
+0010000  16   COVERED
+0001000   8   EQUAL
+0000100   4   COVERS
+0000010   2   OVERLAP_RIGHT
+0000001   1   OUTSIDE_RIGHT
+=======  ===  ===============
+
+Typically when looking up cues on the timeline, the desire is to lookup
+all cues which are *valid* somewhere within the *lookup interval*.
+If so, all groups except OUTSIDE_LEFT and OUTSIDE_RIGHT are included,
+and the appropriate lookup mode is 62.
+
+
+..  _axis-events:
+
+Events
+------------------------------------------------------------------------
+
+The axis emits a **change** event after every **update** operation has
+been processed. This allows multiple observers to monitor state changes
+of the axis dynamically. Event callbacks may be registered and
+un-registered using operations **on(type, callback)** and
+**off(type, callback)**. Event callbacks are invoked with a ``Map``
+object describing state changes for each affected cue, indexed by key.
+State changes include the **new** cue object and the **old** cue object.
+The axis creates the batch map as follows:
+
+..  code-block:: javascript
+
+    let eventMap = new Map();
+
+    // new cue inserted
+    eventMap.set(key, {new:inserted_cue, old:undefined})
+
+    // existing cue repaced
+    eventMap.set(key, {new:new_cue, old:replaced_cue})
+
+    // cue deleted
+    eventMap.set(key, {new:undefined, old:deleted_cue})
 
 
 ..  _axis-efficiency:
@@ -202,16 +289,29 @@ either a single cue or a list of cues as parameter.
 Efficiency
 ------------------------------------------------------------------------
 
-
-The axis implementation targets efficiency with high volumes of
-cues, and support for batch operations is crucial in this regard. For
-instance, with the current implementation inserting 100.000 ordered cues
-would take about 0.2 seconds in a desktop environment.
+The axis implementation targets efficiency with high volumes of cues. In
+particular, the efficiency of the **lookup** operations is crucial, as
+this will to be used repeatedly during media playback. With high volumes
+of cues, a brute force linear search will not be appropriate. The
+implementation therefor maintains a sorted index for cues and uses
+binary search to resolve lookup, yielding O(logN) lookup performance.
+The crux of the lookup algorithm relates to resolving the cues which
+COVERS the lookup interval, without resorting to an O(N) solution.
+On the other hand, maintaining a sorted index internally implies that
+the **update** is O(N). The support for :ref:`batch operations <axis-batch>`
+improves the efficiency, by ensuring that sorting overhead can be taken
+once for a large batch operation, instead on once per cue.
 
 
 ..  note::
 
+    For instance, with the current implementation inserting 100.000
+    pre-ordered cues would take about 0.2 seconds in a desktop environment.
+
+
     More details
+
+
 
 
 Api
@@ -306,63 +406,6 @@ Api
 
 
 
-.. axis-lookup:
-
-Lookup Cues
-------------------------------------------------------------------------
-
-The basic function of the lookup operation is to take a *search
-interval* and return all cues where **cue.interval** *matches* the
-**search interval**. There are, however, multiple ways to define a *match*
-between two intervals, and this is controlled by *lookup modes*.
-
-..  note::
-
-    Since ``Intervals`` may also be used to represent singular points
-    (see :ref:`interval-definition`), the lookup operation readily supports lookup for
-    cues that cover a single point.
-
-
-Lookup Modes
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Comparison between a *search interval* and a set of *cue intervals* yields
-five distinct groups of cues, based on the five five distinct comparison
-relations defined for intervals: COVERED, PARTIAL_LEFT, PARTIAL_RIGHT,
-COVERS, OUTSIDE_LEFT, OUTSIDE_RIGHT, EQUAL (see :ref:`interval-comparison`).
-
-The lookup operation allows *match* to be controlled by selectively
-including above groups (except OUTSIDE_LEFT and OUTSIDE_RIGHT).
-This gives rise to the following *modes* for the lookup operation,
-i.e. a bitmask indicating which groups to include in the lookup result.
-
-=============  =======================
-mask           included groups
-=============  =======================
-b'00001 (1)    COVERS
-b'00010 (2)    PARTIAL_LEFT
-b'00100 (4)    PARTIAL_RIGHT
-b'01000 (8)    COVERS
-b'10000 (16)   EQUAL
-=============  =======================
-
-Typically, when looking up cues on an axis, the desire is to lookup
-all cues which are *valid* somewhere within the *search interval*.
-If so, all groups must be included, and the appropriate lookup mode is
-b'11111 (31).
-
-
-Lookup Efficiency
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-The principal motivation for ``Axis`` is to be able to lookup cues
-efficiently, based on their location on the ``Axis``. With high volumes
-of cues, a brute force linear search will not be appropriate. The
-implementation maintains a sorted index for cues and uses binary search
-to resolve lookup, yielding lookup performance O(logN). The crux of the
-algorithm relates to resolving the COVERS group without resorting to
-linear search.
-
 
 Api
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -376,6 +419,11 @@ Api
     Returns all cues for a given interval on ``Axis``. Search mode
     specifies which cues to include.
 
+    Since ``Intervals`` may also be used to represent singular points
+    (see :ref:`interval-definition`), the lookup operation readily supports lookup for
+    cues that are valid for a single point on the timeline.
+
+
 
 ..  js:method:: axis.lookup_remove(interval[, mode])
 
@@ -386,32 +434,6 @@ Api
     Removes all cues for a given interval on ``Axis``. Search mode
     specifies which cues to include. More effective than iterating
     through cues and removing them iteratively.
-
-
-..  _axis-events:
-
-Events
-------------------------------------------------------------------------
-
-The ``Axis`` emits a ``change`` event after every ``update`` batch has
-been processed. This allows multiple observers to monitor state changes
-of the ``Axis`` dynamically. Event callbacks are invoked with a ``Map``
-object describing state changes for each affected cue, indexed by key.
-State changes include the **new** cue value and the **old** cue value.
-The ``Axis`` creates the batch map as follows:
-
-..  code-block:: javascript
-
-    let batchMap = new Map();
-
-    // new cue added
-    batchMap.set(key, {new:added_cue, old:undefined})
-
-    // existing cue modified
-    batchMap.set(key, {new:new_cue, old:old_cue})
-
-    // cue removed
-    batchMap.set(key, {new:undefined, old:removed_cue})
 
 
 Api
