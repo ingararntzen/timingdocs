@@ -354,9 +354,6 @@ Interval relations available as static variables on the Interval class.
 Static Functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-
-
-
 ..  js:function:: Interval.cmpLow (interval_a, interval_b)
 
     :param Interval interval_a: interval A

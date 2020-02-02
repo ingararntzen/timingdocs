@@ -153,6 +153,10 @@ C      NOOP                  REPLACE cue.data
 D      INSERT cue            REPLACE cue
 =====  ====================  ==============================
 
+
+
+
+
 .. _axis-batch:
 
 Batch Operations
@@ -185,24 +189,7 @@ either a single cue or a list of cues as parameter.
     axis.update(cues);
 
 
-..  warning::
 
-    Repeated invocation of the update operation is an *anti-pattern*
-    with respect to efficiency! Cue operations should always be
-    aggregated and then applied together with a single update operation.
-
-    ..  code-block:: javascript
-
-        // cues
-        let cues = [...];
-
-        // NO!
-        cues.forEach(function(cue)) {
-            axis.update(cue);
-        }
-
-        // YES!
-        axis.update(cues);
 
 ..  note::
 
@@ -216,7 +203,7 @@ either a single cue or a list of cues as parameter.
 
 
 
-.. axis-lookup:
+.. _axis-lookup:
 
 Cue Lookup
 ------------------------------------------------------------------------
@@ -318,72 +305,26 @@ Api
 ------------------------------------------------------------------------
 
 
-..  js:method:: axis.update (cueOpList)
-
-    :param list cueOpList: single cue operation or list
-
-    The update operations is asynchronous, and the will not return a result.
-    For the same reason, effects on the ``Axis`` will not be observable
-    directly after this operation.
-
-    Multiple invokations of ``update`` is fine, it will still result
-    in a single aggregate batch being applied to the ``Axis``.
-
-
-
-..  js:method:: axis.clear()
-
-    Clears all cues of the ``Axis``. More effective than iterating
-    through cues and removing them.
-
-
-..  js:method:: axis.addCue (key, interval, data)
-
-    :param object key: cue key
-    :param Interval interval: cue interval
-    :param object data: cue data
-    :returns object: this
-
-    This method will either add a new cue or modify an existing.
-    Partial modification (modifying only interval or only data) will not be
-    possible using this method.
-
-    ..  code-block:: javascript
-
-        addCue(key, interval, data) {
-            this.update({key:key, interval:interval, data:data});
-            return this;
-        };
-
-..  js:method:: axis.removeCue (key)
-
-    :param object key: cue key
-    :returns object: this
-
-    This method will remove a cue.
-
-    ..  code-block:: javascript
-
-        removeCue(key) {
-            this.update({key:key});
-            return this;
-        };
-
-
-.. axis-get:
-
-Get Cues
-------------------------------------------------------------------------
-
-A selection of ``Map``-like methods are available for accessing the
-state of the ``Axis``.
-
-Api
+Constructor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-..  js:attribute:: size
+..  js:class:: Axis()
+
+    Create an empty axis.
+
+
+Instance Attributes
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+..  js:attribute:: axis.size
 
     :returns int: number of cues
+
+
+
+Instance Methods
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 ..  js:method:: axis.has(key)
 
@@ -404,40 +345,75 @@ Api
     :returns Array: list of all cues
 
 
+..  js:method:: axis.update (cues[, equals])
+
+    :param list cues: list of cues or single cue
+    :param function equals: equality function for cue data
+    :returns changeMap: cue changes caused by the update operation
+
+    Insert, replace or delete cues from the axis. For details on how
+    to construct cues see :ref:`axis-update`.
+
+    Attempts to replace a cue with an *equal* cue should be recognized
+    as NOOP and not incur any processing. However, with regards to the
+    cue data object there is no general way of determinig object
+    equality. By default, the axis uses a simple value equality test
+    ``==``, which will work for values, but not for objects.
+    In this case, an application specific equality function may be
+    given as parameter to update.
+
+    ..  code-block:: javascript
+
+        function equals(cue_data_a, cue_data_b) {...}
+
+    ..  warning::
+
+        Repeated invocation of the update operation is an *anti-pattern*
+        with respect to efficiency! Cue operations should always be
+        aggregated and then applied together as a single update operation.
+
+        ..  code-block:: javascript
+
+            // cues
+            let cues = [...];
+
+            // NO!
+            cues.forEach(function(cue)) {
+                axis.update(cue);
+            }
+
+            // YES!
+            axis.update(cues);
 
 
+..  js:method:: axis.clear()
 
-Api
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    Clears all cues of the axis. More effective than iterating
+    through cues and removing them.
+
 
 ..  js:method:: axis.lookup(interval[, mode])
 
-    :param Interval interval: search interval
-    :param int mode: search mode
+    :param Interval interval: lookup interval
+    :param int mode: lookup mode
     :returns Array: list of cues
 
-    Returns all cues for a given interval on ``Axis``. Search mode
-    specifies which cues to include.
+    Returns all cues matching a given interval on axis. Lookup mode
+    specifies the exact meaning of *match*, see :ref:`axis-lookup`.
 
-    Since ``Intervals`` may also be used to represent singular points
-    (see :ref:`interval-definition`), the lookup operation readily supports lookup for
-    cues that are valid for a single point on the timeline.
+    Note also that the lookup operation may be used to lookup cues that
+    match a single point on the timeline, simply by defining the
+    lookup interval as a single point.
 
 
+..  js:method:: axis.lookup_delete(interval[, mode])
 
-..  js:method:: axis.lookup_remove(interval[, mode])
-
-    :param Interval interval: search interval
+    :param Interval interval: lookup interval
     :param int mode: search mode
-    :returns Array: list of removed cues
+    :returns Array: list of deleted cues
 
-    Removes all cues for a given interval on ``Axis``. Search mode
-    specifies which cues to include. More effective than iterating
-    through cues and removing them iteratively.
+    Similar to *lookup*, except that it deletes all cues matching a given interval.
 
-
-Api
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:method:: axis.on (type, callback[, ctx])
 
@@ -469,3 +445,5 @@ Api
 ..  js:method:: callback (batchMap)
 
     :param Map batchMap: state changes
+
+
