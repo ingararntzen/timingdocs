@@ -405,6 +405,17 @@ Instance Methods
     match a single point on the timeline, simply by defining the
     lookup interval as a single point.
 
+..  js:method:: axis.lookup_points(interval)
+
+    :param Interval interval: lookup interval
+    :returns Array: list of (point, cue) tuples
+
+    This function is used to lookup all points on the axis (i.e. cue
+    endpoints), within some interval. Return list of (point, cue)
+    tuples. Point is an endpoint value of cue, either cue.low or
+    cue.high. Multiple cues may be registered on a single endpoint
+    value, so a point may occur multiple times with different cues.
+
 
 ..  js:method:: axis.lookup_delete(interval[, mode])
 
