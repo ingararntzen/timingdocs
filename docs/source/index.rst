@@ -11,11 +11,8 @@ Welcome to timingsrc's documentation!
    :caption: Timed Data
 
    timeddata/intro
-   timeddata/usage
    timeddata/interval
    timeddata/axis
-   timeddata/sequencer
-   timeddata/example
 
 
 Indices and tables

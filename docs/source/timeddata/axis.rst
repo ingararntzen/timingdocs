@@ -4,17 +4,17 @@
 Axis
 ========================================================================
 
-``Axis`` is a dataset for *timed* data. Timed data is essentially an
-object relatable to a timeline. Typical examples include data with
-timestamps and/or duration, such as log data, user comments, sensor
-data, subtitles, images, playlists, transcripts, gps coordinates etc.
+``Axis`` is a dataset for managing *timed data* on a timeline. Timed
+data is any datset where objects are associated with a timestamp (i.e. single point on
+the timeline) or with an interval (i.e. a continuous segment on the timeline).
+Typical examples of timed data include log data, user comments, sensor data,
+subtitles, images, playlists, transcripts, gps coordinates etc.
 
-The axis implements efficient data searches on the timeline and is
-generally useful for management and visualisation of large datasets of
-timed data. Still, the main purpose of the axis is to provide a
-datastructure suitable for precise and efficient *sequencing* (playback
-and navigation) of timed data. This is achieved by connecting one or
-more ``Sequencers`` to the axis.
+``Axis`` implements efficient data search on the timeline and is generally
+useful for management and visualisation of large datasets of timed data.
+Still, the main purpose of ``Axis`` is to provide a datastructure suitable for
+precisely timed playback of timed data. This is achieved by connecting one or
+more ``Sequencers`` to the ``Axis``.
 
 
 ..  _axis-definition:
@@ -34,12 +34,12 @@ Definition
     }
 
 
-The axis supports efficient lookup of *cues* by *key*. In addition,
+``Axis`` supports efficient lookup of *cues* by *key*. In addition,
 *cues* are indexed by their *interval* enabling effective search for cues
-on the timeline. Intervals define the validity of cues on the timeline,
+on the timeline. Intervals define the validity of a cue on the timeline,
 and represent either a singular point or a continuous segment (see
 :ref:`Interval <interval-definition>`). Likewise, search operations use
-intervals to describe a target point or segment on the timeline.
+intervals to limit searches to a specific segment on the timeline.
 
 
 ..  note::
@@ -79,17 +79,20 @@ Example
 
 .. _axis-update:
 
-Cue Operations
+Update
 ------------------------------------------------------------------------
 
-The axis allows cues to be **inserted**, **replaced** or **deleted**.
-Cues managed by the axis should never be modified directly by application code.
+``Axis`` allows cues to be **inserted**, **replaced** or **deleted** using a
+single operation; **update(cues)**. The argument **cues** describes a list of
+cues to be **inserted**, or a single *cue*. If a *cue* with identical *key*
+already exists in the ``Axis``, the *pre-existing* *cue* will be **replaced**
+by the *cue* argument. If a *cue* argument includes a *key* but no *interval*
+or *data*, this means to **delete** a pre-existing *cue*.
 
-Cue operations **insert**, **replace** and **delete** are all
-implemented by a single operation; **update(cue)**. The parameter
-**cue** describes a cue to be inserted. If a cue already exists with the
-same key, this pre-existing cue will be replaced. If the cue parameter includes a
-key, but no interval or data property, any pre-existing cue is deleted.
+
+..  note::
+
+    Cues managed by ``Axis`` should never be modified directly by application code.
 
 
 ..  code-block:: javascript
