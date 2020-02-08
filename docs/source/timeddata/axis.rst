@@ -92,7 +92,7 @@ or *data*, this means to **delete** a pre-existing *cue*.
 
 ..  note::
 
-    Cues managed by ``Axis`` should never be modified directly by application code.
+    Cues managed by ``Axis`` must not be modified directly by application code.
 
 
 ..  code-block:: javascript
@@ -117,9 +117,13 @@ or *data*, this means to **delete** a pre-existing *cue*.
     axis.update({key: "mykey"})
 
 
-For convenience there is also a distinction between *full* and *partial*
-cue replacement. *Partial* means to replace only the cue interval, or
-only the cue data. This gives rise to four types of cue operations:
+For convenience, the ``Axis`` also supports *partial* cue replacement.
+*Partial* means to replace the cue interval without having to restate the cue
+data, or, the other way around, to replace the cue data without having to
+restate the cue interval. Partial cue operations are specified simply by
+omitting the property which is not to be replaced. The omitted property will
+then be preserved from the pre-existing cue. This yields four types of cue
+arguments for the **update** operation:
 
 =====  ========================================  ====================
 Type   Cue parameter                             Text
@@ -130,10 +134,6 @@ C      {key: "mykey", data: ...}                 no interval, data
 D      {key: "mykey", interval: ..., data: ...}  interval, data
 =====  ========================================  ====================
 
-If *only* the interval is replaced (*type B*), the data of the preexisting
-cue will be preserved. Similarly, if *only* the data is replaced (*type
-C*), the interval of the pre-existing cue will be preserved.
-
 ..  note::
 
     Note that ``{key: "mykey"}`` is *type A* whereas ``{key: "mykey",
@@ -141,11 +141,11 @@ C*), the interval of the pre-existing cue will be preserved.
     ``cue.hasOwnProperty("data")`` rather than ``cue.data ===
     undefined``. This ensures that ``undefined`` may be used as a data
     value with cues. The type evaluation for interval is stricter,
-    as *type B* and *type D* require interval to be instance of the
+    as *type B* and *type D* additionally require interval to be instance of the
     ``Interval`` class.
 
-In summary, the different types of cue operations are interpreted
-according to the following table.
+In summary, the different types of cue arguments are interpreted according to the
+following table.
 
 =====  ====================  ==============================
 Type   Key NOT pre-existing  Key pre-existing
@@ -155,9 +155,6 @@ B      NOOP                  REPLACE cue.interval
 C      NOOP                  REPLACE cue.data
 D      INSERT cue            REPLACE cue
 =====  ====================  ==============================
-
-
-
 
 
 .. _axis-batch:
