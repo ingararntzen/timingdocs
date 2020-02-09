@@ -4,11 +4,11 @@
 Interval
 ========================================================================
 
-``Interval`` is used by ``Axis`` and ``Sequencer`` to define the
-validity of objects or values in relation to an *axis*. Intervals
-describe either a continuous *line segment* or a singular *point*. In media,
-the axis is often thought of as a *timeline* and in this context intervals
-define the *temporal validity* of media content.
+``Interval`` is used by ``Axis`` and ``Sequencer`` to define the validity of
+objects or values in relation to an *axis*. Intervals describe either a
+continuous *line segment* or a singular *point*. In media, the axis is often
+thought of as a *timeline* and in this context intervals define the *temporal
+validity* of media content.
 
 
 .. _interval-definition:
@@ -16,19 +16,18 @@ define the *temporal validity* of media content.
 Definition
 ------------------------------------------------------------------------
 
-Following standard mathematical notation intervals are expressed by two
-endpoint values **low** and **high**, where **low <= high**. Interval
-endpoints are either **open** or **closed**, as indicated with
-brackets below:
+Following standard mathematical notation intervals are expressed by two endpoint
+values **low** and **high**, where **low <= high**. Interval endpoints are
+either **open** or **closed**, as indicated with brackets below:
 
     e.g.: **[a,b]  [a,b)  (a,b]  (a,b)**
 
-If **low == high** the interval is said to represent a *singular* point
-**[low, low]**, or simply **[low]** for short. Endpoints of singular
-point intervals are always closed.
+If **low == high** the interval is said to represent a *singular* point **[low,
+low]**, or simply **[low]** for short. Endpoints of singular point intervals are
+always closed.
 
-*Infinity* values may be used to create un-bounded intervals. Endpoints
-with infinite values are always closed.
+*Infinity* values may be used to create un-bounded intervals. Endpoints with
+infinite values are always closed.
 
     e.g.: **[a, Infinity]  [-Infinity, a]  [-Infinity, Infinity]**.
 
@@ -67,10 +66,10 @@ How to create intervals.
 
 ..  note::
 
-    Knowledge of how to create intervals is likely sufficient for basic usage
-    of ``Axis`` and ``Sequencer``. The rest of this section serves
-    mainly as a reference for advanced users interested in the details
-    concerning ordering and lookup of intervals on a timeline.
+    Knowledge of how to create intervals is likely sufficient for basic usage of
+    ``Axis`` and ``Sequencer``. The rest of this section serves mainly as a
+    reference for advanced users interested in the details concerning ordering
+    and lookup of intervals on a timeline.
 
 
 ..  _interval-mediastate:
@@ -78,29 +77,27 @@ How to create intervals.
 Background
 ------------------------------------------------------------------------
 
-This focus on intervals and their mathematical definition may seem odd,
-given that the topic is media, not mathematics. Still, continuous media
-experiences require *media state* to be well defined along its timeline.
-For *discrete* media content, points and intervals offer a simple and
-elegant mechanism for achieving this goal:
+This focus on intervals and their mathematical definition may seem odd, given
+that the topic is media, not mathematics. Still, continuous media experiences
+require *media state* to be well defined along its timeline. For *discrete*
+media content, points and intervals offer a simple and elegant mechanism for
+achieving this goal:
 
-    At any given point **p** on the timeline, the **media state**
-    at point **p** is given by the set of all objects with an
-    interval covering point **p**.
+    At any given point **p** on the timeline, the **media state** at point **p**
+    is given by the set of all objects with an interval covering point **p**.
 
-The mathematical model for points and intervals is attractive in this
-context. For example, by using back-to-back intervals **... [a,b),
-[b,c), ...** one may ensure that the entire timeline is covered by media
-content, and the use of brackets removes any ambiguity regarding the
-media state at interval endpoints.
+The mathematical model for points and intervals is attractive in this context.
+For example, by using back-to-back intervals **... [a,b), [b,c), ...** one may
+ensure that the entire timeline is covered by media content, and the use of
+brackets removes any ambiguity regarding the media state at interval endpoints.
 
-Importantly, the above definition also makes a solid basis for
-implementing *navigation* and *playback* within the *media state*. For
-example, jumping from one point to another on the timeline requires a quick
-transition between two different media states, possibly involving
-deactivation of some media objects and activation of others. Furthermore,
-during continuous media playback, state transitions must be implemented
-dynamically, at the correct time and in the correct order.
+Importantly, the above definition also makes a solid basis for implementing
+*navigation* and *playback* within the *media state*. For example, jumping from
+one point to another on the timeline requires a quick transition between two
+different media states, possibly involving deactivation of some media objects
+and activation of others. Furthermore, during continuous media playback, state
+transitions must be implemented dynamically, at the correct time and in the
+correct order.
 
 .. _interval-endpoint:
 
@@ -108,23 +105,22 @@ Endpoint Types
 ------------------------------------------------------------------------
 
 
-Intervals are defined as a pair of interval endpoints. The table
-below shows that there are four distinct types of endpoints, and
-that endpoints have three distinct properties
+Intervals are defined as a pair of interval endpoints. The table below shows
+that there are four distinct types of endpoints, and that endpoints have three
+distinct properties
 
 *   **value**: numerical value
 *   **direction**: left or right
 *   **bracket**: closed or open
 
-
-    ======  ============  ======  =========  =======
-    symbol  name          value   direction  bracket
-    ======  ============  ======  =========  =======
-    **[a**  left-closed   a       left       closed
-    **(a**  left-open     a       left       open
-    **a]**  right-closed  a       right      closed
-    **a)**  right-open    a       right      open
-    ======  ============  ======  =========  =======
+======  ============  ======  =========  =======
+symbol  name          value   direction  bracket
+======  ============  ======  =========  =======
+**[a**  left-closed   a       left       closed
+**(a**  left-open     a       left       open
+**a]**  right-closed  a       right      closed
+**a)**  right-open    a       right      open
+======  ============  ======  =========  =======
 
 
 ..  _interval-ordering:
@@ -132,15 +128,14 @@ that endpoints have three distinct properties
 Endpoint Ordering
 ------------------------------------------------------------------------
 
-Correct ordering of points and endpoints is important for consistency of
-media state, media navigation and playback. Ordering is straight forward
-as long as endpoint values are different in value. For instance, *2.2]*
-is ordered before *(3.1* because *2.2 < 3.1*. However, in case of
-equality, sensitivity to properties **bracket** and **direction**
-is required to avoid ambiguities.
+Correct ordering of points and endpoints is important for consistency of media
+state, media navigation and playback. Ordering is straight forward as long as
+endpoint values are different in value. For instance, *2.2]* is ordered before
+*(3.1* because *2.2 < 3.1*. However, in case of equality, sensitivity to
+properties **bracket** and **direction** is required to avoid ambiguities.
 
-The internal ordering of point **p** and the four endpoint types
-with value **p** is, from left to right:
+The internal ordering of point **p** and the four endpoint types with value
+**p** is, from left to right:
 
     **p), [p, p, p], (p**
 
@@ -149,8 +144,8 @@ Or, by name:
     *right-open, left-closed, value, right-closed, left-open*
 
 Based on this ordering we may define the comparison operators **leftof(e1, e2)**
-and **rightof(e1, e2)**, where **e1** and **e2** are either endpoints or
-regular points values.
+and **rightof(e1, e2)**, where **e1** and **e2** are either endpoints or regular
+points values.
 
     **leftof(e1, e2)** returns true if **e1** is before **e2**,
     and false if **e1** is equal to or after **e2**.
@@ -164,26 +159,23 @@ regular points values.
 Interval Comparison
 ------------------------------------------------------------------------
 
-Intervals may overlap partly, fully, or not at all. More formally,
-we define interval comparison as follows:
+Intervals may overlap partly, fully, or not at all. More formally, we define
+interval comparison as follows:
 
-    The operator **cmp(a, b)** compares interval **a** to
-    interval **b**. The comparison yields one of seven possible
-    relasions: OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL, COVERS,
-    OVERLAP_RIGHT, or OUTSIDE_RIGHT.
+    The operator **cmp(a, b)** compares interval **a** to interval **b**. The
+    comparison yields one of seven possible relasions: OUTSIDE_LEFT,
+    OVERLAP_LEFT, COVERED, EQUAL, COVERS, OVERLAP_RIGHT, or OUTSIDE_RIGHT.
 
-..  figure:: interval_compare.png
+..  figure:: images/interval_compare.png
 
-    This illustrates the different interval relations yielded by
-    **cmp(a,b)** when seven diffent intervals A are compared to the same
-    interval B.
+    This illustrates the different interval relations yielded by **cmp(a,b)**
+    when seven diffent intervals A are compared to the same interval B.
 
 
-The **cmp(a,b)** operator is then defined in terms of simpler
-operators **leftof**, **rightof** and **inside**. The operator
-**inside(e, i)** evaluates to true if a point or an endpoint **e** is inside
-interval **i**. Interval **i** is in turn defined by its two endpoints
-**i.low** and **i.high**.
+The **cmp(a,b)** operator is then defined in terms of simpler operators
+**leftof**, **rightof** and **inside**. The operator **inside(e, i)** evaluates
+to true if a point or an endpoint **e** is inside interval **i**. Interval **i**
+is in turn defined by its two endpoints **i.low** and **i.high**.
 
     **inside(e, i)** = **!leftof(e, i.low) && !rightof(e, i.high)**
 

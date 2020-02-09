@@ -10,9 +10,9 @@ Welcome to timingsrc's documentation!
    :maxdepth: 2
    :caption: Timed Data
 
-   timeddata/intro
-   timeddata/interval
-   timeddata/axis
+   intro
+   interval
+   axis
 
 
 Indices and tables
