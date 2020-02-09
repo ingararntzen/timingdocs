@@ -203,7 +203,7 @@ single cue or a list of cues as parameter.
 
 
 
-..
+.. note:: TODO
 
 
     TODO: update counter
@@ -338,7 +338,7 @@ The axis creates the batch map as follows:
     eventMap.set(key, {new:undefined, old:deleted_cue})
 
 
-..
+..  note:: TODO
 
     TODO: indication of partial event?
     TODO: update counter
@@ -456,7 +456,7 @@ Instance Methods
     cue.high. Multiple cues may be registered on a single endpoint value, so a
     simple point value may occur multiple times with different cues.
 
-..
+..  note:: TODO
 
     TODO - cue endpoint definition
     TODO - cue endpoint ordering
@@ -477,7 +477,7 @@ Instance Methods
     :param string type: event type
     :param function callback: event callback
     :param object ctx: set *this* object to be used during callback
-        invokation. If not provided, *this* will be ``Axis``.
+        invokation. If not provided, *this* will be the axis instance.
 
     Register a callback for events of given type.
 
