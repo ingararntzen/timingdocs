@@ -17,7 +17,7 @@ python3 -m venv venv
 Activate Python environment
 
 ```sh
-source venv/bin/Activate
+source venv/bin/activate
 ```
 
 Install sphinx
