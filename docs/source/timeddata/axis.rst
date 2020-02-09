@@ -34,8 +34,8 @@ Definition
     }
 
 
-``Axis`` supports efficient lookup of *cues* by *key*. In addition,
-*cues* are indexed by their *interval* enabling effective search for cues
+``Axis`` supports efficient lookup of cues by key. In addition,
+cues are indexed by their interval enabling effective search for cues
 on the timeline. Intervals define the validity of a cue on the timeline,
 and represent either a singular point or a continuous segment (see
 :ref:`Interval <interval-definition>`). Likewise, search operations use
@@ -84,10 +84,10 @@ Update
 
 ``Axis`` allows cues to be **inserted**, **replaced** or **deleted** using a
 single operation; **update(cues)**. The argument **cues** describes a list of
-cues to be **inserted**, or a single *cue*. If a *cue* with identical *key*
-already exists in the ``Axis``, the *pre-existing* *cue* will be **replaced**
-by the *cue* argument. If a *cue* argument includes a *key* but no *interval*
-or *data*, this means to **delete** a pre-existing *cue*.
+cues to be **inserted**, or a single *cue*. If a cue with identical key
+already exists in the ``Axis``, the *pre-existing* cue will be **replaced**
+by the cue argument. If a cue argument includes a key but no interval
+or data, this means to **delete** a pre-existing cue.
 
 
 ..  note::
@@ -115,6 +115,10 @@ or *data*, this means to **delete** a pre-existing *cue*.
 
     // delete
     axis.update({key: "mykey"})
+
+
+Partial cue replacement
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
 For convenience, the ``Axis`` also supports *partial* cue replacement.
@@ -157,17 +161,17 @@ D      INSERT cue            REPLACE cue
 =====  ====================  ==============================
 
 
+
 .. _axis-batch:
 
 Batch Operations
-------------------------------------------------------------------------
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-The **update(cue)** operaration is also *batch-oriented*, implying that
-multiple cue operations can be processed as one atomic operation. This is
-important in regards to :ref:`efficiency <axis-efficiency>`. This way, a
-single batch may include a mix of **insert**, **replace** and **delete**
-operations. The **update(cue)** operation supports this by accepting a
-either a single cue or a list of cues as parameter.
+As indicated, the **update(cues)** operaration is *batch-oriented*,
+implying that multiple cue operations can be processed as one atomic
+operation. This way, a single batch may include a mix of **insert**,
+**replace** and **delete** operations. The **update(cues)** operation supports
+this by accepting either a single cue or a list of cues as parameter.
 
 ..  code-block:: javascript
 
@@ -189,41 +193,70 @@ either a single cue or a list of cues as parameter.
     axis.update(cues);
 
 
-
-
 ..  note::
 
     It is possible to include multiple cue operations regarding the
     same key in a single batch. If so, all cue operations will be
     applied in given order. However, as they are part of the same
-    update operation, intermediate states will not be exposed. This effectively
+    update operation intermediate states will not be exposed. This effectively
     means that multiple cue operations are collapsed into one.
-    For instances, if a cue is first inserted and then deleted,
+    For instance, if a cue is first inserted and then deleted,
     the net effect is *no effect*.
+
+..  _axis-update-performance:
+
+Update Performance
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+The performance of the **update** operation relates to the implementation of
+**lookup**, see :ref:`axis-lookup`. Since the efficiency of **lookup** depends
+on a sorted index, sorting must be performed as part of the **update**
+operation This implies that the performance of **update** is ultimately
+limited by sorting performace, i.e. ``Array.sort()``, which is O(N).
+Importantly, the support for :ref:`batch operations <axis-batch>` is vital 
+for reducing the sorting overhead, by ensuring that sorting is needed only
+once for a large batch operation, instead of once per cue argument.
+
+..  warning::
+
+    Repeated invocation of the update operation is an *anti-pattern*
+    with respect to efficiency! Cue operations should always be
+    aggregated and then applied together as a single update operation.
+
+    ..  code-block:: javascript
+
+        // cues
+        let cues = [...];
+
+        // NO!
+        cues.forEach(function(cue)) {
+            axis.update(cue);
+        }
+
+        // YES!
+        axis.update(cues);
+
 
 
 
 .. _axis-lookup:
 
-Cue Lookup
+Lookup
 ------------------------------------------------------------------------
 
-The **lookup(interval, lookupMode)** operation provides an efficient mechanism for
-identifying all cues which *match* a specific interval of the
-timeline. The parameter **interval** specifices the lookup interval, and
-**lookupMode** regulates what exactly counts as a match.
+The **lookup(interval, mode)** operation provides an efficient mechanism for
+identifying all cues *matching* a specific interval of the timeline. The
+parameter **interval** specifices the target interval for the
+operation, and **mode** regulates what exactly counts as a *match*.
 
-The *lookup* operation is defined in terms of
-:ref:`interval-comparison`. Comparing the lookup interval to all cue
-intervals on the timeline yields seven distinct groups of cues, based on
-the comparison relations defined for intervals: OUTSIDE_LEFT,
-OVERLAP_LEFT, COVERED,  EQUAL, COVERS, OVERLAP_RIGHT, OUTSIDE_RIGHT. The
-lookup operation then allows the exact definition of *match* to be
-controlled by selectively including above cue groups in  the result set.
-
-This gives rise to the following **lookupModes** for the lookup
-operation, i.e. an integer derived from a bitmask indicating which
-groups to include in the lookup result.
+The **lookup** operation is defined in terms of :ref:`interval-comparison`.
+A comparison between the target lookup interval and all cue intervals of the
+axis, yields seven distinct groups of cues: OUTSIDE_LEFT, OVERLAP_LEFT,
+COVERED, EQUAL, COVERS, OVERLAP_RIGHT, OUTSIDE_RIGHT. The lookup operation
+then allows the exact definition of *match* to be controlled by selectively
+including cue groups into the result set. The **mode** is an integer
+indicating which groups to include in the lookup result, constructed from
+bitmasks below:
 
 =======  ===  ===============
 mask     int  included groups
@@ -238,10 +271,23 @@ mask     int  included groups
 =======  ===  ===============
 
 Typically when looking up cues on the timeline, the desire is to lookup
-all cues which are *valid* somewhere within the *lookup interval*.
+all cues which are *valid* somewhere within the target lookup interval.
 If so, all groups except OUTSIDE_LEFT and OUTSIDE_RIGHT are included,
-and the appropriate lookup mode is 62.
+and the appropriate lookup mode is `32+16+8+4+2=62`.
 
+
+..  _axis-lookup-performance:
+
+Lookup Performance
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+The implementation of the **lookup** operation is not based on iterative
+comparison with with all cues on the axis, as this would be ineffective with
+large volumes of cues. Instead, the implementation depends on a sorted index
+for cues and uses binary search techniques to resolve lookup operations,
+yielding O(logN) performance. The crux of the lookup algorithm is to resolve
+the cues which COVERS the target lookup interval, without resorting to an O(N)
+solution.
 
 ..  _axis-events:
 
@@ -277,17 +323,10 @@ Efficiency
 ------------------------------------------------------------------------
 
 The axis implementation targets efficiency with high volumes of cues. In
-particular, the efficiency of the **lookup** operations is crucial, as
-this will to be used repeatedly during media playback. With high volumes
-of cues, a brute force linear search will not be appropriate. The
-implementation therefor maintains a sorted index for cues and uses
-binary search to resolve lookup, yielding O(logN) lookup performance.
-The crux of the lookup algorithm relates to resolving the cues which
-COVERS the lookup interval, without resorting to an O(N) solution.
-On the other hand, maintaining a sorted index internally implies that
-the **update** is O(N). The support for :ref:`batch operations <axis-batch>`
-improves the efficiency, by ensuring that sorting overhead can be taken
-once for a large batch operation, instead on once per cue.
+particular, the efficiency of the **lookup** operation is crucial, as this
+will to be used repeatedly during media playback. The performance of the
+**lookup** operation is O(logN) (see :ref:`axis-lookup-performance`), whereas
+**update** is O(N) (see :ref:`axis-update-performance`).
 
 
 ..  note::
@@ -366,24 +405,6 @@ Instance Methods
 
         function equals(cue_data_a, cue_data_b) {...}
 
-    ..  warning::
-
-        Repeated invocation of the update operation is an *anti-pattern*
-        with respect to efficiency! Cue operations should always be
-        aggregated and then applied together as a single update operation.
-
-        ..  code-block:: javascript
-
-            // cues
-            let cues = [...];
-
-            // NO!
-            cues.forEach(function(cue)) {
-                axis.update(cue);
-            }
-
-            // YES!
-            axis.update(cues);
 
 
 ..  js:method:: axis.clear()
