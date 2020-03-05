@@ -5,17 +5,17 @@ Axis
 ========================================================================
 
 ``Axis`` is a dataset for managing *timed data* on a timeline. Timed
-data is any datset where objects are associated with a timestamp (i.e.
+data is any dataset where objects are associated with a timestamp (i.e.
 single point on the timeline) or with an interval (i.e. a continuous
 segment on the timeline). Typical examples of timed data include log
 data, user comments, sensor data, subtitles, images, playlists,
 transcripts, gps coordinates etc.
 
 ``Axis`` implements efficient data lookup on the timeline and is
-generally useful for management and visualisation of large datasets of
-timed data. Still, the primary purpose of ``Axis`` is to provide a
+generally useful for management and visualization of large datasets of
+timed data. Still, the primary purpose of the axis is to provide a
 datastructure suitable for precisely timed playback of timed data. This
-is achieved by connecting one or more ``Sequencers`` to the ``Axis``.
+is achieved by connecting one or more ``Sequencers`` to the axis.
 
 
 ..  _axis-definition:
@@ -35,12 +35,12 @@ interval, data)**, represented as a simple Javascript object.
     }
 
 
-``Axis`` allows cues to be resolved efficiently by key, like a
-```Map```. In addition, cues are also indexed by their interval enabling
+Similar to a ``Map``, the axis allows cues to be resolved efficiently by
+key. Additionally, cues are indexed by interval, enabling
 effective lookup of cues along the timeline. Intervals define the
 validity of a cue on the timeline, and represent either a singular point
 or a continuous segment (see :ref:`Interval <interval-definition>`).
-Likewise, lookup operations use intervals to limit searches to a
+Likewise, lookup operations use intervals to limit cue searches to a
 specific point or segment on the timeline.
 
 
@@ -70,12 +70,11 @@ Example
 
     // create cues from subtitles data
     let cues = subtitles.map(function (sub) {
-        let itv = new Interval(sub.start, sub.end);
-        return {key: sub.id, interval: itv, data: sub};
+        return {key: sub.id, interval: new Interval(sub.start, sub.end), data: sub};
     });
 
     // insert cues
-    axis.update(;
+    axis.update(cues);
 
     // lookup cues
     let result_cues = axis.lookup(new Interval(120, 130));
@@ -91,13 +90,13 @@ Example
 Update
 ------------------------------------------------------------------------
 
-``Axis`` allows cues to be **inserted**, **modified** and/or
-**deleted**, using a single operation; **update(cues)**. The argument
-**cues** describes a list of cue objects (or a single cue object) to be
-**inserted**. If a cue with identical key already exists in the
-``Axis``, the *pre-existing* cue will be **modified** by the cue
-argument. If a cue argument includes a key but no interval or data, this
-means to **delete** the *pre-existing* cue.
+The axis provides a single operation **update** allowing cues to be
+**inserted**, **modified** and/or **deleted**. The argument **cues**
+defines a list of cue objects (or a single cue object) to be
+**inserted** into the axis. If a cue with identical key already exists
+in the axis, the *pre-existing* cue will be **modified** to match the
+provided cue argument. If a cue argument includes a key but no interval
+and no data, this means to **delete** the *pre-existing* cue.
 
 
 ..  code-block:: javascript
@@ -122,10 +121,8 @@ means to **delete** the *pre-existing* cue.
     axis.update({key: "mykey"})
 
 
-
-The axis works directly on the cue objects presented by the **update**
-operation. When a cue is inserted into the axis, it will be managed by
-the axis until it is eventually deleted. Internally, cue modification is
+When a cue is inserted into the axis, it will be managed by
+the axis until it is eventually deleted. Cue modification is
 implemented as *in-place* modification of *pre-existing* cues. All cue
 access operations (e.g. **lookup**) provide direct access to managed
 cues.
@@ -135,19 +132,18 @@ cues.
 ..  warning::
 
     Cues managed by the axis are considered **read-only** and must
-    **never** be modified by application code, except by correct usage
-    of the **update** operation.
+    **never** be modified by application code, except by the **update**
+    operation.
 
     If managed cue objects are modified by external code, no guarantees
     may be given concerning functional correctness of the axis. Note
     also that the axis does not implement any protection in this regard.
-
     In particular, programmers must avoid the pitfall of modifying cues
     objects directly ahead of using the **update** operation.
 
-    Good rules of thumb:
+    Rules of thumb:
 
-    -   never reuse cue objects as arguments to **update**.
+    -   never *reuse* previously defined cue objects as arguments to **update**.
     -   avoid keeping variables referencing cue objects.
 
 
@@ -157,32 +153,29 @@ cues.
         let cue = {...};
         axis.update(cue);
 
-        // modify - YES !
+        // YES ! - modify by creating new cue object
         axis.update({
             key: cue.key,
             interval: new Interval(4, 6),
             data: cue.data
         });
 
-        // modify - NO !!!
+        // NO !!! - modify property of managed cue ahead of update
         cue.interval = new Interval(4, 6);
         axis.update(cue);
 
-        // delete - YES !
+        // YES ! - delete by creating a new cue object
         axis.update({key:cue.key});
 
-        // delete - NO !!!
+        // NO !!! - delete properties of managed cue ahead of update
         delete cue.interval;
         delete cue.data;
         axis.update(cue);
 
-
-    External cue modification may also occur if cue.data reference
-    objects that are being managed (and modified in-place) by other
-    collections, frameworks etc. If the source of timed data is subject
-    to in-place modification, copying is required as part of cue creation.
-
-
+    Unwanted modifications of managed cues may also occur when cue.data
+    references objects that are subject to in-place modification by
+    external code. In such circumstances, object copying will
+    be required as part of cue data creation.
 
 
 
@@ -190,13 +183,13 @@ Partial cue modification
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 The axis also supports *partial* cue modification. *Partial*
-modification means to modify *only* the cue interval or *only* cue data.
-For convenience, partial cue modification allows this to be done,
-without requiring that the *unmodified* part of the cue is restated.
-Partial cue modification is specified simply by omitting the property
-which is not to be replaced. The omitted property will then be preserved
-from the *pre-existing* cue. This yields four types of cue arguments for
-the **update** operation:
+modification means to modify *only* the cue interval or *only* the cue
+data. For convenience, partial cue modification allows this to be done
+without restating the *unmodified* part of the cue. Partial cue
+modification is specified simply by omitting the property which is not
+to be replaced. The omitted property will then be preserved from the
+*pre-existing* cue. This yields four types of cue arguments for the
+**update** operation:
 
 =====  ========================================  ====================
 Type   Cue parameter                             Text
@@ -211,38 +204,40 @@ D      {key: "mykey", interval: ..., data: ...}  interval, data
 
     Note that ``{key: "mykey"}`` is *type A* whereas ``{key: "mykey",
     data:undefined}`` is type C. The type evaluation is based on
-    ``cue.hasOwnProperty("data")`` rather than ``cue.data === undefined``. This
-    ensures that ``undefined`` may be used as a data value with cues. The type
-    evaluation for interval is stricter, as *type B* and *type D* additionally
-    require interval to be instance of the ``Interval`` class.
+    ``cue.hasOwnProperty("data")`` rather than ``cue.data ===
+    undefined``. This ensures that ``undefined`` may be used as a data
+    value with cues.
+
+    Similarly, cue intervals may also take the value ``undefined``, in which
+    case they become invisible to the **lookup** operation. Otherwise, cue
+    intervals must be instances of the ``Interval`` class.
 
 
 ..  note::
 
-    If cue interval is derived from timestamps which are also kept as part of
+    If cue interval is derived from timestamps which are also part of
     cue data, interval update (type B) is still possible, but likely not
     advisable. It will not be a problem for the operation of the axis, but
-    it may be confusing for users, as data timestamps may not be consistent
-    with cue rendering, which is based on intervals.
+    it may be confusing for users, as timestamps in cue data may not be consistent
+    with cue rendering, which is based on cue intervals.
 
-    Rule of thumb: avoid cue modification type C if timestamps are part of data.
+    Rule of thumb:
+
+    -   Avoid cue modification type C if timestamps are part of data.
 
 
 
 In summary, the different types of cue arguments are interpreted according to
 the following table.
 
-=====  ====================  ==============================
-Type   Key NOT pre-existing  Key pre-existing
-=====  ====================  ==============================
-A      NOOP                  DELETE cue
-B      NOOP                  REPLACE cue.interval
-C      NOOP                  REPLACE cue.data
-D      INSERT cue            REPLACE cue
-=====  ====================  ==============================
-
-
-
+=====  ================================  ===============================
+Type   Key NOT pre-existing              Key pre-existing
+=====  ================================  ===============================
+A      NOOP                              DELETE cue
+B      INSERT interval, data undefined   MODIFY interval, PRESERVE data
+C      INSERT data, interval undefined   MODIFY data, PRESERVE interval
+D      INSERT cue                        MODIFY cue
+=====  ================================  ===============================
 
 
 .. _axis-batch:
