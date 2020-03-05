@@ -4,17 +4,18 @@
 Axis
 ========================================================================
 
-``Axis`` is a dataset for managing *timed data* on a timeline. Timed data is any
-datset where objects are associated with a timestamp (i.e. single point on the
-timeline) or with an interval (i.e. a continuous segment on the timeline).
-Typical examples of timed data include log data, user comments, sensor data,
-subtitles, images, playlists, transcripts, gps coordinates etc.
+``Axis`` is a dataset for managing *timed data* on a timeline. Timed
+data is any datset where objects are associated with a timestamp (i.e.
+single point on the timeline) or with an interval (i.e. a continuous
+segment on the timeline). Typical examples of timed data include log
+data, user comments, sensor data, subtitles, images, playlists,
+transcripts, gps coordinates etc.
 
-``Axis`` implements efficient data search on the timeline and is generally
-useful for management and visualisation of large datasets of timed data. Still,
-the main purpose of ``Axis`` is to provide a datastructure suitable for
-precisely timed playback of timed data. This is achieved by connecting one or
-more ``Sequencers`` to the ``Axis``.
+``Axis`` implements efficient data lookup on the timeline and is
+generally useful for management and visualisation of large datasets of
+timed data. Still, the primary purpose of ``Axis`` is to provide a
+datastructure suitable for precisely timed playback of timed data. This
+is achieved by connecting one or more ``Sequencers`` to the ``Axis``.
 
 
 ..  _axis-definition:
@@ -34,12 +35,13 @@ interval, data)**, represented as a simple Javascript object.
     }
 
 
-``Axis`` supports efficient lookup of cues by key. In addition, cues are indexed
-by their interval enabling effective search for cues on the timeline. Intervals
-define the validity of a cue on the timeline, and represent either a singular
-point or a continuous segment (see :ref:`Interval <interval-definition>`).
-Likewise, search operations use intervals to limit searches to a specific
-segment on the timeline.
+``Axis`` allows cues to be resolved efficiently by key, like a
+```Map```. In addition, cues are also indexed by their interval enabling
+effective lookup of cues along the timeline. Intervals define the
+validity of a cue on the timeline, and represent either a singular point
+or a continuous segment (see :ref:`Interval <interval-definition>`).
+Likewise, lookup operations use intervals to limit searches to a
+specific point or segment on the timeline.
 
 
 ..  note::
@@ -66,15 +68,22 @@ Example
         ...
     ];
 
-    // create cues from subtitles
+    // create cues from subtitles data
     let cues = subtitles.map(function (sub) {
         let itv = new Interval(sub.start, sub.end);
         return {key: sub.id, interval: itv, data: sub};
     });
 
     // insert cues
-    axis.update(cues);
+    axis.update(;
 
+    // lookup cues
+    let result_cues = axis.lookup(new Interval(120, 130));
+
+    // delete cues
+    axis.update(cues.map(function(cue) {
+        return {key: cue.key};
+    });
 
 
 .. _axis-update:
@@ -82,17 +91,36 @@ Example
 Update
 ------------------------------------------------------------------------
 
-``Axis`` allows cues to be **inserted**, **replaced** or **deleted** using a
-single operation; **update(cues)**. The argument **cues** describes a list of
-cues to be **inserted**, or a single *cue*. If a cue with identical key already
-exists in the ``Axis``, the *pre-existing* cue will be **replaced** by the cue
-argument. If a cue argument includes a key but no interval or data, this means
-to **delete** a pre-existing cue.
+``Axis`` allows cues to be **inserted**, **modified** or **deleted**
+using a single operation; **update(cues)**. The argument **cues**
+describes a list of cue objects to be **inserted**, or a single cue
+object. If a cue with identical key already exists in the ``Axis``, the
+*pre-existing* cue will be **modified** by the cue argument. If a cue
+argument includes a key but no interval or data, this means to
+**delete** a pre-existing cue.
 
 
-..  note::
+..  warning::
 
-    Cues managed by ``Axis`` must not be modified directly by application code.
+    Cues managed by ``Axis`` must **never** be modified by application
+    code.
+
+    For efficiency, the axis works directly on the cue objects presented
+    by the **update** operation. When a cue is inserted into the axis,
+    it will be managed by the axis until it is deleted. Internally, cue
+    modifications is implemented as *in place* modification of
+    *pre-existing* cue. So, a managed cue will always be the same object.
+    Furthermore, all cue access operation (e.g. **lookup**) provide
+    direct access to managed cues.
+
+    Managed cues should always be treated as **read-only**. For the
+    purpose of efficiency, no protection is implemented by the axis.
+
+    TODO: consequences, pitfalls and rule of thumbs
+
+
+
+
 
 
 ..  code-block:: javascript
@@ -146,6 +174,19 @@ D      {key: "mykey", interval: ..., data: ...}  interval, data
     ensures that ``undefined`` may be used as a data value with cues. The type
     evaluation for interval is stricter, as *type B* and *type D* additionally
     require interval to be instance of the ``Interval`` class.
+
+
+..  note::
+
+    If cue interval is derived from timestamps which are also kept as part of
+    cue data, interval update (type B) is still possible, but likely not
+    advisable. It will not be a problem for the operation of the axis, but
+    it may be confusing for users, as data timestamps may not be consistent
+    with cue rendering, which is based on intervals.
+
+    Rule of thumb: avoid cue modification type C if timestamps are part of data.
+
+
 
 In summary, the different types of cue arguments are interpreted according to
 the following table.

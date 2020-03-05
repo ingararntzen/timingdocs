@@ -189,6 +189,7 @@ OVERLAP_RIGHT and OUTSIDE_RIGHT are defined as follows:
 +---------------+-----------------------------+-------------------------------------------+
 | OVERLAP LEFT  | a overlaps b from left      | - a.high is *inside* b                    |
 |               |                             | - a.low is *leftof* b.low                 |
+|               |                             | - a.high is *leftof* b.high               |
 +---------------+-----------------------------+-------------------------------------------+
 | COVERED       | a is covered by b           | - a.low *inside* b && a.high *inside* b   |
 |               |                             | - b.low *!inside* a || b.high *!inside* a |
@@ -200,6 +201,7 @@ OVERLAP_RIGHT and OUTSIDE_RIGHT are defined as follows:
 |               |                             | - b.low *inside* a && b.high *inside* a   |
 +---------------+-----------------------------+-------------------------------------------+
 | OVERLAP RIGHT | a overlaps b from right     | - a.low is *inside* b                     |
+|               |                             | - a.low is *rightof* b.low                |
 |               |                             | - a.high is *rightof* b.high              |
 +---------------+-----------------------------+-------------------------------------------+
 | OUTSIDE RIGHT | a is outside b on the right | - a.low *rightof* b.high                  |
