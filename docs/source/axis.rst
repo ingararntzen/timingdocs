@@ -91,36 +91,13 @@ Example
 Update
 ------------------------------------------------------------------------
 
-``Axis`` allows cues to be **inserted**, **modified** or **deleted**
-using a single operation; **update(cues)**. The argument **cues**
-describes a list of cue objects to be **inserted**, or a single cue
-object. If a cue with identical key already exists in the ``Axis``, the
-*pre-existing* cue will be **modified** by the cue argument. If a cue
-argument includes a key but no interval or data, this means to
-**delete** a pre-existing cue.
-
-
-..  warning::
-
-    Cues managed by ``Axis`` must **never** be modified by application
-    code.
-
-    For efficiency, the axis works directly on the cue objects presented
-    by the **update** operation. When a cue is inserted into the axis,
-    it will be managed by the axis until it is deleted. Internally, cue
-    modifications is implemented as *in place* modification of
-    *pre-existing* cue. So, a managed cue will always be the same object.
-    Furthermore, all cue access operation (e.g. **lookup**) provide
-    direct access to managed cues.
-
-    Managed cues should always be treated as **read-only**. For the
-    purpose of efficiency, no protection is implemented by the axis.
-
-    TODO: consequences, pitfalls and rule of thumbs
-
-
-
-
+``Axis`` allows cues to be **inserted**, **modified** and/or
+**deleted**, using a single operation; **update(cues)**. The argument
+**cues** describes a list of cue objects (or a single cue object) to be
+**inserted**. If a cue with identical key already exists in the
+``Axis``, the *pre-existing* cue will be **modified** by the cue
+argument. If a cue argument includes a key but no interval or data, this
+means to **delete** the *pre-existing* cue.
 
 
 ..  code-block:: javascript
@@ -145,17 +122,81 @@ argument includes a key but no interval or data, this means to
     axis.update({key: "mykey"})
 
 
-Partial cue replacement
+
+The axis works directly on the cue objects presented by the **update**
+operation. When a cue is inserted into the axis, it will be managed by
+the axis until it is eventually deleted. Internally, cue modification is
+implemented as *in-place* modification of *pre-existing* cues. All cue
+access operations (e.g. **lookup**) provide direct access to managed
+cues.
+
+
+
+..  warning::
+
+    Cues managed by the axis are considered **read-only** and must
+    **never** be modified by application code, except by correct usage
+    of the **update** operation.
+
+    If managed cue objects are modified by external code, no guarantees
+    may be given concerning functional correctness of the axis. Note
+    also that the axis does not implement any protection in this regard.
+
+    In particular, programmers must avoid the pitfall of modifying cues
+    objects directly ahead of using the **update** operation.
+
+    Good rules of thumb:
+
+    -   never reuse cue objects as arguments to **update**.
+    -   avoid keeping variables referencing cue objects.
+
+
+    ..  code-block:: javascript
+
+        // insert
+        let cue = {...};
+        axis.update(cue);
+
+        // modify - YES !
+        axis.update({
+            key: cue.key,
+            interval: new Interval(4, 6),
+            data: cue.data
+        });
+
+        // modify - NO !!!
+        cue.interval = new Interval(4, 6);
+        axis.update(cue);
+
+        // delete - YES !
+        axis.update({key:cue.key});
+
+        // delete - NO !!!
+        delete cue.interval;
+        delete cue.data;
+        axis.update(cue);
+
+
+    External cue modification may also occur if cue.data reference
+    objects that are being managed (and modified in-place) by other
+    collections, frameworks etc. If the source of timed data is subject
+    to in-place modification, copying is required as part of cue creation.
+
+
+
+
+
+Partial cue modification
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-
-For convenience, the ``Axis`` also supports *partial* cue replacement. *Partial*
-means to replace the cue interval without having to restate the cue data, or,
-the other way around, to replace the cue data without having to restate the cue
-interval. Partial cue operations are specified simply by omitting the property
-which is not to be replaced. The omitted property will then be preserved from
-the pre-existing cue. This yields four types of cue arguments for the **update**
-operation:
+The axis also supports *partial* cue modification. *Partial*
+modification means to modify *only* the cue interval or *only* cue data.
+For convenience, partial cue modification allows this to be done,
+without requiring that the *unmodified* part of the cue is restated.
+Partial cue modification is specified simply by omitting the property
+which is not to be replaced. The omitted property will then be preserved
+from the *pre-existing* cue. This yields four types of cue arguments for
+the **update** operation:
 
 =====  ========================================  ====================
 Type   Cue parameter                             Text
@@ -199,6 +240,8 @@ B      NOOP                  REPLACE cue.interval
 C      NOOP                  REPLACE cue.data
 D      INSERT cue            REPLACE cue
 =====  ====================  ==============================
+
+
 
 
 
