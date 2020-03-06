@@ -121,12 +121,10 @@ and no data, this means to **delete** the *pre-existing* cue.
     axis.update({key: "mykey"})
 
 
-When a cue is inserted into the axis, it will be managed by
-the axis until it is eventually deleted. Cue modification is
-implemented as *in-place* modification of *pre-existing* cues. All cue
-access operations (e.g. **lookup**) provide direct access to managed
-cues.
-
+When a cue is inserted into the axis, it will be *managed* by the axis
+until it is eventually deleted. Cue modification is implemented as
+*in-place* modification of *pre-existing* cues. All cue access
+operations (e.g. **lookup**) provide direct access to managed cues.
 
 
 ..  warning::
@@ -208,18 +206,19 @@ D      {key: "mykey", interval: ..., data: ...}  interval, data
     undefined``. This ensures that ``undefined`` may be used as a data
     value with cues.
 
-    Similarly, cue intervals may also take the value ``undefined``, in which
-    case they become invisible to the **lookup** operation. Otherwise, cue
-    intervals must be instances of the ``Interval`` class.
+    Similarly, cue intervals may also take the value ``undefined``, in
+    which case they become invisible to the **lookup** operation.
+    Otherwise, cue intervals must be instances of the ``Interval``
+    class.
 
 
 ..  note::
 
     If cue interval is derived from timestamps which are also part of
     cue data, interval update (type B) is still possible, but likely not
-    advisable. It will not be a problem for the operation of the axis, but
-    it may be confusing for users, as timestamps in cue data may not be consistent
-    with cue rendering, which is based on cue intervals.
+    advisable. It will not be a problem for the operation of the axis,
+    but it may be confusing for users, as timestamps in cue data may not
+    be consistent with cue rendering, which is based on cue intervals.
 
     Rule of thumb:
 
@@ -227,8 +226,8 @@ D      {key: "mykey", interval: ..., data: ...}  interval, data
 
 
 
-In summary, the different types of cue arguments are interpreted according to
-the following table.
+In summary, the different types of cue arguments are interpreted
+according to the following table.
 
 =====  ================================  ===============================
 Type   Key NOT pre-existing              Key pre-existing
@@ -240,16 +239,77 @@ D      INSERT cue                        MODIFY cue
 =====  ================================  ===============================
 
 
+Cue state changes
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+TODO : ? Support Equal function to allow cues to be repeatedly pushed to
+the axis, without incurring any processing
+
+Attempts to replace a cue with an *equal* cue should be recognized as
+NOOP and not incur any processing. However, with regards to the cue data
+object there is no general way of determinig object equality. By
+default, the axis uses a simple value equality test ``==``, which will
+work for values, but not for objects. In this case, an application
+specific equality function may be given as parameter to update.
+
+..  code-block:: javascript
+
+    function equals(cue_data_a, cue_data_b) {...}
+
+
+
+
+.. _axis-update-result:
+
+Update result
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+The **update** operation returns **batchMap**, a ``Map`` object
+describing state changes for each affected cue, indexed by cue key. Map
+entries include the **new** cue object (current, modified and managed
+cue object) and the **old** cue object (a shallow copy of cue object, as
+it was before the **update** operation was started). In addition,
+entries include boolean change flags for cue interval and cue data,
+indicating the nature of the cue modification, if it was partial or
+full. The axis creates the batch map as follows:
+
+..  code-block:: javascript
+
+    let batchMap = new Map();
+
+    // new cue inserted
+    batchMap.set(key, {
+        new:inserted_cue,
+        old:undefined,
+        change: {interval:true, data:true}
+    });
+
+    // existing cue modified
+    batchMap.set(key, {
+        new:current_cue,
+        old:old_cue,
+        change: {interval:true, data:true}
+    });
+
+    // cue deleted
+    batchMap.set(key, {
+        new:undefined,
+        old:deleted_cue
+        change: {interval:true, data:true},
+    });
+
+
+
 .. _axis-batch:
 
 Batch Operations
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-As indicated, the **update(cues)** operaration is *batch-oriented*, implying
-that multiple cue operations can be processed as one atomic operation. This way,
-a single batch may include a mix of **insert**, **replace** and **delete**
-operations. The **update(cues)** operation supports this by accepting either a
-single cue or a list of cues as parameter.
+As indicated, the **update(cues)** operation is *batch-oriented*,
+implying that multiple cue operations can be processed as one atomic
+operation. This way, a single batch may include a mix of **insert**,
+**replace** and **delete** operations.
 
 ..  code-block:: javascript
 
@@ -271,38 +331,24 @@ single cue or a list of cues as parameter.
     axis.update(cues);
 
 
-..  note::
+It is possible to include several cue arguments concerning the same key
+in a single batch. This is called **repeated** cue arguments. Repeated
+cue arguments will be applied in given order, and the net effect will be
+equal to the effect of splitting the cue batch into individual
+invokations of **update**. For instance, if a cue is first inserted and
+then deleted within a single batch, the net effect is *no effect*.
 
-    It is possible to include multiple cue operations regarding the same key in
-    a single batch. If so, all cue operations will be applied in given order.
-    However, as they are part of the same update operation intermediate states
-    will not be exposed. This effectively means that multiple cue operations are
-    collapsed into one. For instance, if a cue is first inserted and then
-    deleted, the net effect is *no effect*.
+The result of the **update** operation (see :ref:`axis-update-result`)
+includes a reference to the *old* state of the cue. With repeated cue
+arguments, *old* still indicates the state of the cue *before* the
+**update** operation was initiated. This way, external consumers
+monitoring the axis are able to reproduce its state changes correctly.
 
-
-
-.. note:: TODO
-
-
-    TODO: update counter
-
-
-    TODO : ? Support Equal function to allow cues to be repeatedly pushed to the
-    axis, without incurring any processing
-
-    Attempts to replace a cue with an *equal* cue should be recognized as NOOP
-    and not incur any processing. However, with regards to the cue data object
-    there is no general way of determinig object equality. By default, the axis
-    uses a simple value equality test ``==``, which will work for values, but
-    not for objects. In this case, an application specific equality function may
-    be given as parameter to update.
-
-    ..  code-block:: javascript
-
-        function equals(cue_data_a, cue_data_b) {...}
-
-
+Correct handling of repated cue arguments introduces additional
+complexity into the **update** operation, possibly making it slightly
+slower for very large (>10.000) cues batches. If the cue batch is
+known to not include any repeated cue arguents, this may be indicated
+using the option **no_repeated** to **update**.
 
 
 
@@ -398,24 +444,7 @@ Events
 The axis emits a **change** event following every **update** operation. This
 allows multiple observers to monitor state changes of the axis dynamically.
 Event callbacks may be registered and un-registered using operations **on(type,
-callback)** and **off(type, callback)**. Event callbacks are invoked with a
-**batchMap** object describing state changes for each affected cue, indexed by cue
-key. State changes include the **new** cue object and the **old** cue object.
-The axis creates the batch map as follows:
-
-..  code-block:: javascript
-
-    let eventMap = new Map();
-
-    // new cue inserted
-    eventMap.set(key, {new:inserted_cue, old:undefined})
-
-    // existing cue repaced
-    eventMap.set(key, {new:new_cue, old:replaced_cue})
-
-    // cue deleted
-    eventMap.set(key, {new:undefined, old:deleted_cue})
-
+callback)** and **off(type, callback)**. Event callbacks are invoked with
 
 ..  note:: TODO
 
