@@ -421,15 +421,22 @@ a single batch, the net effect is *no effect*.
 
 Correct handling of chained cue arguments introduces additional
 complexity within the **update** operation, possibly making it slightly
-slower for very large (>10.000) cues batches. If the cue batch is known
-in advance to *not* include any chained cue arguents, this may be
-indicated using the option *no_chain* to **update**.
-
+slower for large cues batches. If the cue batch does *not* include any
+chained cue arguents, this may be indicated by setting the option
+*chaining* to false, yielding faster cue processing. The default value
+for chaining* is true.
 
 ..  code-block:: javascript
 
-    axis.update(cues, {no_chain:true});
+    axis.update(cues, {chaining:false});
 
+
+..  warning::
+
+    If the *chaining* option is set to false while the cue batch still
+    contains chained cue arguments, this violation will not be detected.
+    The consequence is that the *old* value and *delta* flags will be
+    wrong for chained cues.
 
 
 .. _axis-lookup:
