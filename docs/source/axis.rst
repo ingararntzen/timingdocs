@@ -247,8 +247,9 @@ Cue modifications have *no effect* if cue argument is equal to the
 unchanged, and avoid unneccesary reevaluation of internal indexes.
 However, object equality for cue data may be application dependent. For
 this reason the **update** operation allows a custom equality function
-(for the cue data property) to be specified using the optional parameter
-*equals*.
+to be specified using the optional parameter *equals*. Note that the
+equality function is evaluated with cue data properties as arguments,
+not the entire cue.
 
 
 ..  code-block:: javascript
@@ -303,39 +304,52 @@ doing it as a separate step beforehand.
 Update result
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-The **update** operation returns **batchMap**, a ``Map`` object
-describing state changes for each affected cue, indexed by cue key. Map
-entries include the **new** cue object (current, modified and managed
-cue object) and the **old** cue object (a shallow copy of cue object, as
-it was before the **update** operation was started). In addition,
-entries include boolean change flags for cue interval and cue data,
-indicating the nature of the cue modification, if it was partial or
-full. The axis creates the batch map as follows:
+The **update** operation returns a ``Map`` object describing state
+changes for each affected cue, indexed by cue key. Map entries include
+the **new** cue object and an **old** cue object, as well as a *change*
+object detailing the nature of the cue modification.
+
+
+-   **new**: the current, modified cue object, or undefined
+    if the cue was deleted.
+-   **old**: a copy (shallow) of the previous cue object, as it was
+    before the **update** operation was initiated, or undefined if the
+    cue was inserted.
+-   **change**: flags indicating changes to cue interval and/or cue data.
+
+
+
+The axis creates the result map as follows. Change flags depends
+on comparison between old and new, sensitive to partial modification.
 
 ..  code-block:: javascript
 
-    let batchMap = new Map();
+    let result = new Map();
 
     // new cue inserted
-    batchMap.set(key, {
+    result.set(key, {
         new:inserted_cue,
         old:undefined,
         change: {interval:true, data:true}
     });
 
     // existing cue modified
-    batchMap.set(key, {
+    result.set(key, {
         new:current_cue,
         old:old_cue,
         change: {interval:true, data:true}
     });
 
     // cue deleted
-    batchMap.set(key, {
+    result.set(key, {
         new:undefined,
         old:deleted_cue
         change: {interval:true, data:true},
     });
+
+The update result is also given as an argument to the change event (see
+:ref:`axis-events`), thereby allowing monitoring clients to correctly
+reproduce the state changes of the axis.
 
 
 
@@ -344,10 +358,10 @@ full. The axis creates the batch map as follows:
 Batch operations
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-As indicated, the **update(cues)** operation is *batch-oriented*,
-implying that multiple cue operations can be processed as one atomic
-operation. This way, a single batch may include a mix of **insert**,
-**replace** and **delete** operations.
+The **update(cues)** operation is *batch-oriented*, implying that
+multiple cue operations can be processed as one atomic operation. This
+way, a single batch may include a mix of **insert**, **replace** and
+**delete** operations.
 
 ..  code-block:: javascript
 
@@ -369,46 +383,17 @@ operation. This way, a single batch may include a mix of **insert**,
     axis.update(cues);
 
 
-It is possible to include several cue arguments concerning the same key
-in a single batch. This is called **repeated** cue arguments. Repeated
-cue arguments will be applied in given order, and the net effect will be
-equal to the effect of splitting the cue batch into individual
-invokations of **update**. For instance, if a cue is first inserted and
-then deleted within a single batch, the net effect is *no effect*.
+Batch oriented processing is crucial for the efficiency of the
+**update** operation. In particular, the overhead of reevaluating
+internal indexes may be paid once for the accumulated effects of the
+entire batch, as opposed to once per cue modification.
 
-The result of the **update** operation (see :ref:`axis-update-result`)
-includes a reference to the *old* state of the cue. With repeated cue
-arguments, *old* still indicates the state of the cue *before* the
-**update** operation was initiated. This way, external consumers
-monitoring the axis are able to reproduce its state changes correctly.
-
-Correct handling of repated cue arguments introduces additional
-complexity into the **update** operation, possibly making it slightly
-slower for very large (>10.000) cues batches. If the cue batch is
-known to not include any repeated cue arguents, this may be indicated
-using the option **no_repeated** to **update**.
-
-
-
-..  _axis-update-performance:
-
-Performance
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-The performance of the **update** operation relates to the implementation of
-**lookup**, see :ref:`axis-lookup`. Since the efficiency of **lookup** depends
-on a sorted index, sorting must be performed as part of the **update** operation
-This implies that the performance of **update** is ultimately limited by sorting
-performace, i.e. ``Array.sort()``, which is O(N). Importantly, the support for
-:ref:`batch operations <axis-batch>` is vital for reducing the sorting overhead,
-by ensuring that sorting is needed only once for a large batch operation,
-instead of once per cue argument.
 
 ..  warning::
 
-    Repeated invocation of the update operation is an *anti-pattern* with
-    respect to performance! Cue operations should always be aggregated and then
-    applied together as a single update operation.
+    Repeated invocation of **update** is an *anti-pattern* with respect
+    to performance! Cue operations should if possible be aggregated and
+    then applied together as a single batch operation.
 
     ..  code-block:: javascript
 
@@ -423,6 +408,27 @@ instead of once per cue argument.
         // YES!
         axis.update(cues);
 
+
+It is possible to include several cue arguments concerning the same key
+in a single batch. This is called *chained* cue arguments. Chained cue
+arguments will be applied in given order, and the net effect in terms of
+cue state will be equal to the effect of splitting the cue batch into
+individual invokations of **update**. However, chained cue arguments
+are essentially collapsed into a single cue operation with the same net
+effect. For instance, if a cue is first inserted and then deleted within
+a single batch, the net effect is *no effect*.
+
+
+Correct handling of chained cue arguments introduces additional
+complexity within the **update** operation, possibly making it slightly
+slower for very large (>10.000) cues batches. If the cue batch is known
+in advance to *not* include any chained cue arguents, this may be
+indicated using the option *no_chain* to **update**.
+
+
+..  code-block:: javascript
+
+    axis.update(cues, {no_chain:true});
 
 
 
@@ -495,6 +501,19 @@ callback)** and **off(type, callback)**. Event callbacks are invoked with
 
 Performance
 ------------------------------------------------------------------------
+
+
+
+The performance of the **update** operation relates to the implementation of
+**lookup**, see :ref:`axis-lookup`. Since the efficiency of **lookup** depends
+on a sorted index, sorting must be performed as part of the **update** operation
+This implies that the performance of **update** is ultimately limited by sorting
+performace, i.e. ``Array.sort()``, which is O(N). Importantly, the support for
+:ref:`batch operations <axis-batch>` is vital for reducing the sorting overhead,
+by ensuring that sorting is needed only once for a large batch operation,
+instead of once per cue argument.
+
+
 
 The axis implementation targets high performance even with high volumes of cues.
 In particular, the efficiency of the **lookup** operation is crucial, as this
