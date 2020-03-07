@@ -92,7 +92,7 @@ Update
 
 The axis provides a single operation **update** allowing cues to be
 **inserted**, **modified** and/or **deleted**. The argument **cues**
-defines a list of cue objects (or a single cue object) to be
+defines a list of cue argument (or a single cue argument) to be
 **inserted** into the axis. If a cue with identical key already exists
 in the axis, the *pre-existing* cue will be **modified** to match the
 provided cue argument. If a cue argument includes a key but no interval
@@ -123,18 +123,18 @@ and no data, this means to **delete** the *pre-existing* cue.
 
 When a cue is inserted into the axis, it will be *managed* by the axis
 until it is eventually deleted. Cue modification is implemented as
-*in-place* modification of *pre-existing* cues. All cue access
+*in-place* modification of the *pre-existing* cue. All cue access
 operations (e.g. **lookup**) provide direct access to managed cues.
 
 
 ..  warning::
 
     Cues managed by the axis are considered **read-only** and must
-    **never** be modified by application code, except by the **update**
-    operation.
+    **never** be modified by application code, except through the
+    **update** operation.
 
     If managed cue objects are modified by external code, no guarantees
-    may be given concerning functional correctness of the axis. Note
+    can be given concerning functional correctness of the axis. Note
     also that the axis does not implement any protection in this regard.
     In particular, programmers must avoid the pitfall of modifying cues
     objects directly ahead of using the **update** operation.
@@ -177,7 +177,7 @@ operations (e.g. **lookup**) provide direct access to managed cues.
 
 
 
-Partial cue modification
+Cue arguments
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 The axis also supports *partial* cue modification. *Partial*
@@ -206,24 +206,24 @@ D      {key: "mykey", interval: ..., data: ...}  interval, data
     undefined``. This ensures that ``undefined`` may be used as a data
     value with cues.
 
-    Similarly, cue intervals may also take the value ``undefined``, in
-    which case they become invisible to the **lookup** operation.
-    Otherwise, cue intervals must be instances of the ``Interval``
-    class.
-
+    Similarly, cue intervals may also take the value ``undefined``.
+    Lacking an interval, they become invisible to the **lookup**
+    operation, yet still accessible through ``Map`` operations
+    **has, get, keys, values, entries**. Otherwise, if cue interval is
+    defined, it must be instances of the ``Interval`` class.
 
 ..  note::
 
-    If cue interval is derived from timestamps which are also part of
+    If a cue interval is derived from timestamps which are also part of
     cue data, interval update (type B) is still possible, but likely not
-    advisable. It will not be a problem for the operation of the axis,
-    but it may be confusing for users, as timestamps in cue data may not
-    be consistent with cue rendering, which is based on cue intervals.
+    advisable, as it introduces inconsistencies between time values in
+    cue interval and cue data. Though not criticial for the integrity of the axis,
+    it might be confusing for users, as timeline playback would
+    not match timestamps values in cue data.
 
     Rule of thumb:
 
     -   Avoid cue modification type C if timestamps are part of data.
-
 
 
 In summary, the different types of cue arguments are interpreted
@@ -239,25 +239,63 @@ D      INSERT cue                        MODIFY cue
 =====  ================================  ===============================
 
 
-Cue state changes
+Cue equality
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+Cue modifications have *no effect* if cue argument is equal to the
+*pre-existing* cue. The axis will detect this if cue intervals are
+unchanged, and avoid unneccesary reevaluation of internal indexes.
+However, object equality for cue data may be application dependent. For
+this reason the **update** operation allows a custom equality function
+(for the cue data property) to be specified using the optional parameter
+*equals*.
 
-TODO : ? Support Equal function to allow cues to be repeatedly pushed to
-the axis, without incurring any processing
-
-Attempts to replace a cue with an *equal* cue should be recognized as
-NOOP and not incur any processing. However, with regards to the cue data
-object there is no general way of determinig object equality. By
-default, the axis uses a simple value equality test ``==``, which will
-work for values, but not for objects. In this case, an application
-specific equality function may be given as parameter to update.
 
 ..  code-block:: javascript
 
-    function equals(cue_data_a, cue_data_b) {...}
+    function equals(a, b) {
+        ...
+        return true;
+    }
+
+    axis.update(cues, {equals:equals});
 
 
+The default equality function used by the axis is the following:
+
+
+..  code-block:: javascript
+
+    function object_equals(a, b) {
+        // Create arrays of property names
+        let aProps = Object.getOwnPropertyNames(a);
+        let bProps = Object.getOwnPropertyNames(b);
+        let len = aProps.length;
+        let propName;
+        // If properties lenght is different => not equal
+        if (aProps.length != bProps.length) {
+            return false;
+        }
+        for (let i=0; i<len; i++) {
+            propName = aProps[i];
+            // If property values are not equal => not equal
+            if (a[propName] !== b[propName]) {
+                return false;
+            }
+        }
+        // equal
+        return true;
+    }
+
+
+Given that object equality is appropriately specified, repeated
+invocation of **update** is safe, without having to check cue equality
+beforehand. This is practical for instance when an online source of
+timed data is polled repeatedly for updates. Polling results may then be
+fed directly to the axis **update** operation and the update  result
+value will indicate if any actual modifications occured. Evaluating cue
+equality as part of the **update** operation is also more effective than
+doing it as a separate step beforehand.
 
 
 .. _axis-update-result:
@@ -303,7 +341,7 @@ full. The axis creates the batch map as follows:
 
 .. _axis-batch:
 
-Batch Operations
+Batch operations
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 As indicated, the **update(cues)** operation is *batch-oriented*,
