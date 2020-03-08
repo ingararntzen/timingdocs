@@ -306,21 +306,16 @@ Update result
 
 The **update** operation returns a ``Map`` object describing state
 changes for each affected cue, indexed by cue key. Map entries include
-the **new** cue object and an **old** cue object, as well as a *change*
-object detailing the nature of the cue modification.
-
+the **new** cue object and an **old** cue object.
 
 -   **new**: the current, modified cue object, or undefined
     if the cue was deleted.
 -   **old**: a copy (shallow) of the previous cue object, as it was
     before the **update** operation was initiated, or undefined if the
     cue was inserted.
--   **change**: flags indicating changes to cue interval and/or cue data.
 
 
-
-The axis creates the result map as follows. Change flags depends
-on comparison between old and new, sensitive to partial modification.
+The axis creates the result map as follows:
 
 ..  code-block:: javascript
 
@@ -329,22 +324,19 @@ on comparison between old and new, sensitive to partial modification.
     // new cue inserted
     result.set(key, {
         new:inserted_cue,
-        old:undefined,
-        change: {interval:true, data:true}
+        old:undefined
     });
 
     // existing cue modified
     result.set(key, {
         new:current_cue,
-        old:old_cue,
-        change: {interval:true, data:true}
+        old:old_cue
     });
 
     // cue deleted
     result.set(key, {
         new:undefined,
         old:deleted_cue
-        change: {interval:true, data:true},
     });
 
 The update result is also given as an argument to the change event (see
@@ -526,8 +518,7 @@ The axis implementation targets high performance even with high volumes of cues.
 In particular, the efficiency of the **lookup** operation is crucial, as this
 will to be used repeatedly during media playback. The performance of the
 **lookup** operation is O(logN) (see :ref:`Lookup Performance
-<axis-lookup-performance>`), whereas **update** is O(N) (see :ref:`Update
-Performance <axis-update-performance>`).
+<axis-lookup-performance>`), whereas **update** is O(N).
 
 
 ..  note::
