@@ -90,7 +90,7 @@ Example
 Update
 ------------------------------------------------------------------------
 
-The axis provides a single operation **update** allowing cues to be
+The axis provides a single operation **update(cues)** allowing cues to be
 **inserted**, **modified** and/or **deleted**. The argument **cues**
 defines a list of cue argument (or a single cue argument) to be
 **inserted** into the axis. If a cue with identical key already exists
@@ -427,7 +427,7 @@ for chaining* is true.
 
     If the *chaining* option is set to false while the cue batch still
     contains chained cue arguments, this violation will not be detected.
-    The consequence is that the *old* value and *delta* flags will be
+    The consequence is that the *old* value will be
     wrong for chained cues.
 
 
@@ -436,63 +436,93 @@ for chaining* is true.
 Lookup
 ------------------------------------------------------------------------
 
-The **lookup(interval, mode)** operation provides an efficient mechanism for
-identifying all cues *matching* a specific interval of the timeline. The
-parameter **interval** specifices the target interval for the operation, and
-**mode** regulates what exactly counts as a *match*.
+The operation **lookup(interval, mode)** identifies all cues *matching*
+a specific interval on the timeline. The parameter **interval**
+specifices the target interval and **mode** regulates what exactly
+counts as a *match*.
 
-The **lookup** operation is defined in terms of :ref:`interval-comparison`. A
-comparison between the target lookup interval and all cue intervals of the axis,
-yields seven distinct groups of cues: OUTSIDE_LEFT, OVERLAP_LEFT, COVERED,
-EQUAL, COVERS, OVERLAP_RIGHT, OUTSIDE_RIGHT. The lookup operation then allows
-the exact definition of *match* to be controlled by selectively including cue
-groups into the result set. The **mode** is an integer indicating which groups
-to include in the lookup result, constructed from bitmasks below:
+The **lookup** operation is defined in terms of
+:ref:`interval-comparison`. Comparison between the lookup
+interval and all cue intervals managed by the axis yields seven
+distinct groups of cues: OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL,
+COVERS, OVERLAP_RIGHT, OUTSIDE_RIGHT. The lookup operation then allows
+the exact definition of *match* to be controlled by selectively
+including cue groups into the result set, with the exception of
+OUTSIDE_LEFT, and OUTSIDE_RIGHT. The **mode** is an integer indicating
+which groups to include in the lookup result, constructed from bitmasks
+below.
 
-=======  ===  ===============
-mask     int  included groups
-=======  ===  ===============
-1000000  64   OUTSIDE_LEFT
-0100000  32   OVERLAP_LEFT
-0010000  16   COVERED
-0001000   8   EQUAL
-0000100   4   COVERS
-0000010   2   OVERLAP_RIGHT
-0000001   1   OUTSIDE_RIGHT
-=======  ===  ===============
+=====  ===  ===============
+mask   int  included groups
+=====  ===  ===============
+10000   16  OVERLAP_LEFT
+01000    8  COVERED
+00100    4  EQUAL
+00010    2  COVERS
+00001    1  OVERLAP_RIGHT
+=====  ===  ===============
 
-Typically when looking up cues on the timeline, the desire is to lookup all cues
-which are *valid* somewhere within the target lookup interval. If so, all groups
-except OUTSIDE_LEFT and OUTSIDE_RIGHT are included, and the appropriate lookup
-mode is `32+16+8+4+2=62`.
+Typically when looking up cues on the timeline, the desire is to lookup
+all cues which are *valid* somewhere within the target lookup interval.
+If so, all groups except OUTSIDE_LEFT and OUTSIDE_RIGHT are included,
+and the appropriate lookup mode is `16+8+4+2+1=31`. This is the default
+value for lookup mode.
+
+Additionally, the axis provides an operation  **lookup_delete(interval,
+mode)** which deletes all cues matching a given interval. This operation
+is more efficient than  **lookup** followed by **update** for
+cue deletion.
 
 
-..  _axis-lookup-performance:
-
-Performance
+Lookup endpoints
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-The implementation of the **lookup** operation is not based on iterative
-comparison with with all cues on the axis, as this would be ineffective with
-large volumes of cues. Instead, the implementation depends on a sorted index for
-cues and uses binary search techniques to resolve lookup operations, yielding
-O(logN) performance. The crux of the lookup algorithm is to resolve the cues
-which COVERS the target lookup interval, without resorting to an O(N) solution.
+In addition to looking up cues, the axis also supports looking up cue
+endpoints. Cue endpoints correspond to events on the timeline, and the
+operation **lookup_endpoints(interval)** identifies all cue endpoints
+**inside** the given interval, as defined in :ref:`interval-comparison`.
+The operation returns a list of (endpoint, cue) pairs, where endpoint
+is the low endpoint of the cue interval, or the high endpoint.
+
+..  code-block:: javascript
+
+    // (endpoint, cue) pair
+    {
+        endpoint: [value, high, closed],
+        cue: {
+            key: "mykey",
+            interval: new Interval(...),
+            data: {...}
+        }
+    }
+
+The endpoint property (see :ref:`interval-endpoint`) includes the
+numerical *value* of the endpoint, and two boolean flags *high* an
+*closed*. If *high* is *true*, the endpoint is a *high* endpoint of cue,
+else the *low* endpoint. If *closed* is *true*, the endpoint is *closed*,
+else *open*.
+
 
 ..  _axis-events:
 
 Events
 ------------------------------------------------------------------------
 
-The axis emits a **change** event following every **update** operation. This
-allows multiple observers to monitor state changes of the axis dynamically.
-Event callbacks may be registered and un-registered using operations **on(type,
-callback)** and **off(type, callback)**. Event callbacks are invoked with
+The axis emits a **change** event following every **update** operation.
+This allows multiple observers to monitor state changes of the axis
+dynamically. Event callbacks may be registered and un-registered using
+operations **on(type, callback)** and **off(type, callback)**. Event
+callbacks are invoked with the **update** result map as argument.
 
-..  note:: TODO
+..  code-block:: javascript
 
-    TODO: indication of partial event?
-    TODO: update counter
+    const handler = function (e) {
+        // handle axis change event
+        ...
+    };
+
+    axis.on("change", handler);
+    axis.off("change", handler);
 
 
 
@@ -500,8 +530,6 @@ callback)** and **off(type, callback)**. Event callbacks are invoked with
 
 Performance
 ------------------------------------------------------------------------
-
-
 
 The performance of the **update** operation relates to the implementation of
 **lookup**, see :ref:`axis-lookup`. Since the efficiency of **lookup** depends
@@ -512,6 +540,13 @@ performace, i.e. ``Array.sort()``, which is O(N). Importantly, the support for
 by ensuring that sorting is needed only once for a large batch operation,
 instead of once per cue argument.
 
+
+The implementation of the **lookup** operation is not based on iterative
+comparison with with all cues on the axis, as this would be ineffective with
+large volumes of cues. Instead, the implementation depends on a sorted index for
+cues and uses binary search techniques to resolve lookup operations, yielding
+O(logN) performance. The crux of the lookup algorithm is to resolve the cues
+which COVERS the target lookup interval, without resorting to an O(N) solution.
 
 
 The axis implementation targets high performance even with high volumes of cues.
@@ -609,7 +644,7 @@ Instance Methods
     single point on the timeline, simply by defining the lookup interval as a
     single point.
 
-..  js:method:: axis.lookup_points(interval)
+..  js:method:: axis.lookup_endpoints(interval)
 
     :param Interval interval: lookup interval
     :returns Array: list of (point, cue) tuples
