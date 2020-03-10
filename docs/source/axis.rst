@@ -541,14 +541,17 @@ related to indexing are paid by the **update** operation.
 The **lookup** operation depends on a sorted index of cue endpoints, and
 sorting is performed as part of the **update** operation. For this
 reason, **update** is ultimately limited by sorting performace, i.e.
-``Array.sort()``, which is O(N). Importantly, the support for
-:ref:`batch operations <axis-batch>` reduces the sorting overhead by
-ensuring that sorting is needed only once for a large batch operation,
-instead of once per cue argument. The implementation of **lookup** uses
-binary search techniques to identify the appropriate cues, yielding
-O(logN) performance. The crux of the lookup algorithm is to resolve the
-cues which COVERS the lookup interval in sub linear time.
+``Array.sort()``, which is O(NlogN) (see `sorting complexity`_).
+Importantly, the support for :ref:`batch operations <axis-batch>`
+reduces the sorting overhead by ensuring that sorting is needed only
+once for a large batch operation, instead of once per cue argument. The
+implementation of **lookup** uses binary search techniques to identify
+the appropriate cues, yielding O(logN) performance. The crux of the
+lookup algorithm is to resolve the cues which COVERS the lookup interval
+in sub linear time.
 
+
+.. _sorting complexity: https://blog.shovonhasan.com/time-space-complexity-of-array-sort-in-v8/
 
 ..  note::
 
