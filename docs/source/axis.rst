@@ -531,38 +531,28 @@ callbacks are invoked with the **update** result map as argument.
 Performance
 ------------------------------------------------------------------------
 
-The performance of the **update** operation relates to the implementation of
-**lookup**, see :ref:`axis-lookup`. Since the efficiency of **lookup** depends
-on a sorted index, sorting must be performed as part of the **update** operation
-This implies that the performance of **update** is ultimately limited by sorting
-performace, i.e. ``Array.sort()``, which is O(N). Importantly, the support for
-:ref:`batch operations <axis-batch>` is vital for reducing the sorting overhead,
-by ensuring that sorting is needed only once for a large batch operation,
-instead of once per cue argument.
+The axis implementation targets high performance with high volumes of
+cues. In particular, the efficiency of the **lookup** operation is
+important as it is likely used repeatedly, for instance during media
+playback. For this reason, the axis implementation is optimized with
+respect to fast **lookup**, with the implication that internal costs
+related to indexing are paid by the **update** operation.
 
-
-The implementation of the **lookup** operation is not based on iterative
-comparison with with all cues on the axis, as this would be ineffective with
-large volumes of cues. Instead, the implementation depends on a sorted index for
-cues and uses binary search techniques to resolve lookup operations, yielding
-O(logN) performance. The crux of the lookup algorithm is to resolve the cues
-which COVERS the target lookup interval, without resorting to an O(N) solution.
-
-
-The axis implementation targets high performance even with high volumes of cues.
-In particular, the efficiency of the **lookup** operation is crucial, as this
-will to be used repeatedly during media playback. The performance of the
-**lookup** operation is O(logN) (see :ref:`Lookup Performance
-<axis-lookup-performance>`), whereas **update** is O(N).
+The **lookup** operation depends on a sorted index of cue endpoints, and
+sorting is performed as part of the **update** operation. For this
+reason, **update** is ultimately limited by sorting performace, i.e.
+``Array.sort()``, which is O(N). Importantly, the support for
+:ref:`batch operations <axis-batch>` reduces the sorting overhead by
+ensuring that sorting is needed only once for a large batch operation,
+instead of once per cue argument. The implementation of **lookup** uses
+binary search techniques to identify the appropriate cues, yielding
+O(logN) performance. The crux of the lookup algorithm is to resolve the
+cues which COVERS the lookup interval in sub linear time.
 
 
 ..  note::
 
-    For instance, with the current implementation inserting 100.000 pre-ordered
-    cues would take about 0.2 seconds in a desktop environment.
-
-
-    More details
+    More details needed.
 
 
 
