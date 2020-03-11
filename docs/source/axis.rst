@@ -534,7 +534,7 @@ Performance
 The axis implementation targets high performance with high volumes of
 cues. In particular, the efficiency of the **lookup** operation is
 important as it is likely used repeatedly, for instance during media
-playback. For this reason, the axis implementation is optimized with
+playback. For this reason the axis implementation is optimized with
 respect to fast **lookup**, with the implication that internal costs
 related to indexing are paid by the **update** operation.
 
@@ -556,6 +556,22 @@ in sub linear time.
 ..  note::
 
     More details needed.
+
+    1) legger til 100000 cues som refererer 200000 ulike punkter på tidslinja. Så dobler jeg dette med en ny insert av samme størrelse til 400000 punkter. Disse batchene er sorterte i utgangspunktet - 230ms (init) og 336 ms (add) - altså raskere på første init.
+
+    2) samme som 1), tester insert av en liten batch (10 cues) inn i en stor og viser at det fortsatt er lynrask (2ms)
+
+    3) gjentar 1), men med randomiserte cues (worst case) - som gir mer tidsbruk på sortering 788ms (init) og 855ms (add)
+
+    4) stort oppslag på tallinja som returnerer ca 200000 punkter (med assosierte cues) 122ms
+
+    5) samme som 4) men returnerer kun cues (ca 100000) 190 ms
+
+    6) oppslag på liten del av tidslinja (Sequenceren bruker denne) 19 cues - 7ms
+
+    7) samme som 5) men fjerner også alle cues 727 (implementasjon kan optimaliseres - utnytter for øyeblikket ikke at det er sammenhengende punkter på talllinja)
+
+    8) fjerner 50000 tilfeldige cues - 356 ms
 
 
 
