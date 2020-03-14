@@ -540,38 +540,63 @@ related to indexing are paid by the **update** operation.
 
 The **lookup** operation depends on a sorted index of cue endpoints, and
 sorting is performed as part of the **update** operation. For this
-reason, **update** is ultimately limited by sorting performace, i.e.
-``Array.sort()``, which is O(NlogN) (see `sorting complexity`_).
-Importantly, the support for :ref:`batch operations <axis-batch>`
-reduces the sorting overhead by ensuring that sorting is needed only
-once for a large batch operation, instead of once per cue argument. The
-implementation of **lookup** uses binary search techniques to identify
-the appropriate cues, yielding O(logN) performance. The crux of the
-lookup algorithm is to resolve the cues which COVERS the lookup interval
-in sub linear time.
+reason, **update** perfrmance is ultimately limited by sorting
+performace, i.e. ``Array.sort()``, which is O(NlogN) (see `sorting
+complexity`_). Importantly, support for :ref:`batch operations
+<axis-batch>` reduces the sorting overhead by ensuring that sorting is
+needed only once for a large batch operation, instead of repeatedly for
+each cue argument. The implementation of **lookup** uses binary search
+techniques to identify the appropriate cues, yielding O(logN)
+performance. The crux of the lookup algorithm is to resolve the cues
+which COVERS the lookup interval in sub linear time.
 
 
 .. _sorting complexity: https://blog.shovonhasan.com/time-space-complexity-of-array-sort-in-v8/
 
-..  note::
 
-    More details needed.
+To indicate the performance metrics of the axis, some measurements have
+been collected for common usage patterns. For this particular test, a
+standard laptop computer is used (Lenovo ThinkPad T450S, 4 cpu Intel
+Core i5-53000 CPU, Ubuntu 18.04). Tests are run with Chrome and Firefox,
+with similar results. Though results will vary between systems, these
+measurements should give a rough indication.
 
-    1) legger til 100000 cues som refererer 200000 ulike punkter på tidslinja. Så dobler jeg dette med en ny insert av samme størrelse til 400000 punkter. Disse batchene er sorterte i utgangspunktet - 230ms (init) og 336 ms (add) - altså raskere på første init.
+Update performance depends primarily the size of the cue batch, but also
+a few other factors. The **update** operation is more efficient if the
+axis is empty ahead of the operation. Also, since the **update**
+operation depends on sorting internally, it matters if the cue batch is
+mostly sorted or random order.
 
-    2) samme som 1), tester insert av en liten batch (10 cues) inn i en stor og viser at det fortsatt er lynrask (2ms)
+Tests operate on cue batches of size 100.000 cues, which corresponds to
+200.000 cue endpoints. Results are given in milliseconds.
 
-    3) gjentar 1), men med randomiserte cues (worst case) - som gir mer tidsbruk på sortering 788ms (init) og 855ms (add)
+=============  =======================================================  ===
+INSERT         100.000 sorted cues into empty axis                      278
+INSERT         100.000 random cues into empty axis                      524
+INSERT         100.000 sorted cues into axis with 100.000 cues          334
+INSERT         100.000 random cues into axis with 100.000 cues          580
+INSERT         10 cues into axis with 100.000 cues                        2
+LOOKUP         100.000 endpoints in interval from axis of 100.000 cue    74
+LOOKUP         20 endpoints from axis with 100.000 cues                   1
+LOOKUP         50.000 cues in interval from axis of 100.000 cues         80
+LOOKUP         10 cues in interval from axis of 100.000 cues              1
+LOOKUP_DELETE  50.000 cues in interval from axis with 100.000 cues      100
+LOOKUP_DELETE  10 cues in interval from axis with 100.000 cues            1
+DELETE         50.000 random cues from axis with 100.000 cues           280
+DELETE         10 random cues from axis with 100.000 cues                10
+CLEAR          axis with 100.000 cues                                    29
+=============  =======================================================  ===
 
-    4) stort oppslag på tallinja som returnerer ca 200000 punkter (med assosierte cues) 122ms
+The results show that the axis implementation is highly efficient for
+**lookup** operations and **update** operations with small cue batches,
+even if the axis is preloaded with a large (100.000) volume of cues. In
+addition, (not evident from this table) **update** behaviour is tested
+up to 1.000.000 cues and appears to scale well with sorting costs.
+However, batch sizes beyond 100.000 are not recommended, as this would
+likely hurt the responsiveness of the Web page too much. On the other
+hand, use cases requiring loading of 100.000 cues might be rare in
+practice.
 
-    5) samme som 4) men returnerer kun cues (ca 100000) 190 ms
-
-    6) oppslag på liten del av tidslinja (Sequenceren bruker denne) 19 cues - 7ms
-
-    7) samme som 5) men fjerner også alle cues 727 (implementasjon kan optimaliseres - utnytter for øyeblikket ikke at det er sammenhengende punkter på talllinja)
-
-    8) fjerner 50000 tilfeldige cues - 356 ms
 
 
 
