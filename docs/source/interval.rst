@@ -77,7 +77,7 @@ How to create intervals.
 Background
 ------------------------------------------------------------------------
 
-This focus on intervals and their mathematical definition may seem odd, given
+This focus on intervals and their mathematical definition may be unexpected, given
 that the topic is media, not mathematics. Still, continuous media experiences
 require *media state* to be well defined along its timeline. For *discrete*
 media content, points and intervals offer a simple and elegant mechanism for
@@ -121,6 +121,11 @@ symbol  name          value   direction  bracket
 **a]**  right-closed  a       right      closed
 **a)**  right-open    a       right      open
 ======  ============  ======  =========  =======
+
+Endpoints are represented as triplets *[value, right, closed]*, where
+the first entry *value* is a number, and the remaining two entries are
+boolean flags indicating if the endpoint is *right* and *closed*.
+
 
 
 ..  _interval-ordering:
@@ -288,6 +293,14 @@ Instance Attributes
 ..  js:attribute:: interval.length
 
     float: interval length (**high-low**)
+
+..  js:attribute:: interval.endpointLow
+
+    endpoint: low endpoing [value, false, lowInclude]
+
+..  js:attribute:: interval.endpointHigh
+
+    endpoint: low endpoing [value, true, highInclude]
 
 
 Instance Methods

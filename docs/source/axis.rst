@@ -49,6 +49,7 @@ specific point or segment on the timeline.
     Illustration!
 
 
+
 Example
 ------------------------------------------------------------------------
 
@@ -238,6 +239,7 @@ C      INSERT data, interval undefined   MODIFY data, PRESERVE interval
 D      INSERT cue                        MODIFY cue
 =====  ================================  ===============================
 
+..  _axis-cue-equality:
 
 Cue equality
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -267,7 +269,7 @@ The default equality function used by the axis is the following:
 
 ..  code-block:: javascript
 
-    function object_equals(a, b) {
+    function equals(a, b) {
         // Create arrays of property names
         let aProps = Object.getOwnPropertyNames(a);
         let bProps = Object.getOwnPropertyNames(b);
@@ -401,14 +403,19 @@ entire batch, as opposed to once per cue modification.
         axis.update(cues);
 
 
+..  _axis-chaining:
+
+Cue chaining
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 It is possible to include several cue arguments concerning the same key
-in a single batch. This is called *chained* cue arguments. Chained cue
-arguments will be applied in given order, and the net effect in terms of
-cue state will be equal to the effect of splitting the cue batch into
-individual invokations of **update**. However, chained cue arguments
-are essentially collapsed into a single cue operation with the same net
-effect. For instance, if a cue is first inserted and then deleted within
-a single batch, the net effect is *no effect*.
+in a single batch to **update**. This is called *chained* cue arguments.
+Chained cue arguments will be applied in given order, and the net effect
+in terms of cue state will be equal to the effect of splitting the cue
+batch into individual invokations of **update**. However, chained cue
+arguments are essentially collapsed into a single cue operation with the
+same net effect. For instance, if a cue is first inserted and then
+deleted within a single batch, the net effect is *no effect*.
 
 
 Correct handling of chained cue arguments introduces additional
@@ -416,7 +423,7 @@ complexity within the **update** operation, possibly making it slightly
 slower for large cues batches. If the cue batch does *not* include any
 chained cue arguents, this may be indicated by setting the option
 *chaining* to false, yielding faster cue processing. The default value
-for chaining* is true.
+for *chaining* is true.
 
 ..  code-block:: javascript
 
@@ -442,12 +449,12 @@ specifices the target interval and **mode** regulates what exactly
 counts as a *match*.
 
 The **lookup** operation is defined in terms of
-:ref:`interval-comparison`. Comparison between the lookup
-interval and all cue intervals managed by the axis yields seven
+:ref:`interval-comparison`. Comparison  between the cue intervals and
+lookup interval, i.e. **cmp(cue.interval, interval)**, yields seven
 distinct groups of cues: OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL,
 COVERS, OVERLAP_RIGHT, OUTSIDE_RIGHT. The lookup operation then allows
 the exact definition of *match* to be controlled by selectively
-including cue groups into the result set, with the exception of
+including these cue groups into the result set, with the exception of
 OUTSIDE_LEFT, and OUTSIDE_RIGHT. The **mode** is an integer indicating
 which groups to include in the lookup result, constructed from bitmasks
 below.
@@ -466,13 +473,15 @@ Typically when looking up cues on the timeline, the desire is to lookup
 all cues which are *valid* somewhere within the target lookup interval.
 If so, all groups except OUTSIDE_LEFT and OUTSIDE_RIGHT are included,
 and the appropriate lookup mode is `16+8+4+2+1=31`. This is the default
-value for lookup mode.
+value for lookup mode. Other useful modes may be 29 (all except COVERS)
+or 12 (COVERED and EQUAL).
 
 Additionally, the axis provides an operation  **lookup_delete(interval,
 mode)** which deletes all cues matching a given interval. This operation
 is more efficient than  **lookup** followed by **update** for
 cue deletion.
 
+..  _axis-lookup-endpoints:
 
 Lookup endpoints
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -486,7 +495,6 @@ is the low endpoint of the cue interval, or the high endpoint.
 
 ..  code-block:: javascript
 
-    // (endpoint, cue) pair
     {
         endpoint: [value, high, closed],
         cue: {
@@ -501,6 +509,7 @@ numerical *value* of the endpoint, and two boolean flags *high* an
 *closed*. If *high* is *true*, the endpoint is a *high* endpoint of cue,
 else the *low* endpoint. If *closed* is *true*, the endpoint is *closed*,
 else *open*.
+
 
 
 ..  _axis-events:
@@ -641,28 +650,39 @@ Instance Methods
 
 ..  js:method:: axis.keys()
 
-    :returns Array: list of keys
+    :returns iterable: all cue keys
 
-    Get list of all keys managed by axis.
+    Iterable for all keys managed by axis.
 
-..  js:method:: axis.cues()
+..  js:method:: axis.values()
 
-    :returns Array: list of cues
+    :returns iterable: all cues
 
-    Get list of all cues managed by axis.
+    Iterable for all cues managed by axis.
 
-..  js:method:: axis.update (cues)
+..  js:method:: axis.update (cues[, options])
 
-    :param list cues: list of cues or single cue
-    :param function equals: equality function for cue data
+    :param iterator cues: iterable of cues or single cue
+    :param object options: options
     :returns changeMap: cue changes caused by the update operation
 
     Insert, replace and delete cues from the axis. For details on how
     to construct cue parameters see :ref:`axis-update`.
 
+    - options.equals: custom equality function for cue data
+
+        See :ref:`axis-cue-equality`.
+
+    - options.chaining: support chaining
+
+        See :ref:`axis-chaining`
+
+
 ..  js:method:: axis.clear()
 
-    Clears all cues of the axis. More effective than iterating
+    :returns changeMap: cue changes caused by the operation
+
+    Clears all cues of the axis. Much more effective than iterating
     through cues and deleting them.
 
 ..  js:method:: axis.lookup(interval[, mode])
@@ -676,32 +696,26 @@ Instance Methods
 
     Note also that the lookup operation may be used to lookup cues that match a
     single point on the timeline, simply by defining the lookup interval as a
-    single point.
+    single point, see :ref:`interval-definition`.
 
 ..  js:method:: axis.lookup_endpoints(interval)
 
     :param Interval interval: lookup interval
-    :returns Array: list of (point, cue) tuples
+    :returns Array: list of {endpoint: endpoint, cue:cue} objects
 
-    Lookup all cue endpoints on the axis, within some interval. Return list of
-    (point, cue) tuples. Point is an endpoint value of a cue, either cue.low or
-    cue.high. Multiple cues may be registered on a single endpoint value, so a
-    simple point value may occur multiple times with different cues.
 
-..  note:: TODO
-
-    TODO - cue endpoint definition
-    TODO - cue endpoint ordering
+    Lookup all cue endpoints on the axis, within some interval See
+    :ref:`axis-lookup-endpoints`.
 
 
 ..  js:method:: axis.lookup_delete(interval[, mode])
 
     :param Interval interval: lookup interval
     :param int mode: search mode
-    :returns Array: list of deleted cues
+    :returns changeMap: cue changes caused by the operation
 
-    Similar to *lookup*, except that it deletes all cues *matching* a given
-    lookup interval.
+    Deletes all cues *matching* a given lookup interval.
+    Similar to *lookup*, see :ref:`axis-lookup`.
 
 
 ..  js:method:: axis.on (type, callback[, ctx])
@@ -711,12 +725,8 @@ Instance Methods
     :param object ctx: set *this* object to be used during callback
         invokation. If not provided, *this* will be the axis instance.
 
-    Register a callback for events of given type.
-
-    ..  code-block:: javascript
-
-        let handler = function(e){}
-        axis.on("change", handler)
+    Register a callback for events of given type. The axis exports only
+    a single event type *"change"*. See :ref:`axis-events`.
 
 
 ..  js:method:: axis.off (type, callback)
@@ -724,15 +734,5 @@ Instance Methods
     :param string type: event type
     :param function callback: event callback
 
-    Un-register a callback from given event type
-
-    ..  code-block:: javascript
-
-        axis.off("change", handler)
-
-
-..  js:method:: callback (batchMap)
-
-    :param Map batchMap: state changes
-
+    Un-register a callback for given event type. See :ref:`axis-events`.
 
