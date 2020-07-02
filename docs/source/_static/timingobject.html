@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="module">
+            import * as timingsrc from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+            console.log(`hello world timingsrc version ${timingsrc.version}!`);
+
+            const value_el = document.getElementById("value");
+            const play_btn = document.getElementById("play");
+            const pause_btn = document.getElementById("pause");
+            const reset_btn = document.getElementById("reset");
+
+            const to = new timingsrc.TimingObject({range: [0,10]});
+
+            to.on("timeupdate", () => {
+                value_el.innerHTML = `${to.pos.toFixed(2)}`;
+            });
+
+            play_btn.onclick = function () {to.update({velocity:1});}
+            pause_btn.onclick = function () {to.update({velocity:0});}
+            reset_btn.onclick = function () {to.update({position:0, velocity:0});}
+
+        </script>
+    </head>
+    <body>
+        <div id=value></div>
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+        <button id="reset">Reset</button>
+    </body>
+</html>
