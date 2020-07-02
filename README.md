@@ -1,11 +1,13 @@
 # timingdocs
-Documentation for [timingsrc](https://webtiming.github.io/timingsrc/) hosted on [https://timingsrc.readthedocs.io](https://timingsrc.readthedocs.io).
+
+Documentation for [timingsrc (v3)](https://webtiming.github.io/timingsrc/),
+hosted on [https://timingsrc.readthedocs.io](https://timingsrc.readthedocs.io).
 
 
 # virtualenv
 
-A Python virtual environment with sphinx and other dependencies was
-needed for project startup and is also needed for local builds.
+A Python virtual environment with sphinx and other dependencies
+needed for project startup and local builds.
 
 
 Create Python environment
@@ -33,3 +35,15 @@ Deactivate Python environment
 deactivate
 ```
 
+# Build
+
+```sh
+cd docs
+make html
+```
+
+# View
+
+```sh
+google-chrome docs/build/html/index.html
+```

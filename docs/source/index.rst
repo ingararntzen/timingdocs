@@ -6,10 +6,12 @@
 Welcome to timingsrc's documentation!
 ======================================
 
+
 .. toctree::
    :maxdepth: 2
    :caption: Timed Data
 
+   install
    intro
    interval
    axis
