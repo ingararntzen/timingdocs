@@ -14,7 +14,7 @@ Welcome to timingsrc's documentation!
    install
    intro
    interval
-   axis
+   dataset
 
 
 Indices and tables

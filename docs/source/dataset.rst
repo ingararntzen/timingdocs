@@ -1,21 +1,29 @@
 ..  _axis:
 
 ========================================================================
-Axis
+Dataset
 ========================================================================
 
-``Axis`` is a dataset for managing *timed data* on a timeline. Timed
-data is any dataset where objects are associated with a timestamp (i.e.
-single point on the timeline) or with an interval (i.e. a continuous
-segment on the timeline). Typical examples of timed data include log
-data, user comments, sensor data, subtitles, images, playlists,
-transcripts, gps coordinates etc.
+``Dataset`` is a collection type similar to ``Map``, yet specialized
+for *timed data*.
 
-``Axis`` implements efficient data lookup on the timeline and is
-generally useful for management and visualization of large datasets of
-timed data. Still, the primary purpose of the axis is to provide a
-datastructure suitable for precisely timed playback of timed data. This
-is achieved by connecting one or more ``Sequencers`` to the axis.
+Timed data is simply *values* or *objects* associated with *timestamps*
+(*single point* on a timeline) or with *segments* (*continuous
+interval* on the timeline). Typical examples of timed data
+include log data, user comments, sensor measurements, subtitles, images,
+playlists, transcripts, gps coordinates etc.
+
+``Dataset`` maps *keys* to *values*, like a ``Map``. In addition,
+*values* are also indexed by their positioning on the timeline, allowing
+efficient *spatial* search on the timeline. For instance, the *lookup*
+method returns all *values* present within a given *interval*.
+
+
+``Dataset`` is useful for management and visualization of
+large datasets of timed data. In addition, ``Dataset`` is carefully
+designed to support precisely *timed playback* of
+timed data. This is achieved by connecting one or more ``Sequencers`` to
+the dataset.
 
 
 ..  _axis-definition:
@@ -23,8 +31,8 @@ is achieved by connecting one or more ``Sequencers`` to the axis.
 Definition
 ------------------------------------------------------------------------
 
-``Axis`` is a dataset of *cues*. A *cue* is essentially a triplet: **(key,
-interval, data)**, represented as a simple Javascript object.
+``Dataset`` is a collection of *cues*. A *cue* is essentially a triplet:
+**(key, interval, data)**, represented as a simple Javascript object.
 
 ..  code-block:: javascript
 
@@ -36,7 +44,7 @@ interval, data)**, represented as a simple Javascript object.
 
 
 Similar to a ``Map``, the axis allows cues to be resolved efficiently by
-key. Additionally, cues are indexed by interval, enabling
+key. Additionally, cues are indexed by their intervals, enabling
 effective lookup of cues along the timeline. Intervals define the
 validity of a cue on the timeline, and represent either a singular point
 or a continuous segment (see :ref:`Interval <interval-definition>`).
@@ -55,8 +63,8 @@ Example
 
 ..  code-block:: javascript
 
-    // create axis
-    let axis = new Axis();
+    // create dataset
+    let ds = new timingsrc.Dataset();
 
     // timed data
     let subtitles = [
@@ -71,17 +79,18 @@ Example
 
     // create cues from subtitles data
     let cues = subtitles.map(function (sub) {
-        return {key: sub.id, interval: new Interval(sub.start, sub.end), data: sub};
+        let itv = new timingsrc.Interval(sub.start, sub.end);
+        return {key: sub.id, interval: itv, data: sub};
     });
 
     // insert cues
-    axis.update(cues);
+    ds.update(cues);
 
     // lookup cues
-    let result_cues = axis.lookup(new Interval(120, 130));
+    let result_cues = ds.lookup(new timingsrc.Interval(120, 130));
 
     // delete cues
-    axis.update(cues.map(function(cue) {
+    ds.update(cues.map(function(cue) {
         return {key: cue.key};
     });
 
@@ -91,38 +100,38 @@ Example
 Update
 ------------------------------------------------------------------------
 
-The axis provides a single operation **update(cues)** allowing cues to be
-**inserted**, **modified** and/or **deleted**. The argument **cues**
-defines a list of cue argument (or a single cue argument) to be
-**inserted** into the axis. If a cue with identical key already exists
-in the axis, the *pre-existing* cue will be **modified** to match the
-provided cue argument. If a cue argument includes a key but no interval
-and no data, this means to **delete** the *pre-existing* cue.
+*Dataset* provides a single operation **update(cues)** allowing cues
+to be **inserted**, **modified** and/or **deleted**. The argument
+**cues** defines a list of cue argument (or a single cue argument) to be
+**inserted** into the dataset. If a cue with identical key already
+exists in the dataset, the *pre-existing* cue will be **modified** to
+match the provided cue argument. If a cue argument includes a key but no
+interval and no data, this means to **delete** the *pre-existing* cue.
 
 
 ..  code-block:: javascript
 
-    let axis = new Axis();
+    let ds = new timingsrc.Dataset();
 
     // insert
-    axis.update({
+    ds.update({
         key: "mykey",
-        interval: new Interval(2.2, 4.31),
+        interval: new timingsrc.Interval(2.2, 4.31),
         data: "foo"
     });
 
     // replace
-    axis.update({
+    ds.update({
         key: "mykey",
-        interval: new Interval(4.4, 6.9),
+        interval: new timingsrc.Interval(4.4, 6.9),
         data: "bar"
     });
 
     // delete
-    axis.update({key: "mykey"})
+    ds.update({key: "mykey"})
 
 
-When a cue is inserted into the axis, it will be *managed* by the axis
+When a cue is inserted into the axis, it will be *managed* by *Dataset*
 until it is eventually deleted. Cue modification is implemented as
 *in-place* modification of the *pre-existing* cue. All cue access
 operations (e.g. **lookup**) provide direct access to managed cues.
@@ -130,58 +139,61 @@ operations (e.g. **lookup**) provide direct access to managed cues.
 
 ..  warning::
 
-    Cues managed by the axis are considered **read-only** and must
+    Cues managed by *Dataset* are considered **read-only** and must
     **never** be modified by application code, except through the
     **update** operation.
 
     If managed cue objects are modified by external code, no guarantees
-    can be given concerning functional correctness of the axis. Note
-    also that the axis does not implement any protection in this regard.
-    In particular, programmers must avoid the pitfall of modifying cues
-    objects directly ahead of using the **update** operation.
+    can be given concerning functional correctness. Note
+    also that *Dataset* does not implement any protection in this regard.
+
+    In particular, programmers must avoid the pitfall of trying to
+    modify a a cue (or its data part), by directly modifying the
+    existing cue ahead of resubmitting it to the *Dataset* using the
+    **update** operation.
 
     Rules of thumb:
 
     -   never *reuse* previously defined cue objects as arguments to **update**.
-    -   avoid keeping variables referencing cue objects.
+    -   avoid keeping variables referencing individual cue objects.
 
 
     ..  code-block:: javascript
 
         // insert
         let cue = {...};
-        axis.update(cue);
+        ds.update(cue);
 
         // YES ! - modify by creating new cue object
-        axis.update({
+        ds.update({
             key: cue.key,
-            interval: new Interval(4, 6),
+            interval: new timingsrc.Interval(4, 6),
             data: cue.data
         });
 
         // NO !!! - modify property of managed cue ahead of update
         cue.interval = new Interval(4, 6);
-        axis.update(cue);
+        ds.update(cue);
 
         // YES ! - delete by creating a new cue object
-        axis.update({key:cue.key});
+        ds.update({key:cue.key});
 
         // NO !!! - delete properties of managed cue ahead of update
         delete cue.interval;
         delete cue.data;
-        axis.update(cue);
+        ds.update(cue);
 
     Unwanted modifications of managed cues may also occur when cue.data
     references objects that are subject to in-place modification by
-    external code. In such circumstances, object copying will
-    be required as part of cue data creation.
+    external code. So, in order to modify an aspect of the cue data,
+    create a new data object with the desired state.
 
 
 
 Cue arguments
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-The axis also supports *partial* cue modification. *Partial*
+*Dataset* also supports *partial* cue modification. *Partial*
 modification means to modify *only* the cue interval or *only* the cue
 data. For convenience, partial cue modification allows this to be done
 without restating the *unmodified* part of the cue. Partial cue
@@ -208,19 +220,19 @@ D      {key: "mykey", interval: ..., data: ...}  interval, data
     value with cues.
 
     Similarly, cue intervals may also take the value ``undefined``.
-    Lacking an interval, they become invisible to the **lookup**
+    Without an interval cues become invisible to the **lookup**
     operation, yet still accessible through ``Map`` operations
     **has, get, keys, values, entries**. Otherwise, if cue interval is
-    defined, it must be instances of the ``Interval`` class.
+    defined, it must be an instance of the ``Interval`` class.
 
 ..  note::
 
     If a cue interval is derived from timestamps which are also part of
     cue data, interval update (type B) is still possible, but likely not
     advisable, as it introduces inconsistencies between time values in
-    cue interval and cue data. Though not criticial for the integrity of the axis,
-    it might be confusing for users, as timeline playback would
-    not match timestamps values in cue data.
+    cue interval and cue data. Though not criticial for the integrity of
+    the *Dataset*, it might be confusing for users, as timeline playback
+    would not match timestamps values in cue data.
 
     Rule of thumb:
 
@@ -244,14 +256,14 @@ D      INSERT cue                        MODIFY cue
 Cue equality
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Cue modifications have *no effect* if cue argument is equal to the
-*pre-existing* cue. The axis will detect this if cue intervals are
+Cue modification has *no effect* if cue argument is equal to the
+*pre-existing* cue. The *Dataset* will detect this if cue intervals are
 unchanged, and avoid unneccesary reevaluation of internal indexes.
-However, object equality for cue data may be application dependent. For
-this reason the **update** operation allows a custom equality function
-to be specified using the optional parameter *equals*. Note that the
-equality function is evaluated with cue data properties as arguments,
-not the entire cue.
+However, the definition of *object equality* for cue data may be
+application dependent. For this reason the **update** operation allows a
+custom equality function to be specified using the optional parameter
+*equals*. Note that the equality function is evaluated with cue data
+properties as arguments, not the entire cue.
 
 
 ..  code-block:: javascript
@@ -261,10 +273,10 @@ not the entire cue.
         return true;
     }
 
-    axis.update(cues, {equals:equals});
+    ds.update(cues, {equals:equals});
 
 
-The default equality function used by the axis is the following:
+The default equality function used by the *Dataset* is the following:
 
 
 ..  code-block:: javascript
@@ -295,8 +307,8 @@ Given that object equality is appropriately specified, repeated
 invocation of **update** is safe, without having to check cue equality
 beforehand. This is practical for instance when an online source of
 timed data is polled repeatedly for updates. Polling results may then be
-fed directly to the axis **update** operation and the update  result
-value will indicate if any actual modifications occured. Evaluating cue
+fed directly to the **update** operation and the return value
+will indicate if any actual modifications occured. Evaluating cue
 equality as part of the **update** operation is also more effective than
 doing it as a separate step beforehand.
 
