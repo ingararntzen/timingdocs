@@ -1,4 +1,4 @@
-..  _axis:
+..  _dataset:
 
 ========================================================================
 Dataset
@@ -13,25 +13,25 @@ interval* on the timeline). Typical examples of timed data
 include log data, user comments, sensor measurements, subtitles, images,
 playlists, transcripts, gps coordinates etc.
 
-``Dataset`` maps *keys* to *values*, like a ``Map``. In addition,
+*Dataset* maps *keys* to *values*, like a ``Map``. In addition,
 *values* are also indexed by their positioning on the timeline, allowing
 efficient *spatial* search on the timeline. For instance, the *lookup*
 method returns all *values* present within a given *interval*.
 
 
-``Dataset`` is useful for management and visualization of
-large datasets of timed data. In addition, ``Dataset`` is carefully
+*Dataset* is useful for management and visualization of
+large datasets of timed data. In addition, *Dataset* is carefully
 designed to support precisely *timed playback* of
 timed data. This is achieved by connecting one or more ``Sequencers`` to
 the dataset.
 
 
-..  _axis-definition:
+..  _dataset-definition:
 
 Definition
 ------------------------------------------------------------------------
 
-``Dataset`` is a collection of *cues*. A *cue* is essentially a triplet:
+*Dataset* is a collection of *cues*. A *cue* is essentially a triplet:
 **(key, interval, data)**, represented as a simple Javascript object.
 
 ..  code-block:: javascript
@@ -43,7 +43,7 @@ Definition
     }
 
 
-Similar to a ``Map``, the axis allows cues to be resolved efficiently by
+Similar to a ``Map``, the *Dataset* allows cues to be resolved efficiently by
 key. Additionally, cues are indexed by their intervals, enabling
 effective lookup of cues along the timeline. Intervals define the
 validity of a cue on the timeline, and represent either a singular point
@@ -95,7 +95,7 @@ Example
     });
 
 
-.. _axis-update:
+.. _dataset-update:
 
 Update
 ------------------------------------------------------------------------
@@ -131,7 +131,7 @@ interval and no data, this means to **delete** the *pre-existing* cue.
     ds.update({key: "mykey"})
 
 
-When a cue is inserted into the axis, it will be *managed* by *Dataset*
+When a cue is inserted into the *Dataset*, it will be *managed* by *Dataset*
 until it is eventually deleted. Cue modification is implemented as
 *in-place* modification of the *pre-existing* cue. All cue access
 operations (e.g. **lookup**) provide direct access to managed cues.
@@ -251,7 +251,7 @@ C      INSERT data, interval undefined   MODIFY data, PRESERVE interval
 D      INSERT cue                        MODIFY cue
 =====  ================================  ===============================
 
-..  _axis-cue-equality:
+..  _dataset-cue-equality:
 
 Cue equality
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -313,65 +313,50 @@ equality as part of the **update** operation is also more effective than
 doing it as a separate step beforehand.
 
 
-.. _axis-update-result:
+.. _dataset-update-result:
 
 Update result
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-The **update** operation returns a ``Map`` object describing state
-changes for each affected cue, indexed by cue key. Map entries include
-the **new** cue object and an **old** cue object.
-
--   **new**: the current, modified cue object, or undefined
-    if the cue was deleted.
--   **old**: a copy (shallow) of the previous cue object, as it was
-    before the **update** operation was initiated, or undefined if the
-    cue was inserted.
-
-
-The axis creates the result map as follows:
+The **update** operation returns an array of items describing the effects
+for each cue argument.
 
 ..  code-block:: javascript
 
-    let result = new Map();
-
-    // new cue inserted
-    result.set(key, {
-        new:inserted_cue,
-        old:undefined
-    });
-
-    // existing cue modified
-    result.set(key, {
-        new:current_cue,
-        old:old_cue
-    });
-
-    // cue deleted
-    result.set(key, {
-        new:undefined,
-        old:deleted_cue
-    });
-
-The update result is also given as an argument to the change event (see
-:ref:`axis-events`), thereby allowing monitoring clients to correctly
-reproduce the state changes of the axis.
+    // update result item
+    let item = {key: ..., new: {...}, old: {...}}
 
 
+-   **new**: resulting cue *after* the operation.
+    If the cue was deleted, **new** is undefined.
 
-.. _axis-batch:
+-   **old**: a copy (shallow) of the cue as it were *before* the operation.
+    If the cue was inserted (i.e., did not exist before the operation),
+    **old** is undefined.
+
+-   **key** of the cue. Always matches **new.key** and **old.key**
+    (unless **new** and **old** are undefined).
+
+
+Note that it is possible with result items where both **new** and
+**old** are undefined. For instance, this will be the case if a cue is
+both insterted and deleted in the same operation (see
+:ref:`dataset_batch`).
+
+
+.. _dataset-batch:
 
 Batch operations
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 The **update(cues)** operation is *batch-oriented*, implying that
-multiple cue operations can be processed as one atomic operation. This
-way, a single batch may include a mix of **insert**, **replace** and
-**delete** operations.
+multiple cue operations can be processed as one atomic operation. A
+single batch may include a mix of **insert**, **replace** and **delete**
+operations.
 
 ..  code-block:: javascript
 
-    let axis = new Axis();
+    let ds = new Dataset();
 
     let cues = [
         {
@@ -386,7 +371,7 @@ way, a single batch may include a mix of **insert**, **replace** and
         }
     ];
 
-    axis.update(cues);
+    ds.update(cues);
 
 
 Batch oriented processing is crucial for the efficiency of the
@@ -408,14 +393,14 @@ entire batch, as opposed to once per cue modification.
 
         // NO!
         cues.forEach(function(cue)) {
-            axis.update(cue);
+            ds.update(cue);
         }
 
         // YES!
-        axis.update(cues);
+        ds.update(cues);
 
 
-..  _axis-chaining:
+..  _dataset-chaining:
 
 Cue chaining
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -424,11 +409,10 @@ It is possible to include several cue arguments concerning the same key
 in a single batch to **update**. This is called *chained* cue arguments.
 Chained cue arguments will be applied in given order, and the net effect
 in terms of cue state will be equal to the effect of splitting the cue
-batch into individual invokations of **update**. However, chained cue
-arguments are essentially collapsed into a single cue operation with the
+batch into individual invokations of **update**. However, internally,
+chained cue arguments are collapsed into a single cue operation with the
 same net effect. For instance, if a cue is first inserted and then
 deleted within a single batch, the net effect is *no effect*.
-
 
 Correct handling of chained cue arguments introduces additional
 complexity within the **update** operation, possibly making it slightly
@@ -439,71 +423,43 @@ for *chaining* is true.
 
 ..  code-block:: javascript
 
-    axis.update(cues, {chaining:false});
+    ds.update(cues, {chaining:false});
 
 
 ..  warning::
 
-    If the *chaining* option is set to false while the cue batch still
+    If the *chaining* option is set to false, but the cue batch still
     contains chained cue arguments, this violation will not be detected.
-    The consequence is that the *old* value will be
-    wrong for chained cues.
+    The consequence is that the *old* value will be incorrect for chained
+    cues.
 
 
-.. _axis-lookup:
+.. _dataset-lookup:
 
 Lookup
 ------------------------------------------------------------------------
 
-The operation **lookup(interval, mode)** identifies all cues *matching*
+The operation **lookup(interval, mask)** identifies all cues *matching*
 a specific interval on the timeline. The parameter **interval**
-specifices the target interval and **mode** regulates what exactly
-counts as a *match*.
+specifices the target interval and **mask** defines what interval
+relations count as a *match*. (see :ref:`interval-match`.
 
-The **lookup** operation is defined in terms of
-:ref:`interval-comparison`. Comparison  between the cue intervals and
-lookup interval, i.e. **cmp(cue.interval, interval)**, yields seven
-distinct groups of cues: OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL,
-COVERS, OVERLAP_RIGHT, OUTSIDE_RIGHT. The lookup operation then allows
-the exact definition of *match* to be controlled by selectively
-including these cue groups into the result set, with the exception of
-OUTSIDE_LEFT, and OUTSIDE_RIGHT. The **mode** is an integer indicating
-which groups to include in the lookup result, constructed from bitmasks
-below.
+Additionally, *Dataset* provides an operation  **lookup_delete(interval,
+mask)** which deletes all cues matching a given interval. This operation
+is more efficient than  **lookup** followed by cue deletion using
+**update**.
 
-=====  ===  ===============
-mask   int  included groups
-=====  ===  ===============
-10000   16  OVERLAP_LEFT
-01000    8  COVERED
-00100    4  EQUAL
-00010    2  COVERS
-00001    1  OVERLAP_RIGHT
-=====  ===  ===============
-
-Typically when looking up cues on the timeline, the desire is to lookup
-all cues which are *valid* somewhere within the target lookup interval.
-If so, all groups except OUTSIDE_LEFT and OUTSIDE_RIGHT are included,
-and the appropriate lookup mode is `16+8+4+2+1=31`. This is the default
-value for lookup mode. Other useful modes may be 29 (all except COVERS)
-or 12 (COVERED and EQUAL).
-
-Additionally, the axis provides an operation  **lookup_delete(interval,
-mode)** which deletes all cues matching a given interval. This operation
-is more efficient than  **lookup** followed by **update** for
-cue deletion.
-
-..  _axis-lookup-endpoints:
+..  _dataset-lookup-endpoints:
 
 Lookup endpoints
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-In addition to looking up cues, the axis also supports looking up cue
+In addition to looking up cues, *Dataset* also supports looking up cue
 endpoints. Cue endpoints correspond to events on the timeline, and the
 operation **lookup_endpoints(interval)** identifies all cue endpoints
 **inside** the given interval, as defined in :ref:`interval-comparison`.
 The operation returns a list of (endpoint, cue) pairs, where endpoint
-is the low endpoint of the cue interval, or the high endpoint.
+is the low endpoint or the high endpoint of the cue interval.
 
 ..  code-block:: javascript
 
@@ -524,50 +480,92 @@ else *open*.
 
 
 
-..  _axis-events:
+..  _dataset-events:
 
 Events
 ------------------------------------------------------------------------
 
-The axis emits a **change** event following every **update** operation.
-This allows multiple observers to monitor state changes of the axis
+The *Dataset* emits a **update** event following every **update**
+operation. This allows multiple observers to monitor cue changes
 dynamically. Event callbacks may be registered and un-registered using
-operations **on(type, callback)** and **off(type, callback)**. Event
-callbacks are invoked with the **update** result map as argument.
+operations **on(type, callback)** and **off(type, callback)**. Callbacks
+for the **update** event are invoked with the result of the **update**
+operation as first parameter, i.e. a list of items describing cue
+changes (see :ref:`dataset-update-result`).
 
 ..  code-block:: javascript
 
-    const handler = function (e) {
-        // handle axis change event
-        ...
+    // handle a single item
+    function handle_item (item) {
+        if (item.new != undefined) {
+            if (item.old != undefined) {
+                // cue modify
+            } else {
+                // cue insert
+            }
+        } else {
+            if (item.old != undefined) {
+                // cue delete
+            } else {
+                // noop
+            }
+        }
+    }
+
+    // handle update event batch
+    function handler(items) {
+        items.forEach(function(item) {
+            handle_item(item);
+        });
     };
 
-    axis.on("change", handler);
-    axis.off("change", handler);
+    ds.on("update", handler);
+    ds.off("update", handler);
+
+
+Alternatively, use events types **change** and **remove** which invoke
+callback per item. Cue *insert* and *modify* operations are emitted by
+the **change** event, whereas cue *delete* operations are emitted by
+the **remove** event.
+
+..  code-block:: javascript
+
+    ds.on("change", function(item) {
+        if (item.old != undefined) {
+            // cue modify
+        } else {
+            // cue insert
+        }
+    });
+
+    ds.on("remove", function (item) {
+        // cue delete
+    });
 
 
 
-..  _axis-performance:
+
+..  _dataset-performance:
 
 Performance
 ------------------------------------------------------------------------
 
-The axis implementation targets high performance with high volumes of
-cues. In particular, the efficiency of the **lookup** operation is
-important as it is likely used repeatedly, for instance during media
-playback. For this reason the axis implementation is optimized with
-respect to fast **lookup**, with the implication that internal costs
-related to indexing are paid by the **update** operation.
+The *Dataset* implementation targets high performance with high volumes
+of cues. In particular, the efficiency of the **lookup** operation is
+important as it is used repeatedly during media playback. For this
+reason the implementation is optimized with respect to fast
+**lookup**, with the implication that internal costs related to indexing
+are paid by the **update** operation.
 
 The **lookup** operation depends on a sorted index of cue endpoints, and
 sorting is performed as part of the **update** operation. For this
-reason, **update** perfrmance is ultimately limited by sorting
+reason, **update** performance is ultimately limited by sorting
 performace, i.e. ``Array.sort()``, which is O(NlogN) (see `sorting
-complexity`_). Importantly, support for :ref:`batch operations
-<axis-batch>` reduces the sorting overhead by ensuring that sorting is
+complexity`_). Importantly, support for :ref:`batch operations<dataset-batch>`
+reduces the sorting overhead by ensuring that sorting is
 needed only once for a large batch operation, instead of repeatedly for
 each cue argument. The implementation of **lookup** uses binary search
-techniques to identify the appropriate cues, yielding O(logN)
+to identify the appropriate cues, yielding O(logN)
 performance. The crux of the lookup algorithm is to resolve the cues
 which COVERS the lookup interval in sub linear time.
 
@@ -575,7 +573,7 @@ which COVERS the lookup interval in sub linear time.
 .. _sorting complexity: https://blog.shovonhasan.com/time-space-complexity-of-array-sort-in-v8/
 
 
-To indicate the performance metrics of the axis, some measurements have
+To indicate the performance metrics of the *Dataset*, some measurements have
 been collected for common usage patterns. For this particular test, a
 standard laptop computer is used (Lenovo ThinkPad T450S, 4 cpu Intel
 Core i5-53000 CPU, Ubuntu 18.04). Tests are run with Chrome and Firefox,
@@ -584,41 +582,40 @@ measurements should give a rough indication.
 
 Update performance depends primarily the size of the cue batch, but also
 a few other factors. The **update** operation is more efficient if the
-axis is empty ahead of the operation. Also, since the **update**
-operation depends on sorting internally, it matters if the cue batch is
+*Dataset* is empty ahead of the operation. Also, since the **update**
+operation depends on sorting internally, it matters if the cues are
 mostly sorted or random order.
 
 Tests operate on cue batches of size 100.000 cues, which corresponds to
 200.000 cue endpoints. Results are given in milliseconds.
 
-=============  =======================================================  ===
-INSERT         100.000 sorted cues into empty axis                      278
-INSERT         100.000 random cues into empty axis                      524
-INSERT         100.000 sorted cues into axis with 100.000 cues          334
-INSERT         100.000 random cues into axis with 100.000 cues          580
-INSERT         10 cues into axis with 100.000 cues                        2
-LOOKUP         100.000 endpoints in interval from axis of 100.000 cue    74
-LOOKUP         20 endpoints from axis with 100.000 cues                   1
-LOOKUP         50.000 cues in interval from axis of 100.000 cues         80
-LOOKUP         10 cues in interval from axis of 100.000 cues              1
-LOOKUP_DELETE  50.000 cues in interval from axis with 100.000 cues      100
-LOOKUP_DELETE  10 cues in interval from axis with 100.000 cues            1
-DELETE         50.000 random cues from axis with 100.000 cues           280
-DELETE         10 random cues from axis with 100.000 cues                10
-CLEAR          axis with 100.000 cues                                    29
-=============  =======================================================  ===
+=============  ==========================================================  ===
+INSERT         100.000 sorted cues into empty Dataset                      278
+INSERT         100.000 random cues into empty Dataset                      524
+INSERT         100.000 sorted cues into Dataset with 100.000 cues          334
+INSERT         100.000 random cues into Dataset with 100.000 cues          580
+INSERT         10 cues into Dataset with 100.000 cues                        2
+LOOKUP         100.000 endpoints in interval from Dataset of 100.000 cues   74
+LOOKUP         20 endpoints from Dataset with 100.000 cues                   1
+LOOKUP         50.000 cues in interval from Dataset of 100.000 cues         80
+LOOKUP         10 cues in interval from Dataset of 100.000 cues              1
+LOOKUP_DELETE  50.000 cues in interval from Dataset with 100.000 cues      100
+LOOKUP_DELETE  10 cues in interval from Dataset with 100.000 cues            1
+DELETE         50.000 random cues from Dataset with 100.000 cues           280
+DELETE         10 random cues from Dataset with 100.000 cues                10
+CLEAR          Dataset with 100.000 cues                                    29
+=============  ==========================================================  ===
 
-The results show that the axis implementation is highly efficient for
-**lookup** operations and **update** operations with small cue batches,
-even if the axis is preloaded with a large (100.000) volume of cues. In
-addition, (not evident from this table) **update** behaviour is tested
-up to 1.000.000 cues and appears to scale well with sorting costs.
-However, batch sizes beyond 100.000 are not recommended, as this would
-likely hurt the responsiveness of the Web page too much. On the other
-hand, use cases requiring loading of 100.000 cues might be rare in
-practice.
-
-
+The results show that the *Dataset* implementation is highly efficient
+for **lookup** operations and **update** operations with small cue
+batches, even if the *Dataset* is preloaded with a large volume of cues
+(100.000). In addition, (not evident from this table) **update**
+behaviour is tested up to 1.000.000 cues and appears to scale well with
+sorting costs. However, batch sizes beyond 100.000 are not recommended,
+as this would likely hurt the responsiveness of the Web page too much.
+To maintain responsiveness, it would make sense to divide the batch in
+smaller parts, and spread them out in time. On the other hand, use cases
+requiring loading of over 100.000 cues might be rare in practice.
 
 
 
@@ -629,122 +626,123 @@ Api
 Constructor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-..  js:class:: Axis()
+..  js:class:: Dataset()
 
-    Creates an empty axis dataset.
+    Creates an empty *Dataset*.
 
 
 Instance Attributes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-..  js:attribute:: axis.size
+..  js:attribute:: size
 
-    :returns int: number of cues managed by axis
+    :returns int: number of cues managed by *Dataset*
 
 
 Instance Methods
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-..  js:method:: axis.has(key)
+..  js:method:: has(key)
 
     :param object key: cue key
     :returns boolean: true if cue key exists
 
-    Check if given key is managed by axis.
+    Check if given key is managed by *Dataset*.
 
-..  js:method:: axis.get(key)
+..  js:method:: get(key)
 
     :param object key: cue key
     :returns cue: cue object if key exists, else undefined
 
     Get cue object by key.
 
-..  js:method:: axis.keys()
+..  js:method:: keys()
 
     :returns iterable: all cue keys
 
-    Iterable for all keys managed by axis.
+    Iterable for all keys managed by *Dataset*.
 
-..  js:method:: axis.values()
+..  js:method:: values()
 
     :returns iterable: all cues
 
-    Iterable for all cues managed by axis.
+    Iterable for all cues managed by *Dataset*.
 
-..  js:method:: axis.update (cues[, options])
+..  js:method:: update (cues[, options])
 
     :param iterator cues: iterable of cues or single cue
     :param object options: options
-    :returns changeMap: cue changes caused by the update operation
+    :returns Array: list of cue change items
 
-    Insert, replace and delete cues from the axis. For details on how
-    to construct cue parameters see :ref:`axis-update`.
+    Insert, replace and delete cues from the *Dataset*. For details on how
+    to construct cue parameters see :ref:`dataset-update`. For details on
+    return value see :ref:`dataset-update-result`.
 
     - options.equals: custom equality function for cue data
 
-        See :ref:`axis-cue-equality`.
+        See :ref:`dataset-cue-equality`.
 
     - options.chaining: support chaining
 
-        See :ref:`axis-chaining`
+        See :ref:`dataset-chaining`
 
 
-..  js:method:: axis.clear()
+..  js:method:: clear()
 
-    :returns changeMap: cue changes caused by the operation
+    :returns Array: list of change items: cue changes caused by the operation
 
-    Clears all cues of the axis. Much more effective than iterating
+    Clears all cues of the *Dataset*. Much more effective than iterating
     through cues and deleting them.
 
-..  js:method:: axis.lookup(interval[, mode])
+..  js:method:: lookup(interval[, mode])
 
     :param Interval interval: lookup interval
     :param int mode: lookup mode
     :returns Array: list of cues
 
-    Returns all cues matching a given interval on axis. Lookup mode specifies
-    the exact meaning of *match*, see :ref:`axis-lookup`.
+    Returns all cues matching a given interval on *Dataset*. Lookup mode specifies
+    the exact meaning of *match*, see :ref:`interval-match`.
 
     Note also that the lookup operation may be used to lookup cues that match a
     single point on the timeline, simply by defining the lookup interval as a
     single point, see :ref:`interval-definition`.
 
-..  js:method:: axis.lookup_endpoints(interval)
+..  js:method:: lookup_endpoints(interval)
 
     :param Interval interval: lookup interval
     :returns Array: list of {endpoint: endpoint, cue:cue} objects
 
 
-    Lookup all cue endpoints on the axis, within some interval See
-    :ref:`axis-lookup-endpoints`.
+    Lookup all cue endpoints on the *Dataset*, within some interval see
+    :ref:`dataset-lookup-endpoints`.
 
 
-..  js:method:: axis.lookup_delete(interval[, mode])
+..  js:method:: lookup_delete(interval[, mode])
 
     :param Interval interval: lookup interval
     :param int mode: search mode
-    :returns changeMap: cue changes caused by the operation
+    :returns Array: array of cue change items
 
     Deletes all cues *matching* a given lookup interval.
-    Similar to *lookup*, see :ref:`axis-lookup`.
+    Similar to *lookup*, see :ref:`dataset-lookup`.
 
 
-..  js:method:: axis.on (type, callback[, ctx])
+..  js:method:: on (type, callback[, ctx])
 
     :param string type: event type
     :param function callback: event callback
     :param object ctx: set *this* object to be used during callback
-        invokation. If not provided, *this* will be the axis instance.
+        invokation. If not provided, *this* will be the *Dataset* instance.
 
-    Register a callback for events of given type. The axis exports only
-    a single event type *"change"*. See :ref:`axis-events`.
+    Register a callback for events of given type. The *Dataset* exports
+    event types **update**, **change**, **remove**. See :ref:`dataset-events`.
 
 
-..  js:method:: axis.off (type, callback)
+..  js:method:: off (type, callback)
 
     :param string type: event type
     :param function callback: event callback
 
-    Un-register a callback for given event type. See :ref:`axis-events`.
+    Un-register a callback for given event type. See :ref:`dataset-events`.
 

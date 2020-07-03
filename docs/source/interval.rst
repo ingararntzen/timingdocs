@@ -4,11 +4,11 @@
 Interval
 ========================================================================
 
-``Interval`` is used by ``Axis`` and ``Sequencer`` to define the validity of
-objects or values in relation to an *axis*. Intervals describe either a
-continuous *line segment* or a singular *point*. In media, the axis is often
-thought of as a *timeline* and in this context intervals define the *temporal
-validity* of media content.
+``Interval`` is used by ``Dataset`` and ``Sequencer`` to define the
+validity of objects or values in relation to a timeline. Intervals
+describe either a continuous *line segment* or a singular *point*. In
+the context of media, intervals define the *temporal validity* of timed
+media content.
 
 
 .. _interval-definition:
@@ -16,9 +16,10 @@ validity* of media content.
 Definition
 ------------------------------------------------------------------------
 
-Following standard mathematical notation intervals are expressed by two endpoint
-values **low** and **high**, where **low <= high**. Interval endpoints are
-either **open** or **closed**, as indicated with brackets below:
+Following standard mathematical notation intervals are expressed by two
+endpoint values **low** and **high**, where **low <= high**. Interval
+endpoints are either **open** or **closed**, as indicated with brackets
+below:
 
     e.g.: **[a,b]  [a,b)  (a,b]  (a,b)**
 
@@ -77,11 +78,11 @@ How to create intervals.
 Background
 ------------------------------------------------------------------------
 
-This focus on intervals and their mathematical definition may be unexpected, given
-that the topic is media, not mathematics. Still, continuous media experiences
-require *media state* to be well defined along its timeline. For *discrete*
-media content, points and intervals offer a simple and elegant mechanism for
-achieving this goal:
+This focus on intervals and their mathematical definition may be
+unexpected, given that the topic is media, not mathematics. Still,
+continuous media experiences require *media state* to be well defined
+along its timeline. For *discrete* media content, points and intervals
+offer a simple and efficient mechanism for achieving this goal:
 
     At any given point **p** on the timeline, the **media state** at point **p**
     is given by the set of all objects with an interval covering point **p**.
@@ -91,41 +92,41 @@ For example, by using back-to-back intervals **... [a,b), [b,c), ...** one may
 ensure that the entire timeline is covered by media content, and the use of
 brackets removes any ambiguity regarding the media state at interval endpoints.
 
-Importantly, the above definition also makes a solid basis for implementing
-*navigation* and *playback* within the *media state*. For example, jumping from
-one point to another on the timeline requires a quick transition between two
-different media states, possibly involving deactivation of some media objects
-and activation of others. Furthermore, during continuous media playback, state
-transitions must be implemented dynamically, at the correct time and in the
-correct order.
+Importantly, the above definition also makes a solid basis for
+implementing *navigation* and *playback* of the *media state*. For
+example, jumping from one point to another on the timeline requires a
+quick transition between two different media states, i.e. deactivation
+of some media objects and activation of others. Furthermore, during
+continuous media playback, the  mathematical basis simplifies the
+challenges of implementing dynamic state transitions at the correct time
+and in the correct order.
 
 .. _interval-endpoint:
 
 Endpoint Types
 ------------------------------------------------------------------------
 
-
-Intervals are defined as a pair of interval endpoints. The table below shows
-that there are four distinct types of endpoints, and that endpoints have three
-distinct properties
+Intervals are defined as a pair of interval endpoints. The table below
+shows that there are four distinct types of endpoints, and that
+endpoints have three distinct properties
 
 *   **value**: numerical value
-*   **direction**: left or right
-*   **bracket**: closed or open
+*   **bracket-side**: low or high
+*   **bracket-type**: closed or open
 
-======  ============  ======  =========  =======
-symbol  name          value   direction  bracket
-======  ============  ======  =========  =======
-**[a**  left-closed   a       left       closed
-**(a**  left-open     a       left       open
-**a]**  right-closed  a       right      closed
-**a)**  right-open    a       right      open
-======  ============  ======  =========  =======
+======  ============  ======  ============  ============
+symbol  name          value   bracket-side  bracket-type
+======  ============  ======  ============  ============
+**[a**  low-closed    a       low           closed
+**(a**  low-open      a       low           open
+**a]**  high-closed   a       high          closed
+**a)**  high-open     a       high          open
+======  ============  ======  ============  ============
 
-Endpoints are represented as triplets *[value, right, closed]*, where
-the first entry *value* is a number, and the remaining two entries are
-boolean flags indicating if the endpoint is *right* and *closed*.
-
+Endpoints are represented as triplets *[value, bracket-side,
+bracket-type]*, where the first entry *value* is a number, and the
+remaining two entries are boolean flags indicating if the endpoint is
+*bracket-side* *high* and bracket-type* *closed*.
 
 
 ..  _interval-ordering:
@@ -133,11 +134,12 @@ boolean flags indicating if the endpoint is *right* and *closed*.
 Endpoint Ordering
 ------------------------------------------------------------------------
 
-Correct ordering of points and endpoints is important for consistency of media
-state, media navigation and playback. Ordering is straight forward as long as
-endpoint values are different in value. For instance, *2.2]* is ordered before
-*(3.1* because *2.2 < 3.1*. However, in case of equality, sensitivity to
-properties **bracket** and **direction** is required to avoid ambiguities.
+Correct ordering of points and endpoints is important for consistency of
+media state, media navigation and playback. Ordering is straight forward
+as long as endpoint values are different in value. For instance, *2.2]*
+is ordered before *(3.1* because *2.2 < 3.1*. However, in case of
+equality, sensitivity to properties **bracket-side** and
+**bracket-type** is required to avoid ambiguities.
 
 The internal ordering of point **p** and the four endpoint types with value
 **p** is, from left to right:
@@ -146,16 +148,16 @@ The internal ordering of point **p** and the four endpoint types with value
 
 Or, by name:
 
-    *right-open, left-closed, value, right-closed, left-open*
+    *high-open, low-closed, value, high-closed, low-open*
 
-Based on this ordering we may define the comparison operators **leftof(e1, e2)**
-and **rightof(e1, e2)**, where **e1** and **e2** are either endpoints or regular
+Based on this ordering we may define the comparison operators **lt(e1, e2)**
+and **gt(e1, e2)**, where **e1** and **e2** are either endpoints or regular
 points values.
 
-    **leftof(e1, e2)** returns true if **e1** is before **e2**,
+    **lt(e1, e2)** returns true if **e1** is before **e2**,
     and false if **e1** is equal to or after **e2**.
 
-    **rightof(e1, e2)** returns true if **e1** is after **e2**,
+    **gt(e1, e2)** returns true if **e1** is after **e2**,
     and false if **e1** is equal to or before **e2**.
 
 
@@ -178,11 +180,11 @@ interval comparison as follows:
 
 
 The **cmp(a,b)** operator is then defined in terms of simpler operators
-**leftof**, **rightof** and **inside**. The operator **inside(e, i)** evaluates
+**lt**, **gt** and **inside**. The operator **inside(e, i)** evaluates
 to true if a point or an endpoint **e** is inside interval **i**. Interval **i**
 is in turn defined by its two endpoints **i.low** and **i.high**.
 
-    **inside(e, i)** = **!leftof(e, i.low) && !rightof(e, i.high)**
+    **inside(e, i)** = **!lt(e, i.low) && !gt(e, i.high)**
 
 Interval relations OUTSIDE_LEFT, OVERLAP_LEFT, COVERED, EQUAL, COVERS,
 OVERLAP_RIGHT and OUTSIDE_RIGHT are defined as follows:
@@ -190,11 +192,11 @@ OVERLAP_RIGHT and OUTSIDE_RIGHT are defined as follows:
 +---------------+-----------------------------+-------------------------------------------+
 | **cmp(a, b)** | **description**             | **definition**                            |
 +---------------+-----------------------------+-------------------------------------------+
-| OUTSIDE LEFT  | a is outside b on the left  | - a.high *leftof* b.low                   |
+| OUTSIDE LEFT  | a is outside b on the left  | - a.high *lt* b.low                       |
 +---------------+-----------------------------+-------------------------------------------+
 | OVERLAP LEFT  | a overlaps b from left      | - a.high is *inside* b                    |
-|               |                             | - a.low is *leftof* b.low                 |
-|               |                             | - a.high is *leftof* b.high               |
+|               |                             | - a.low is *gt* b.low                     |
+|               |                             | - a.high is *lt* b.high                   |
 +---------------+-----------------------------+-------------------------------------------+
 | COVERED       | a is covered by b           | - a.low *inside* b && a.high *inside* b   |
 |               |                             | - b.low *!inside* a || b.high *!inside* a |
@@ -206,10 +208,10 @@ OVERLAP_RIGHT and OUTSIDE_RIGHT are defined as follows:
 |               |                             | - b.low *inside* a && b.high *inside* a   |
 +---------------+-----------------------------+-------------------------------------------+
 | OVERLAP RIGHT | a overlaps b from right     | - a.low is *inside* b                     |
-|               |                             | - a.low is *rightof* b.low                |
-|               |                             | - a.high is *rightof* b.high              |
+|               |                             | - a.low is *gt* b.low                     |
+|               |                             | - a.high is *gt* b.high                   |
 +---------------+-----------------------------+-------------------------------------------+
-| OUTSIDE RIGHT | a is outside b on the right | - a.low *rightof* b.high                  |
+| OUTSIDE RIGHT | a is outside b on the right | - a.low *gt* b.high                       |
 +---------------+-----------------------------+-------------------------------------------+
 
 
@@ -226,6 +228,36 @@ a       b       cmp(a, b)
 [2,4>   <1,3>   OVERLAP_RIGHT: a overlaps b from right
 [2,4>   <1,2>   OUTSIDE_RIGHT: a is outside b on the right
 ======  ======  ===============================================
+
+
+..  _interval-match:
+
+Interval Match
+------------------------------------------------------------------------
+
+While **cmp(a,b)** gives the relation between a and b, a related
+operation **match(a, b, mask)** returns true if interval a *matches*
+interval b, where **mask** defines what relations are accepted as a
+*match*.
+
+Each Interval relation is associated with a mask value. Multiple
+relations may then be be aggregated by AND'ing the appropriate masks.
+
+=========  ===  ===============
+mask       int  relation
+=========  ===  ===============
+0b1000000   64  OUTSIDE_LEFT
+0b0100000   32  OVERLAP_LEFT
+0b0010000   16  COVERED
+0b0001000    8  EQUALS
+0b0000100    4  COVERS
+0b0000010    2  OVERLAP_RIGHT
+0b0000001    1  OUTSIDE_RIGHT
+=========  ===  ===============
+
+The default value of match **mask** is 62 (0b0111110), which implies
+that all relations except OUTSIDE_LEFT and OUTSIDE_RIGHT are counted
+as a match.
 
 
 

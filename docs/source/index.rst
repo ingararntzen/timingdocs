@@ -12,7 +12,6 @@ Welcome to timingsrc's documentation!
    :caption: Timed Data
 
    install
-   intro
    interval
    dataset
 
