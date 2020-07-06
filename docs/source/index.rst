@@ -6,14 +6,54 @@
 Welcome to timingsrc's documentation!
 ======================================
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Main
+
+   why
+   install
+   quickstart
+   concepts
+   resources
+   faq
+   contributing
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Timing Object
+
+   timingobject
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: HTML5 Media
+
+   mediasync
+   livesync
 
 .. toctree::
    :maxdepth: 2
    :caption: Timed Data
 
-   install
    interval
    dataset
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API
+
+   api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples
+
+   examples
+
+
 
 
 Indices and tables
