@@ -4,7 +4,7 @@
 Cue
 ========================================================================
 
-A **Cue** is a triplet: **(key, interval, data)**, represented as a
+A **Cue** is a triplet **(key, interval, data)** represented by a
 simple **Javascript** object.
 
 ..  code-block:: javascript
@@ -16,26 +16,25 @@ simple **Javascript** object.
     };
 
 
--   The **cue key** is any value or object that may be used as a key with
+-   The **key** property is any value or object that may be used as a key with
     ``Map``. The purpose of cue *key* is to uniquely identify a cue object
-    within a collection of cues (see :ref:`cuecollection`).
+    within a collection of cue objects (see :ref:`cuecollection`).
 
+-   The **interval** property defines the validity of the cue
+    in reference to a numerical dimension, typically a timeline. Intervals
+    represent a contiguous segment on the timeline or
+    singular points (see :ref:`interval`).
 
--   The **cue interval** is an object representing the validity of the cue
-    in reference to a numerical dimension (e.g. timeline). Intervals
-    typically represent a contiguous segment on the timeline, though they may
-    also represent singular points (see :ref:`interval`).
-
-
--   The **cue data** is an application-specific value or object. Typically,
-    properties from cue data are used to create cue key and cue interval
+-   The **data** property is an externally defined value or object associated
+    with the cues. Typically, cue properties **key** and **interval** are
+    derived from values within the cue **data** object
     (see :ref:`cue-creation`).
 
 
 Cue Creation
 ------------------------------------------------------------------------
 
-Cues are typically created as a wrapping around **externally
+Cues are typically created by wrapping **application level
 defined data objects**. These objects often include properties which
 define object uniqueness, within some application specific namespace.
 Property names such as **id**, **key** and **uuid** are often
@@ -64,6 +63,3 @@ objects are often created from these values.
         data: subtitle
     };
 
-
-In circumstance where no object identifiers exists, or no timestamps are
-given, appropriate keys and intervals must be created.
