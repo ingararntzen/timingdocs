@@ -21,23 +21,11 @@ Welcome to timingsrc's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Timing Object
-
-   timingobject
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: HTML5 Media
-
-   mediasync
-   livesync
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Timed Data
+   :caption: Reference
 
    interval
+   cue
+   cuecollection
    dataset
 
 
