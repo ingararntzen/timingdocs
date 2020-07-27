@@ -25,6 +25,7 @@ source venv/bin/activate
 Install sphinx
 
 ```sh
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
@@ -35,14 +36,14 @@ Deactivate Python environment
 deactivate
 ```
 
-# Build
+# build
 
 ```sh
 cd docs
 make html
 ```
 
-# View
+# view
 
 ```sh
 google-chrome docs/build/html/index.html

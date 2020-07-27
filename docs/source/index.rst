@@ -18,16 +18,16 @@ Welcome to timingsrc's documentation!
    faq
    contributing
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Reference
 
+   events
    interval
    cue
    cuecollection
    dataset
-
+   sequencer
 
 .. toctree::
    :maxdepth: 2
@@ -48,5 +48,7 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
+.. 
+   * :ref:`modindex`
+   * :ref:`search`
