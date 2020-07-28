@@ -17,22 +17,26 @@ event consumer
     -   receives **event notification** by **event callback** invocation
 
 
-Subscribe and un-subscribe to events using operations **.on()**
+Event consumers subscribe and un-subscribe to events using operations **.on()**
 and **.off()** of the event provider. For instance, this is how to
 subscribe to and un-subscribe from a *change* event.
 
 
 ..  code-block:: javascript
 
-    // event callback
-    function onchange (eArg, eInfo) {...};
+    // event provider
+    let ep;
 
     // register handler with named event
-    let sub = event_provider.on("change", onchange);
+    let sub = ep.on("change", function (eArg, eInfo) {
+        // handle change event
+    });
 
     // unregister subscription
-    event_provider.off("change", sub);
+    ep.off("change", sub);
 
+
+..  _events-callback
 
 Event Callback
 ------------------------------------------------------------------------
@@ -40,9 +44,7 @@ Event Callback
 Execution
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-When an event is triggered event callbacks are not invoked directly, but
-immediately after the current task has been completed. This is achieved using
-using ``Promise.then()``. This avoids nested invocation of event callbacks which may be confusing and hard to debug. 
+When an event is triggered, the execution of event callbacks are always decoupled using ``Promise.then()``. This avoids nested invocation of event callbacks which may be confusing and hard to debug. 
 
 
 This
@@ -50,11 +52,11 @@ This
 
 It is also possible to control the value of the ``this`` object during
 event callback execution. This is particularly useful when the callback handler is a class method, thus the callback handler must be invoked
-with ``this`` being the class instance. There are at least three ways to
-fix this.
+with ``this`` set to the class instance. There are at least three ways to
+achieve this.
 
 
-One approach is to wrap the event handler in a function, which explicitly invokes the event handler with the correct ``this`` object.
+One approach is to wrap the event handler in a function which explicitly invokes the event handler with the correct ``this`` object.
 
 
 ..  code-block:: javascript
@@ -121,25 +123,19 @@ For instance, this can be used to implement **fire once** semantics.
 ..  code-block:: javascript
 
     // event provider
-    let eventProvider;
-
-    // subscription handle
-    let sub;
-
-    // event callback
-    function onchange() {
-        eventProvider.off("change", sub);
-    }
+    let ep;
 
     // subscribe
-    sub = eventProvider.on("change", onchange);
+    let sub = ep.on("change", function() {
+        ep.off("change", sub);
+    });
 
 
 
-Reusing Callback
+Same Callback
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-It is safe to reuse the same event callback with multiple subscriptions. For
+It is safe to use the same event callback with multiple subscriptions. For
 instance, in some cases it may be practical to handle different event types
 using only one callback. If needed, the *eInfo* parameter of 
 :js:meth:`event_callback` identifies the source of the event, i.e. the event provider and the event name.
@@ -151,8 +147,8 @@ Initial Events
 
 The traditional semantic of events systems is that events convey **state
 changes**. So, when an event consumer subscribes to an event, there will be no
-event notification until the next event occurs. When observing a stateful event
-source, this forces a common pattern:
+event notification until the next event occurs. This yields a common pattern
+when subscribing to *stateful* event providers:
 
 1.  Request a snapshot of the currect state
 2.  Subscribe to future state changes. For each state change, update the snapshot accordingly.
@@ -161,23 +157,24 @@ In code, this might look something like this:
 
 ..  code-block:: javascript
 
-    let event_provider;
+    // event provider
+    let ep;
 
     // refresh UI based on current state
     function refresh (state) {...}
 
     // request initial state
-    let state = event_provider.get_state();
+    let state = ep.get_state();
     refresh(state);
 
     // subscribe to future state changes
-    event_provider.on("change", function(eArg) {
+    ep.on("change", function(eArg) {
         /* 
             update state somehow
             - apply diff from eArg
             - or, fetch the current state
         */
-        state = event_provider.get_state();
+        state = ep.get_state();
         refresh(state);
     });
 
@@ -187,25 +184,26 @@ event callback.
 
 ..  code-block:: javascript
 
-    let event_provider;
+    // event provider
+    let ep;
 
     // refresh UI based on current state
     function refresh (state) {...}
 
     // subscribe to future state changes
-    event_provider.on("change", function(eArg) {
+    ep.on("change", function(eArg) {
         /* 
             update state somehow
             - apply diff from eArg
             - or, fetch the current state
         */
-        state = event_provider.get_state();
+        state = ep.get_state();
         refresh(state);
     });
 
 
 For this to be correct, the event provider must replay the initial state 
-as event notifications, the go on to deliver events as usual. The **initial events** semantic thus simplifies code and shifts initialization complexity from the event consumer to the event provider.
+as event notifications, the go on to deliver events as usual. The **initial events** semantic thus simplifies application code and shifts initialization complexity from the event consumer to the event provider.
 
 The initial events semantic only affects the :js:class:`EventProviderInterface`
 in a few minor details. Primarily, there are some extra events. The *eInfo.init* parameter of :js:func:`event_callback` is ``true`` for initial

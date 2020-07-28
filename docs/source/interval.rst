@@ -4,9 +4,9 @@
 Interval
 ========================================================================
 
-``Interval`` is used by ``Dataset`` and ``Sequencer`` to define the
+:ref:`interval` is used by :ref:`dataset` and :ref:`sequencer` to define the
 validity of objects or values in relation to a timeline. Intervals
-describe either a continuous *line segment* or a singular *point*. In
+describe either a *continuous line segment* or a *singular point*. In
 the context of media, intervals define the *temporal validity* of timed
 media content.
 
@@ -24,7 +24,7 @@ below:
     e.g.: **[a,b]  [a,b)  (a,b]  (a,b)**
 
 If **low == high** the interval is said to represent a *singular* point **[low,
-low]**, or simply **[low]** for short. Endpoints of singular point intervals are
+high]**, or simply **[low]** for short. Endpoints of singular point intervals are
 always closed.
 
 *Infinity* values may be used to create un-bounded intervals. Endpoints with
@@ -67,15 +67,15 @@ How to create intervals.
 
 ..  note::
 
-    Knowledge of how to create intervals is likely sufficient for basic usage of
-    ``Axis`` and ``Sequencer``. The rest of this section serves mainly as a
-    reference for advanced users interested in the details concerning ordering
-    and lookup of intervals on a timeline.
+    Knowing how to create intervals is likely sufficient for basic usage 
+    of :ref:`dataset` and :ref:`sequencer`. The rest of this section provides 
+    a reference for advanced usage and details concerning ordering
+    and comparison of intervals on a timeline.
 
 
 ..  _interval-mediastate:
 
-Background
+Basis for Media State
 ------------------------------------------------------------------------
 
 This focus on intervals and their mathematical definition may be
@@ -111,22 +111,25 @@ shows that there are four distinct types of endpoints, and that
 endpoints have three distinct properties
 
 *   **value**: numerical value
-*   **bracket-side**: low or high
-*   **bracket-type**: closed or open
+*   **bracket-side**: true if high else low
+*   **bracket-type**: true if closed else open
 
 ======  ============  ======  ============  ============
 symbol  name          value   bracket-side  bracket-type
 ======  ============  ======  ============  ============
-**[a**  low-closed    a       low           closed
-**(a**  low-open      a       low           open
-**a]**  high-closed   a       high          closed
-**a)**  high-open     a       high          open
+**[a**  low-closed    a       false         true
+**(a**  low-open      a       false         false
+**a]**  high-closed   a       true          true
+**a)**  high-open     a       true          false
 ======  ============  ======  ============  ============
 
-Endpoints are represented as triplets *[value, bracket-side,
-bracket-type]*, where the first entry *value* is a number, and the
-remaining two entries are boolean flags indicating if the endpoint is
-*bracket-side* *high* and bracket-type* *closed*.
+Singular intervals have two endpoints **[a** and **a]**, even though they only
+have one value. In order to distinguish endpoints of a singular interval, boolean flag **singular** is added to the representation.
+
+Endpoints are therefor represented by a four-tuple 
+
+    *[value, bracket-side, bracket-type, singular]*.
+
 
 
 ..  _interval-ordering:
@@ -138,8 +141,8 @@ Correct ordering of points and endpoints is important for consistency of
 media state, media navigation and playback. Ordering is straight forward
 as long as endpoint values are different in value. For instance, *2.2]*
 is ordered before *(3.1* because *2.2 < 3.1*. However, in case of
-equality, sensitivity to properties **bracket-side** and
-**bracket-type** is required to avoid ambiguities.
+equality, sensitivity to properties **bracket-side**,
+**bracket-type** and **singular** is required to avoid ambiguities.
 
 The internal ordering of point **p** and the four endpoint types with value
 **p** is, from left to right:
@@ -149,6 +152,8 @@ The internal ordering of point **p** and the four endpoint types with value
 Or, by name:
 
     *high-open, low-closed, value, high-closed, low-open*
+
+Endpoints of singular intervals are orders as regular values.
 
 Based on this ordering we may define the comparison operators **lt(e1, e2)**
 and **gt(e1, e2)**, where **e1** and **e2** are either endpoints or regular
@@ -167,7 +172,7 @@ Interval Comparison
 ------------------------------------------------------------------------
 
 Intervals may overlap partly, fully, or not at all. More formally, we define
-interval comparison as follows:
+interval comparison in terms of interval relations:
 
     The operator **cmp(a, b)** compares interval **a** to interval **b**. The
     comparison yields one of seven possible relasions: OUTSIDE_LEFT,
@@ -230,18 +235,16 @@ a       b       cmp(a, b)
 ======  ======  ===============================================
 
 
+
 ..  _interval-match:
 
 Interval Match
 ------------------------------------------------------------------------
 
-While **cmp(a,b)** gives the relation between a and b, a related
-operation **match(a, b, mask)** returns true if interval a *matches*
-interval b, where **mask** defines what relations are accepted as a
-*match*.
-
-Each Interval relation is associated with a mask value. Multiple
-relations may then be be aggregated by AND'ing the appropriate masks.
+The operation **match(a, b, mask)** returns true if interval a *matches*
+interval b. **mask** defines what interval relations are accepted as a
+*match*. Each interval relation is associated with a mask value. Multiple
+relations may then be be aggregated (AND'ed) into the appropriate mask.
 
 =========  ===  ===============
 mask       int  relation
@@ -255,18 +258,16 @@ mask       int  relation
 0b0000001    1  OUTSIDE_RIGHT
 =========  ===  ===============
 
-The default value of match **mask** is 62 (0b0111110), which implies
+The *default* value of match **mask** is 62 (0b0111110), which implies
 that all relations except OUTSIDE_LEFT and OUTSIDE_RIGHT are counted
 as a match.
 
 
 
-Api
+
+API
 ------------------------------------------------------------------------
 
-
-Constructor
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:class:: Interval(low[, high[, lowInclude[, highInclude]]])
 
@@ -295,103 +296,137 @@ Constructor
     If **high** is *Infinity*, **highInclude** is always true
 
 
-Instance Attributes
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-..  js:attribute:: interval.low
+    ..  js:attribute:: low
 
-    float: left endpoint value
+        float: left endpoint value
 
-..  js:attribute:: interval.high
+    ..  js:attribute:: high
 
-    float: right endpoint value
+        float: right endpoint value
 
-..  js:attribute:: interval.lowInclude
+    ..  js:attribute:: lowInclude
 
-    boolean: true if interval is left-closed
+        boolean: true if interval is left-closed
 
-..  js:attribute:: interval.highInclude
+    ..  js:attribute:: highInclude
 
-    boolean: true if interval is right-closed
+        boolean: true if interval is right-closed
 
-..  js:attribute:: interval.singular
+    ..  js:attribute:: singular
 
-    boolean: true if interval is singular
+        boolean: true if interval is singular
 
-..  js:attribute:: interval.finite
+    ..  js:attribute:: finite
 
-    boolean: true if both **low** and **high** are finite values
+        boolean: true if both **low** and **high** are finite values
 
-..  js:attribute:: interval.length
+    ..  js:attribute:: length
 
-    float: interval length (**high-low**)
+        float: interval length (**high-low**)
 
-..  js:attribute:: interval.endpointLow
+    ..  js:attribute:: endpointLow
 
-    endpoint: low endpoing [value, false, lowInclude]
+        endpoint: low endpoint [value, false, lowInclude, singular]
 
-..  js:attribute:: interval.endpointHigh
+    ..  js:attribute:: endpointHigh
 
-    endpoint: low endpoing [value, true, highInclude]
+        endpoint: low endpoint [value, true, highInclude, singular]
 
 
-Instance Methods
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-..  js:method:: interval.toString ()
+    ..  js:method:: toString ()
 
-    :returns string:
+        :returns string:
 
-    Human readable string
+        Human readable string
 
 
-..  js:method:: interval.inside(p)
+    ..  js:method:: covers_endpoint(p)
 
-    :param number p: point
-    :returns boolean: True if point p is inside interval
+        :param number p: point
+        :returns boolean: True if point p is inside interval
 
-    Test if point p is inside interval.
+        Test if point p is inside interval.
+
+        See :ref:`interval-comparison`.
+
+        ..  code-block:: javascript
+
+            let a = new Interval(4, 5)  // [4,5)
+            a.covers_endpoint(4.0)  // true
+            a.covers_endpoint(4.3)  // true
+            a.covers_endpoint(5.0)  // false
+
+    ..  js:method:: equals(other)
+
+        :param Interval other: interval to compare with
+        :returns boolean: true if intervals are equal
+        
+        See :ref:`interval-comparison`.
+
+    ..  js:method:: compare(other)
+
+        :param Interval other: interval to compare with
+        :returns int: comparison relation
+
+        Compares interval to another interval, i.e. **cmp(interval, other)**.
+        See :ref:`interval-comparison`.
+
+        ..  code-block:: javascript
+
+            let a = new Interval(4, 5)  // [4,5)
+            let b = new Interval(4, 5, true, true)  // [4,5]
+            a.compare(b) == Interval.Relation.COVERED  // true
+            b.compare(a) == Interval.Relation.COVERS   // true
 
 
-    ..  code-block:: javascript
+    ..  js:method:: match(other, [mask=62])
 
-        let a = new Interval(4, 5)  // [4,5)
-        a.inside(4.0)  // true
-        a.inside(4.3)  // true
-        a.inside(5.0)  // false
+        :param Interval other: interval to compare with
+        :returns boolean: true if intervals match
 
-..  js:method:: interval.compare(other)
+        Matches two intervals. Mask defines what consitutes a match.
+        See :ref:`interval-match`.
 
-    :param Interval other: interval to compare with
-    :returns int: comparison relation
-
-    Compares interval to another interval, i.e. **cmp(interval, other)**.
 
     ..  code-block:: javascript
 
         let a = new Interval(4, 5)  // [4,5)
         let b = new Interval(4, 5, true, true)  // [4,5]
-        a.compare(b) == Interval.COVERED  // true
-        b.compare(a) == Interval.COVERS   // true
+        a.match(b) // true
+        b.match(a) // true
 
 
+..  js:data:: Interval.Relation
+    
+    ..  code-block:: javascript
 
-Static Attributes
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+        {
+            OUTSIDE_LEFT: 64,   // 0b1000000
+            OVERLAP_LEFT: 32,   // 0b0100000
+            COVERED: 16,        // 0b0010000
+            EQUALS: 8,          // 0b0001000
+            COVERS: 4,          // 0b0000100
+            OVERLAP_RIGHT: 2,   // 0b0000010
+            OUTSIDE_RIGHT: 1    // 0b0000001
+        }
 
-Interval relations available as static variables on the Interval class.
+    ..  js:attribute:: Interval.Relation.OUTSIDE_LEFT
 
-..  js:attribute:: Interval.OUTSIDE_LEFT
-..  js:attribute:: Interval.OVERLAP_LEFT
-..  js:attribute:: Interval.COVERED
-..  js:attribute:: Interval.EQUAL
-..  js:attribute:: Interval.COVERS
-..  js:attribute:: Interval.OVERLAP_RIGHT
-..  js:attribute:: Interval.OUTSIDE_RIGHT
+    ..  js:attribute:: Interval.Relation.OVERLAP_LEFT
+
+    ..  js:attribute:: Interval.Relation.COVERED
+
+    ..  js:attribute:: Interval.Relation.EQUAL
+
+    ..  js:attribute:: Interval.Relation.COVERS
+
+    ..  js:attribute:: Interval.Relation.OVERLAP_RIGHT
+
+    ..  js:attribute:: Interval.Relation.OUTSIDE_RIGHT
 
 
-Static Functions
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  js:function:: Interval.cmpLow (interval_a, interval_b)
 

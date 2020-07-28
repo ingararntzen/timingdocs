@@ -29,6 +29,9 @@ The cue collection interface also defines three events: **update**, **change** a
     :ref:`cuecollection` is *read-only* and does *not* specify any mechanisms for modifying the collection, or cues within the collection. Methods for modification are left for specific implementations of the interface, such as :ref:`dataset` and :ref:`sequencer`.
 
 
+Cue Collection Events
+------------------------------------------------------------------------
+
 Modification Types
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -47,7 +50,7 @@ cue-modifications
     cue (old key), insert cue (new key).
 
 
-Change and Remove Events
+Change and Remove
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Cue collection defines events **change** and **remove**. These events
@@ -180,8 +183,6 @@ Distinguishing between modification types is easy:
     cc.on("remove", function(eArg) {
         console.log("delete")
     });
-
-
 
 
 
