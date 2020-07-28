@@ -6,6 +6,15 @@ Cue Collection Interface
 
 :ref:`cuecollection` specifies an *API* for *accessing* and *observing* a collection of :ref:`cues <cue>`.
 
+..  code-block:: javascript
+
+    let cue = {
+        key: "mykey",
+        interval: new Interval(2.2, 4.31),
+        data: {...}
+    };
+
+
 With regard to cue access, cue collection emulates ``Map``. The cue collection
 interface defines methods **has()**, **get()**, **keys()**, **values()** and
 **entries()**. Also, the number of cues in the collection is exposed by the
@@ -26,7 +35,7 @@ Modification Types
 Cue collections support two types of modifications: *membership-modifications* and *cue-modifications*:
 
 membership-modifications
-    Cues *inserted* into or *deleted* from the collection.
+    Cues *inserted* into collection or cues *deleted* from collection.
 
 cue-modifications
     Cues *modified* (without affecting collection membership). 
@@ -34,15 +43,15 @@ cue-modifications
 ..  note::
 
     The cue key is **immutable** by definition, so modification to the key of 
-    a cue must always be modelled as a *membership-modification* (i.e. delete 
-    cue with old key, insert cue with new key).
+    a cue must always be modelled as a *membership-modification*, i.e. delete 
+    cue (old key), insert cue (new key).
 
 
 Change and Remove Events
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Cue collection defines events **change** and **remove**. These events
-are concerned with a single cue, so if modification of the cue collection affects 4 cues, there will be 4 events.
+report modifications for individual cues.
 
 change
     - *inserted* cues (*membership-modification*)
@@ -58,11 +67,11 @@ remove
     let cc;
 
     cc.on("change", function(eArg) {
-        console.log("change", eArg)
+        console.log("change")
     });
 
     cc.on("remove", function(eArg) {
-        console.log("remove", eArg)
+        console.log("remove")
     });
 
 
@@ -70,7 +79,51 @@ remove
 
     It would also have been possible to expose three events 
     (*insert*, *modify*, *delete*) instead of two events (*change*, *remove*). 
-    However, the latter might be more convenient, as **insert** and **modify** events are frequently handled the same way. On the other hand, if the disticion matters the event argument of the *change* event may be used to tell them apart, see: :ref:`cuecollection-earg`. 
+    However, the latter is often more convenient, as **insert** and **modify** events are frequently handled the same way. On the other hand, if the disticion matters the event argument of the *change* event may be used to tell them apart. See :ref:`cuecollection-earg`. 
+
+
+Update Event
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Cue collection additionally defines a **update** event which delivers
+multiple **change** and **remove** events in a single batch. This is 
+relevant for implementations of cue collections supporting modification of multiple cues in one (atomic) operation. If so, the **update** event makes
+it possible to process the all events in one go. :ref:`dataset` supports 
+batch updates (see :ref:`dataset-batch`) and :ref:`sequencer` may activate 
+multiple cues in one operation.
+
+The event argument **eArg** of the **update** event is simply a list of 
+event arguments for individual **change** and **remove** events.
+
+
+..  code-block:: javascript
+
+    // cue collection
+    let cc;
+
+    cc.on("update", function (eArgList) {
+        eArgList.forEach(function(eArg) {
+            if (eArg.new != undefined) {
+                if (eArg.old != undefined) {
+                    console.log("modify");
+                } else {
+                    console.log("insert");
+                }
+            } else {
+                if (eArg.old != undefined) {
+                    console.log("delete");
+                } else {
+                    console.log("noop");
+                }
+            }
+        });
+    });
+
+
+..  note::
+
+    Cue collection may emit **update** events where both  **eArg.new** and
+    **eArg.old** are undefined, i.e. **noop** events.
 
 
 ..  _cuecollection-earg:
@@ -78,7 +131,7 @@ remove
 Event Argument
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Cue collection events provide an event argument (**eArg**) describing
+Cue collection events provide an event argument **eArg** describing
 the modification of of a single cue. The event argument is a simple
 object with properties **key**, **new** and **old**:
 
@@ -96,8 +149,8 @@ new
     The cue *after* modification, or undefined if cue was deleted.
 
 
-This describe values for properties **eArg.old** and **eArg.new**
-may assume for different events.
+This table show values **eArg.old** and **eArg.new**
+may assume for different events and modification types.
 
 
 ============  ======  ==========  ==========
@@ -129,48 +182,6 @@ Distinguishing between modification types is easy:
     });
 
 
-Update Event
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-Cue collection additionally defines an **update** event which delivers
-multiple **change** and **remove** events in a single batch. This is 
-relevant for implementations of cue collections which support modification of multiple cues in one (atomic) operation. If so, the **update** event makes
-it possible to process the all events in one go. :ref:`dataset` support 
-batch updates (see :ref:`dataset-batch`), and :ref:`sequencer` may activate 
-multiple cues in one operation.
-
-The **eArg** or the **update** event is simply a list of **eArgs** for
-individual **change** and **remove** events.
-
-
-..  code-block:: javascript
-
-    // cue collection
-    let cc;
-
-    cc.on("update", function (eArgList) {
-        eArgList.forEach(function(eArg) {
-            if (eArg.new != undefined) {
-                if (eArg.old != undefined) {
-                    console.log("modify");
-                } else {
-                    console.log("insert");
-                }
-            } else {
-                if (eArg.old != undefined) {
-                    console.log("delete");
-                } else {
-                    console.log("noop");
-                }
-            }
-        });
-    });
-
-
-..  note::
-
-    Implementations of cue collection may emit **update** events where both 
-    **eArg.new** and **eArg.old** are undefined, i.e. **noop** events.
 
 
 
