@@ -10,11 +10,12 @@ Welcome to timingsrc's documentation!
    :maxdepth: 2
    :caption: Main
 
-   why
    install
+
+.. 
+
+   why
    quickstart
-   concepts
-   resources
    faq
    contributing
 
@@ -22,18 +23,13 @@ Welcome to timingsrc's documentation!
    :maxdepth: 2
    :caption: Reference
 
-   events
    interval
    cue
+   events
    cuecollection
    dataset
    sequencer
 
-.. toctree::
-   :maxdepth: 2
-   :caption: API
-
-   api
 
 .. toctree::
    :maxdepth: 2
