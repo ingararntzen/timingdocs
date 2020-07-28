@@ -36,7 +36,7 @@ subscribe to and un-subscribe from a *change* event.
     ep.off("change", sub);
 
 
-..  _events-callback
+..  _events-callback:
 
 Event Callback
 ------------------------------------------------------------------------
