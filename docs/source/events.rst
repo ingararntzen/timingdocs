@@ -142,6 +142,8 @@ using only one callback. If needed, the *eInfo* parameter of
 
 
 
+..  _events-init:
+
 Initial Events
 ------------------------------------------------------------------------
 
