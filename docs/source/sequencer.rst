@@ -5,39 +5,40 @@ Sequencer
 ========================================================================
 
 The :ref:`sequencer` implements precisely timed *playback* of *timed data*.
-Playback is orchestrated using one or two **timingobjects**. 
+Playback is controlled using one or two **timingobjects**. 
 Timed data is represented as :ref:`cues <cue>` in a :ref:`dataset`.
 
 
 Definition
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-*	The sequencer is a :ref:`Cue Collection <cuecollection>`, invariably a 
-	**subset** of its source cue collection, i.e. the :ref:`dataset`. 
+*   The sequencer is a :ref:`Cue Collection <cuecollection>`, a 
+    **subset** of its source cue collection, the :ref:`dataset`. 
 
-*	The sequencer invariably holds the subset of **active cues** from 
-	the :ref:`dataset`.
+*   At any time, the sequencer holds the subset of dataset cues that are 
+    **active** cues.
 
-*	The sequencer emits **change**, **remove** and **update** events 
-	(see :ref:`cuecollection`) as cues are **activated** or **deactivated**.
+*   The sequencer emits **change**, **remove** and **update** events 
+    (see: :ref:`cuecollection`) as cues are **activated** or **deactivated**.
 
-Active Cues
-	Cues are **active** or **inactive** based on the playback position, and how it compares to the :ref:`cue interval<cue>`, which defines the **validity** of the cue on the timeline. The sequencer may well be an empty collection, if no cues are **active** at a particular time. Any change to the cue collection of the source dataset might cause changes to the subset of active cues.
+Active cues
+    Cues are **active** or **inactive** based on the playback position, and how it compares to the :ref:`cue interval<cue>`, which defines the **validity** of the cue on the timeline. The sequencer may well be an empty collection, if no cues are **active** at a particular time. Any change to the cue collection of the source dataset might cause changes to the subset of active cues.
 
 Timed playback
-	As *playback position* gradually changes during timed playback, cues must be activated or deactivated at the correct time. The sequencer dynamically manipulates its own cue collection so that it always represents the subset of active cues correctly. **change** and **remove** events (see :ref:`cuecollection`) correspond to timely activation and deactivation of cues.
+    As *playback position* gradually changes during timed playback, cues must be activated or deactivated at the correct time. The sequencer dynamically manipulates its own cue collection so that it always represents the subset of active cues correctly. **change** and **remove** events (see: :ref:`cuecollection`) correspond to timely activation and deactivation of cues.
 
-Flexible timeline navigation and playback
-	Sequencers have full support for all types of navigation and playback allowed by timing objects. This includes jumping on the timeline, any playback speed, backwards playback, and even accelerated playback. For instance, jumping on the timeline might cause all active cues to be deactivated, and the a new set of cues to be activated.
+Timeline navigation and playback
+    Sequencers have full support for all types of navigation and playback allowed by timing objects. This includes jumping on the timeline, setting the playback speed, backwards playback and even accelerated playback. For instance, jumping on the timeline might cause all active cues to be deactivated, and a new set of cues to be activated.
 
 Dynamic dataset
-	Sequencers support dynamic changes to its source :ref:`dataset`, at any time, even during playback. Cues added to the dataset will
-	be activated immediately if they should be active. Cues 
-	removed from the dataset will be deactivated, if they were active. 
-	Modified cues will stay active, stay inactive, be activated or be deactived, whichever is appropriate.
+    Sequencers support dynamic changes to its source :ref:`dataset`, at any time, even during playback. Cues added to the dataset will
+    be activated immediately if they should be active. Cues 
+    removed from the dataset will be deactivated, if they were active. 
+    Modified cues will stay active, stay inactive, be activated or be deactived, whichever is appropriate.
 
-A sequence of timed events
-	The **change** and **remove** events of the sequencer gives access to the full storyline (i.e. sequence of transitions) for the set of active cues. This also includes initialization. Due to the :ref:`events-init` semantics of the **change** event, the **change** event will initially emit cues that are already active, when the subscription is made. After that **change** and **remove** events will communicate all subsequent changes. 
+Sequence of timed events
+    The **change** and **remove** events of the sequencer provide the full storyline (i.e. sequence of transitions) for the set of active cues. This includes initialization. Due to the :ref:`events-init` semantics of the **change** event, the **change** event will initially emit cues that are already active - immediately after the subscription is made. After that **change** and **remove** events will communicate all subsequent changes, including changes to cue data.
+
  
 
 
@@ -51,12 +52,9 @@ This makes for a very attractive programming model, where precisely timed
 playback-visualizations of timed data can be achieved simply by
 implementing handlers for sequencer **change** and **remove** events.
 
-As such, the sequencer encapsulates all the timing-related complexity, thereby:
+As such, the sequencer encapsulates all the timing-related complexity, thereby transforming the challenge of *time-driven visualization* into a challenge of *data-driven visualization*. Of course, reactive data visualization is already a buzzing domain with mature practices and a rich set of tools and framworks to go with them. So, the sequencer is essentially bridging the gap; allowing timed visualizations to reap the fruits of modern data visualation tools, or conversely, bringing consistent visualization of timed data into the realm of data visualization.
 
-	transforming the challenge of *timed visualization* into a challenge of *reactive data visualization*
-
-Of course, reactive data visualization is already a buzzing domain with mature practices and a rich set of tools and framworks to go with them. So, the sequencer is essentially bridging the gap; allowing timed visualizations to reap the fruits of modern data visualation tools, or conversely, bringing
-consistent visualization of timed data into the realm of data visualization.
+    from time-driven visualization to data-driven visualization
 
 
 Example
@@ -67,71 +65,149 @@ a Web page (without the need for a video).
 
 ..  code-block:: javascript
 
-	/*
-		Simplistic subtitle playback
+    /*
+        Simplistic subtitle playback
 
-		assume dataset filled with subtitle cues
+        assume dataset filled with subtitle cues
 
-		let subtitle = {
+        let subtitle = {
             id: "1234",
             start: 123.70,
             end: 128.21,
             text: "This is a subtitle"
         }
 
-		let cue = {
-			key: subtitle.key,
-			interval: new Interval(subtitle.start, subtitle.end),
-			data: subtitle
+        let cue = {
+            key: subtitle.key,
+            interval: new Interval(subtitle.start, subtitle.end),
+            data: subtitle
         }
-	*/
+    */
 
-	// dataset
-	let ds = new Dataset();
-	// timing object
-	let to = new TimingObject();
-	// sequencer
-	let s = new Sequencer(ds, to);
+    // dataset
+    let ds = new Dataset();
+    // timing object
+    let to = new TimingObject();
+    // sequencer
+    let s = new Sequencer(ds, to);
 
-	// subtitle DOM element 
-	let elem = document.getElementById("subtitle");
+    // subtitle DOM element 
+    let elem = document.getElementById("subtitle");
 
-	s.on("change", function (eArg) {
-		// refresh activated subtitle
-		elem.innerHTML = eArg.new.data.text;
-	});
+    s.on("change", function (eArg) {
+        // refresh activated subtitle
+        elem.innerHTML = eArg.new.data.text;
+    });
 
-	s.on("remove", function (eArg) {
-		// remove deactivated subtitle
-		elem.innerHTML = "";
-	});
+    s.on("remove", function (eArg) {
+        // remove deactivated subtitle
+        elem.innerHTML = "";
+    });
 
-	// ready for playback !
-	to.update({velocity:1});
+    // ready for playback !
+    to.update({velocity:1});
 
 
-..  _sequencer-single:
+..  _sequencer-modes:
 
-Single Sequencer
+
+Sequencer Modes
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-..  _sequencer-double:
+The sequencer supports two distinct modes of operation, with distinct
+definitions **active** cues.
 
-Double Sequencer
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Point Mode
+    Pointmode means that sequencing is based on a *moving sequencing point*.
+
+    In point mode, the sequencer is controlled by a single timing object and uses the *position* of the timing object as *sequencing point*. 
+
+    In point mode, a cue is **active** whenever the *sequencing point* is 
+    **inside** the **cue interval**. 
+
+Interval Mode
+    Interval mode means that sequencing is based on a *moving sequencing interval*. 
+
+    In interval mode, the sequencer is controlled by two timing objects, and
+    the sequencer uses the *positions* of the two timing objects to form the *sequencing interval*. 
+
+    In interval mode, a cue is **active** whenever at least one point **inside** the *sequencing interval* is also **inside** the **cue interval**.  
 
 
+*Point mode* sequencing is the traditional approach when sequencing timed data based on a media clock. *Interval mode* is useful for playback of sliding windows of timed data. *Interval mode* sequencing can for instance be used in conjuction with *point mode* sequencing, to prefetch timed data just-in-time for *point mode* sequenced rendering.
 
+..  note::
+
+    Illustrations!
+
+
+The sequencer may be initialized with one or two timing objects, yielding *point-mode* or *interval mode* operation.
+
+
+..  code-block:: javascript
+
+    // dataset
+    let ds;
+
+    // timing object
+    let to = new TimingObject();
+
+    // skewconverter
+    // creaates timing object 10.0 ahead of to 
+    let to_skewed = new SkewConverter(to, 10.0);
+
+    // point mode sequencer
+    let s1 = new Sequencer(ds, to);
+
+    // interval mode sequencer
+    let s2 = new Sequencer(ds, to, to_skewed);
 
 
 API
 ------------------------------------------------------------------------
 
-..  js:class:: Sequencer(dataset, timingObject_A, timingObject_B)
+..  js:class:: Sequencer(dataset, to_A[, to_B])
 
-	Creates a sequencer associated with a dataset.
+    :param Dataset dataset: source dataset of sequencer
 
-	..	js:attribute:: dataset
+    :param TimingObject to_A: first timing object
 
-		Dataset used by sequencer.
+    :param TimingObject to_B: optional second timing object
 
+    Creates a sequencer associated with a dataset.
+
+    ..  js:attribute:: dataset
+
+        Dataset used by sequencer.
+
+    ..  js:attribute:: size
+
+        see :js:meth:`CueCollectionInterface.size`
+
+    ..  js:method:: has(key)
+
+        see :js:meth:`CueCollectionInterface.has`
+
+    ..  js:method:: get(key)
+
+        see :js:meth:`CueCollectionInterface.get`
+
+    ..  js:method:: keys()
+
+        see :js:meth:`CueCollectionInterface.keys`
+
+    ..  js:method:: values()
+
+        see :js:meth:`CueCollectionInterface.values`
+
+    ..  js:method:: entries()
+
+        see :js:meth:`CueCollectionInterface.entries`
+
+    ..  js:method:: on (name, callback[, options])
+
+        see :js:meth:`EventProviderInterface.on`
+
+    ..  js:method:: off (name, subscription)
+
+        see :js:meth:`EventProviderInterface.off`
