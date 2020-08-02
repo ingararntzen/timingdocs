@@ -5,20 +5,20 @@ Sequencer
 ========================================================================
 
 The :ref:`sequencer` implements precisely timed *playback* of *timed data*.
-Playback is controlled using one or two **timingobjects**. 
+Playback is controlled using one or two :ref:`TimingObjects <timingobject>`.
 Timed data is represented as :ref:`cues <cue>` in a :ref:`dataset`.
 
 
 Definition
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-*   The sequencer is a :ref:`Cue Collection <cuecollection>`, a 
-    **subset** of its source cue collection, the :ref:`dataset`. 
+*   The sequencer is a :ref:`Cue Collection <cuecollection>`, a
+    **subset** of its source cue collection, the :ref:`dataset`.
 
-*   At any time, the sequencer holds the subset of dataset cues that are 
+*   At any time, the sequencer holds the subset of dataset cues that are
     **active** cues.
 
-*   The sequencer emits **change**, **remove** and **update** events 
+*   The sequencer emits **change**, **remove** and **update** events
     (see: :ref:`cuecollection`) as cues are **activated** or **deactivated**.
 
 Active cues
@@ -32,21 +32,21 @@ Timeline navigation and playback
 
 Dynamic dataset
     Sequencers support dynamic changes to its source :ref:`dataset`, at any time, even during playback. Cues added to the dataset will
-    be activated immediately if they should be active. Cues 
-    removed from the dataset will be deactivated, if they were active. 
+    be activated immediately if they should be active. Cues
+    removed from the dataset will be deactivated, if they were active.
     Modified cues will stay active, stay inactive, be activated or be deactived, whichever is appropriate.
 
 Sequence of timed events
     The **change** and **remove** events of the sequencer provide the full storyline (i.e. sequence of transitions) for the set of active cues. This includes initialization. Due to the :ref:`events-init` semantics of the **change** event, the **change** event will initially emit cues that are already active - immediately after the subscription is made. After that **change** and **remove** events will communicate all subsequent changes, including changes to cue data.
 
- 
+
 
 
 Programming Model
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-From the perspective of the programmer, the sequencer is simply a 
-**dynamic, read-only view** into a :ref:`dataset` of cues. The view can always be trusted to represent the set of active cues correctly, and to communicate all future changes as events, at the correct time. 
+From the perspective of the programmer, the sequencer is simply a
+**dynamic, read-only view** into a :ref:`dataset` of cues. The view can always be trusted to represent the set of active cues correctly, and to communicate all future changes as events, at the correct time.
 
 This makes for a very attractive programming model, where precisely timed
 playback-visualizations of timed data can be achieved simply by
@@ -91,7 +91,7 @@ a Web page (without the need for a video).
     // sequencer
     let s = new Sequencer(ds, to);
 
-    // subtitle DOM element 
+    // subtitle DOM element
     let elem = document.getElementById("subtitle");
 
     s.on("change", function (eArg) {
@@ -120,18 +120,18 @@ definitions **active** cues.
 Point Mode
     Pointmode means that sequencing is based on a *moving sequencing point*.
 
-    In point mode, the sequencer is controlled by a single timing object and uses the *position* of the timing object as *sequencing point*. 
+    In point mode, the sequencer is controlled by a single timing object and uses the *position* of the timing object as *sequencing point*.
 
-    In point mode, a cue is **active** whenever the *sequencing point* is 
-    **inside** the **cue interval**. 
+    In point mode, a cue is **active** whenever the *sequencing point* is
+    **inside** the **cue interval**.
 
 Interval Mode
-    Interval mode means that sequencing is based on a *moving sequencing interval*. 
+    Interval mode means that sequencing is based on a *moving sequencing interval*.
 
     In interval mode, the sequencer is controlled by two timing objects, and
-    the sequencer uses the *positions* of the two timing objects to form the *sequencing interval*. 
+    the sequencer uses the *positions* of the two timing objects to form the *sequencing interval*.
 
-    In interval mode, a cue is **active** whenever at least one point **inside** the *sequencing interval* is also **inside** the **cue interval**.  
+    In interval mode, a cue is **active** whenever at least one point **inside** the *sequencing interval* is also **inside** the **cue interval**.
 
 
 *Point mode* sequencing is the traditional approach when sequencing timed data based on a media clock. *Interval mode* is useful for playback of sliding windows of timed data. *Interval mode* sequencing can for instance be used in conjuction with *point mode* sequencing, to prefetch timed data just-in-time for *point mode* sequenced rendering.
@@ -153,7 +153,7 @@ The sequencer may be initialized with one or two timing objects, yielding *point
     let to = new TimingObject();
 
     // skewconverter
-    // creaates timing object 10.0 ahead of to 
+    // creaates timing object 10.0 ahead of to
     let to_skewed = new SkewConverter(to, 10.0);
 
     // point mode sequencer

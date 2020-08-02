@@ -11,11 +11,10 @@ Welcome to timingsrc's documentation!
    :caption: Main
 
    install
-
-.. 
+   quickstart
+..
 
    why
-   quickstart
    faq
    contributing
 
@@ -28,6 +27,7 @@ Welcome to timingsrc's documentation!
    events
    cuecollection
    dataset
+   timingobject
    sequencer
 
 
@@ -45,6 +45,6 @@ Indices and tables
 
 * :ref:`genindex`
 
-.. 
+..
    * :ref:`modindex`
    * :ref:`search`
