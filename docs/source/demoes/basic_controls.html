@@ -1,0 +1,77 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+        <script type="module">
+            import {TimingObject} from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+
+            // create a timing object
+            const to = new TimingObject();
+
+            /*
+                Visualize Timing Object Position
+            */
+            const pos_elem = document.getElementById("position");
+            to.on("timeupdate", function() {
+                // refresh position
+                pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
+            });
+
+
+            /*
+                Alternatively, custom frequency sampler.
+
+            function make_sampler(timingObject, sample_callback, interval) {
+                let timeout;
+                let sub = timingObject.on("change", function () {
+                    // sample every time change event is emitted
+                    sample_callback();
+                    // start or stop periodic sampling
+                    let v = timingObject.vector;
+                    let moving = v.velocity != 0 || v.acceleration != 0;
+                    if (moving && timeout === undefined) {
+                        // start sampling
+                        timeout = setInterval(sample_callback, interval);
+                    } else if (!moving && timeout !== undefined) {
+                        // stop sampling
+                        clearTimeout(timeout);
+                        timeout = undefined;
+                    }
+                });
+
+                return {
+                    cancel: function() {
+                        timingObject.off("change", sub);
+                    }
+                }
+            }
+
+            // refresh position every 100ms
+            let sampler = make_sampler(to, function() {
+                pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
+            }, 100);
+
+            */
+
+            const playBtn = document.getElementById("play");
+            const pauseBtn = document.getElementById("pause");
+
+            playBtn.onclick = function () {
+                to.update({velocity:1});
+            };
+
+            pauseBtn.onclick = function () {
+                to.update({velocity:0});
+            };
+
+        </script>
+    </head>
+    <body>
+        <div>
+            Timing Object Position: <span id="position"></span>
+        </div>
+        <div>
+            <button id="play">Play</button>
+            <button id="pause">Pause</button>
+        </div>
+    </body>
+</html>

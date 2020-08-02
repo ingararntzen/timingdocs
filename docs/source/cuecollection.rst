@@ -41,12 +41,12 @@ membership-modifications
     Cues *inserted* into collection or cues *deleted* from collection.
 
 cue-modifications
-    Cues *modified* (without affecting collection membership). 
+    Cues *modified* (without affecting collection membership).
 
 ..  note::
 
-    The cue key is **immutable** by definition, so modification to the key of 
-    a cue must always be modelled as a *membership-modification*, i.e. delete 
+    The cue key is **immutable** by definition, so modification to the key of
+    a cue must always be modelled as a *membership-modification*, i.e. delete
     cue (old key), insert cue (new key).
 
 
@@ -80,22 +80,22 @@ remove
 
 ..  note::
 
-    It would also have been possible to expose three events 
-    (*insert*, *modify*, *delete*) instead of two events (*change*, *remove*). 
-    However, the latter is often more convenient, as **insert** and **modify** events are frequently handled the same way. On the other hand, if the disticion matters the event argument of the *change* event may be used to tell them apart. See :ref:`cuecollection-earg`. 
+    It would also have been possible to expose three events
+    (*insert*, *modify*, *delete*) instead of two events (*change*, *remove*).
+    However, the latter is often more convenient, as **insert** and **modify** events are frequently handled the same way. On the other hand, if the disticion matters the event argument of the *change* event may be used to tell them apart. See :ref:`cuecollection-earg`.
 
 
-Update Event
+Batch Event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Cue collection additionally defines a **update** event which delivers
-multiple **change** and **remove** events in a single batch. This is 
-relevant for implementations of cue collections supporting modification of multiple cues in one (atomic) operation. If so, the **update** event makes
-it possible to process the all events in one go. :ref:`dataset` supports 
-batch updates (see :ref:`dataset-batch`) and :ref:`sequencer` may activate 
+Cue collection additionally defines a **batch** event which delivers
+multiple **change** and **remove** events in a single batch. This is
+relevant for implementations of cue collections supporting modification of multiple cues in one (atomic) operation. If so, the **batch** event makes
+it possible to process the all events in one go. :ref:`dataset` supports
+batch updates (see :ref:`dataset-batch`) and :ref:`sequencer` may activate
 multiple cues in one operation.
 
-The event argument **eArg** of the **update** event is simply a list of 
+The event argument **eArg** of the **batch** event is simply a list of
 event arguments for individual **change** and **remove** events.
 
 
@@ -125,7 +125,7 @@ event arguments for individual **change** and **remove** events.
 
 ..  note::
 
-    Cue collection may emit **update** events where both  **eArg.new** and
+    Cue collection may emit a **batch** event including event arguments where both  **eArg.new** and
     **eArg.old** are undefined, i.e. **noop** events.
 
 
@@ -196,7 +196,7 @@ API
 
         Number of cues managed by cue collection
 
-        :returns int: 
+        :returns int:
 
 
 

@@ -10,7 +10,8 @@ Timed data is represented as :ref:`cues <cue>` in a :ref:`dataset`.
 
 
 Definition
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+------------------------------------------------------------------------
+
 
 *   The sequencer is a :ref:`Cue Collection <cuecollection>`, a
     **subset** of its source cue collection, the :ref:`dataset`.
@@ -18,17 +19,19 @@ Definition
 *   At any time, the sequencer holds the subset of dataset cues that are
     **active** cues.
 
-*   The sequencer emits **change**, **remove** and **update** events
+*   The sequencer emits **change**, **remove** and **batch** events
     (see: :ref:`cuecollection`) as cues are **activated** or **deactivated**.
 
 Active cues
     Cues are **active** or **inactive** based on the playback position, and how it compares to the :ref:`cue interval<cue>`, which defines the **validity** of the cue on the timeline. The sequencer may well be an empty collection, if no cues are **active** at a particular time. Any change to the cue collection of the source dataset might cause changes to the subset of active cues.
 
-Timed playback
-    As *playback position* gradually changes during timed playback, cues must be activated or deactivated at the correct time. The sequencer dynamically manipulates its own cue collection so that it always represents the subset of active cues correctly. **change** and **remove** events (see: :ref:`cuecollection`) correspond to timely activation and deactivation of cues.
+Precisely timed events
+    As *playback position* gradually changes during timed playback, cues must be activated or deactivated at the correct time. The sequencer dynamically manipulates its own cue collection and
+    precisely schedules **change** and **remove** events (see: :ref:`cuecollection`) for activation
+    and deactivateion of cues.
 
-Timeline navigation and playback
-    Sequencers have full support for all types of navigation and playback allowed by timing objects. This includes jumping on the timeline, setting the playback speed, backwards playback and even accelerated playback. For instance, jumping on the timeline might cause all active cues to be deactivated, and a new set of cues to be activated.
+Flexible timeline navigation and playback
+    Sequencers have full support for all kinds of navigation and playback allowed by timing objects. This includes jumping on the timeline, setting the playback speed, backwards playback and even accelerated playback. For instance, jumping on the timeline might cause all active cues to be deactivated, and a new set of cues to be activated.
 
 Dynamic dataset
     Sequencers support dynamic changes to its source :ref:`dataset`, at any time, even during playback. Cues added to the dataset will
@@ -43,7 +46,8 @@ Sequence of timed events
 
 
 Programming Model
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+------------------------------------------------------------------------
+
 
 From the perspective of the programmer, the sequencer is simply a
 **dynamic, read-only view** into a :ref:`dataset` of cues. The view can always be trusted to represent the set of active cues correctly, and to communicate all future changes as events, at the correct time.
@@ -112,7 +116,8 @@ a Web page (without the need for a video).
 
 
 Sequencer Modes
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+------------------------------------------------------------------------
+
 
 The sequencer supports two distinct modes of operation, with distinct
 definitions **active** cues.

@@ -7,11 +7,13 @@ Welcome to timingsrc's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Main
 
    install
    quickstart
+   howto
+
 ..
 
    why
@@ -19,7 +21,7 @@ Welcome to timingsrc's documentation!
    contributing
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Reference
 
    interval
@@ -30,12 +32,6 @@ Welcome to timingsrc's documentation!
    timingobject
    sequencer
 
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Examples
-
-   examples
 
 
 
