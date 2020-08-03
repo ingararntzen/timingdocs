@@ -168,6 +168,28 @@ The sequencer may be initialized with one or two timing objects, yielding *point
     let s2 = new Sequencer(ds, to, to_skewed);
 
 
+Cue ordering
+------------------------------------------------------------------------
+
+During playback, if multiple cues have the same endpoint values, their
+events will also be due at the same time. In this case, cue ordering
+is based on :ref:`interval-ordering`. Endpoint ordering is used for
+forward movement, or no movement. For backward movement, this ordering is reversed.
+
+Changes in the dataset may also cause events to be emitted. For instance,
+if new cues are inserted into the dataset, some of them might immediately
+become active. In this case, cue ordering
+is still based on :ref:`interval-ordering` and movement direction.
+For forward movement or no movement, cues are ordered by
+their *low* endpoints. For backward movement, cues are ordered
+by their *high* endpoints, and also reversed.
+
+By default, accessors **keys()**, **values()** and **entries()** do not provide any
+guarantees with respect to cue ordering. However, :js:meth:`Sequencer.sortCues`
+is sensitive to movement direction and may be used to sorts a list of cues, .
+
+
+
 API
 ------------------------------------------------------------------------
 
@@ -216,3 +238,11 @@ API
     ..  js:method:: off (name, subscription)
 
         see :js:meth:`EventProviderInterface.off`
+
+    .. js:method:: sortCues (cues)
+
+        :param Array cues: list of cues
+        :returns Array cues: sorted list of cues
+
+        Sort a list of cues based on the current movement of
+        the sequencer.

@@ -125,43 +125,17 @@ operations (e.g. **lookup**) provide direct access to managed cues.
 
     If managed cue objects are modified by external code, no guarantees
     can be given concerning functional correctness. Note
-    also that the dataset does not implement any protection in this regard.
+    also that the dataset does not implement any protection against
+    cue modification.
 
-    In particular, programmers must avoid the pitfall of trying to
-    modify a cue (or its data part), by directly modifying the
-    existing cue ahead of resubmitting it to **update**.
-    Always create a new cue object with the desired state, then **update**.
+    The dataset will however throw an exception if a currently managed cue
+    object is used as cue argument with the **update** operation.
 
     Rules of thumb:
 
-    -   never *reuse* previously defined cue objects as arguments to **update**.
-    -   avoid keeping variables referencing individual cue objects.
-
-
-    ..  code-block:: javascript
-
-        // insert
-        let cue = {...};
-        ds.update(cue);
-
-        // YES ! - modify by creating new cue object
-        ds.update({
-            key: cue.key,
-            interval: new timingsrc.Interval(4, 6),
-            data: cue.data
-        });
-
-        // NO !!! - modification of managed cue ahead of update
-        cue.interval = new Interval(4, 6);
-        ds.update(cue);
-
-        // YES ! - delete by creating a new cue object
-        ds.update({key:cue.key});
-
-        // NO !!! - modification of managed cue ahead of update
-        delete cue.interval;
-        delete cue.data;
-        ds.update(cue);
+    -   always create new objects as cue arguments
+    -   never *reuse* previously defined cue objects as arguments to **update**
+    -   avoid keeping variables referencing cue objects.
 
     Unwanted modifications of managed cues may also occur when *cue.data*
     references objects that are subject to in-place modification by
