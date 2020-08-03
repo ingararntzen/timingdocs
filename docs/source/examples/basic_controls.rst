@@ -34,6 +34,8 @@ of the the timingobject, and two buttons **pause** and **play**.
             <div>
                 <button id="play">Play</button>
                 <button id="pause">Pause</button>
+                <button id="reverse">Reverse</button>
+                <button id="reset">Reset</button>
             </div>
         </body>
     </html>
@@ -42,10 +44,8 @@ of the the timingobject, and two buttons **pause** and **play**.
 Step 2: Render the position of the timing object
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-During playback the timingobject position is continuously increasing. To
-visualize this, sample the position at an appropriate frequency.
-The quickest way is to this is to use the **timeupdate** event which
-fires at 5Hz (every 200 ms), whenever the timingobject is not paused.
+During playback the timingobject position is continuously increasing (or decreasing). To visualize this, sample the position at an appropriate frequency. The quick way is to this is to use the **timeupdate** event of
+the timing object, which emits at 5Hz (every 200 ms), as long as the timingobject is not paused.
 
 
 ..  code-block:: javascript
@@ -63,34 +63,51 @@ The sampler is not active when the timingobject is paused.
 
 ..  code-block:: javascript
 
+    class TimingObjectSampler {
 
-    function make_sampler(timingObject, sample_callback, interval) {
-        let timeout;
-        let sub = timingObject.on("change", function () {
+        constructor(timingObject, callback, milliseconds) {
+            this._to = timingObject;
+            this._callback = callback;
+            this._ms = milliseconds;
+            this._timeout = undefined;
+            this._sub = this._to.on("change", 
+                                    this._onchange.bind(this));
+        }
+
+        _start_sampling() {
+            this._timeout = setInterval(this._callback, this._ms);
+        }
+
+        _stop_sampling() {
+            clearTimeout(this.timeout);
+            this._timeout = undefined;
+        }
+
+        _onchange () {
             // sample every time change event is emitted
-            sample_callback();
+            this._callback();
             // start or stop periodic sampling
-            let v = timingObject.vector;
+            let v = this._to.vector;
             let moving = v.velocity != 0 || v.acceleration != 0;
-            if (moving && timeout === undefined) {
-                // start sampling
-                timeout = setInterval(sample_callback, interval);
-            } else if (!moving && timeout !== undefined) {
-                // stop sampling
-                clearTimeout(timeout);
-                timeout = undefined;
+            if (moving && this._timeout === undefined) {
+                this._start_sampling();
+            } else if (!moving && this._timeout !== undefined) {
+                this._stop_sampling();
             }
-        });
+        };
 
-        return {
-            cancel: function() {
-                timingObject.off("change", sub);
+        /* 
+            terminate sampler 
+        */
+        terminate () {
+            this._to.off("change", this._sub);
+            if (this._timeout) {
+                this._stop_sampling();
             }
         }
     }
 
-    // refresh position every 100ms
-    let sampler = make_sampler(to, function() {
+    let sampler = new TimingObjectSampler(to, function() {
         pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
     }, 100);
 
@@ -100,23 +117,32 @@ Step 3: Connect play and pause buttons
 
 ..  code-block:: javascript
 
-    const playBtn = document.getElementById("play");
-    const pauseBtn = document.getElementById("pause");
-
-    playBtn.onclick = function () {
+    document.getElementById("play").onclick = function () {
         to.update({velocity:1});
     };
-
-    pauseBtn.onclick = function () {
+    document.getElementById("pause").onclick = function () {
         to.update({velocity:0});
+    };
+    document.getElementById("reverse").onclick = function () {
+        to.update({velocity:-1});
+    };
+    document.getElementById("reset").onclick = function () {
+        to.update({position:0, velocity:0};
     };
 
 
-..  note::
+..  tip::
 
     During development it may be helpful to make the reference to the
     timing object visible in the global scope. This way you may also
     control the timing object manually from the developer console.
+
+..  tip::
+
+    If the timing object is connected to an **online timing object**,
+    controls will apply to all Webpages connected to the same online
+    timing object. This may be very useful in development, as programmers
+    may have one page with controls, which they may then use to test timed functionality in other Webpages.
 
 
 
@@ -125,15 +151,18 @@ Step 4: Ready
 
 Ready to load the page and start controlling the timing object.
 
-Full example `here <../_static/basic_controls.html>`_.
+.. admonition:: Demo
+
+    .. raw:: html
+        :file: ../demoes/basic_controls.html
+
+
+Code
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. literalinclude:: ../demoes/basic_controls.html
+    :language: html
 
 :download:`the script <../demoes/basic_controls.html>`
 
 
-..  note::
-
-    If the timing object is connected to an **online timing object**,
-    controls will apply to all Webpages connected to the same online
-    timing object. This may be very useful in development, as programmers
-    may have one page with controls, which they use to test functionality
-    in other Webpages.

@@ -20,7 +20,7 @@ import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
-project = 'timingsrc'
+project = 'timingsrc v3'
 copyright = '2020, Ingar Arntzen'
 author = 'Ingar Arntzen'
 

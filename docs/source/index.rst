@@ -14,12 +14,6 @@ Welcome to timingsrc's documentation!
    quickstart
    howto
 
-..
-
-   why
-   faq
-   contributing
-
 .. toctree::
    :maxdepth: 1
    :caption: Reference
@@ -31,9 +25,6 @@ Welcome to timingsrc's documentation!
    dataset
    timingobject
    sequencer
-
-
-
 
 
 Indices and tables

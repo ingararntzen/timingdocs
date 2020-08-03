@@ -10,7 +10,7 @@ Download
 Full source
     `<https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js>`_
 
-Minified
+Minified source
     `<https://webtiming.github.io/timingsrc/lib/timingsrc-min-v3.js>`_
 
 Webpage Script Include
@@ -30,8 +30,6 @@ Import as ES6 module.
             <body>
             </body>
         </html>
-
-
 
 
 

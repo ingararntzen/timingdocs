@@ -1,66 +1,98 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
     <head>
         <script type="module">
             import {TimingObject} from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
 
-            // create a timing object
-            const to = new TimingObject();
-
             /*
-                Visualize Timing Object Position
+                Custom frequency sampler.
             */
-            const pos_elem = document.getElementById("position");
-            to.on("timeupdate", function() {
-                // refresh position
-                pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
-            });
+            class TimingObjectSampler {
 
+                constructor(timingObject, callback, milliseconds) {
+                    this._to = timingObject;
+                    this._callback = callback;
+                    this._ms = milliseconds;
+                    this._timeout = undefined;
+                    this._sub = this._to.on("change", 
+                                            this._onchange.bind(this));
+                }
 
-            /*
-                Alternatively, custom frequency sampler.
+                _start_sampling() {
+                    this._timeout = setInterval(this._callback, this._ms);
+                }
 
-            function make_sampler(timingObject, sample_callback, interval) {
-                let timeout;
-                let sub = timingObject.on("change", function () {
+                _stop_sampling() {
+                    clearTimeout(this.timeout);
+                    this._timeout = undefined;
+                }
+
+                _onchange () {
                     // sample every time change event is emitted
-                    sample_callback();
+                    this._callback();
                     // start or stop periodic sampling
-                    let v = timingObject.vector;
+                    let v = this._to.vector;
                     let moving = v.velocity != 0 || v.acceleration != 0;
-                    if (moving && timeout === undefined) {
-                        // start sampling
-                        timeout = setInterval(sample_callback, interval);
-                    } else if (!moving && timeout !== undefined) {
-                        // stop sampling
-                        clearTimeout(timeout);
-                        timeout = undefined;
+                    if (moving && this._timeout === undefined) {
+                        this._start_sampling();
+                    } else if (!moving && this._timeout !== undefined) {
+                        this._stop_sampling();
                     }
-                });
+                };
 
-                return {
-                    cancel: function() {
-                        timingObject.off("change", sub);
+                /* 
+                    terminate sampler 
+                */
+                terminate () {
+                    this._to.off("change", this._sub);
+                    if (this._timeout) {
+                        this._stop_sampling();
                     }
                 }
             }
 
-            // refresh position every 100ms
-            let sampler = make_sampler(to, function() {
-                pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
-            }, 100);
 
+            /*
+                Create TimingObject
             */
+            const to = new TimingObject();
 
-            const playBtn = document.getElementById("play");
-            const pauseBtn = document.getElementById("pause");
+            /*
+                Visualize Timing Object Position
 
-            playBtn.onclick = function () {
+                Either use timeupdate event for fixed frequency
+                sampling, or create sampler at custom frequency.
+            */
+            const use_timeupdate = false;
+            const pos_elem = document.getElementById("position");
+
+            if (use_timeupdate) {            
+                // refresh position every 200 ms
+                to.on("timeupdate", function() {
+                    pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
+                });
+            } else {
+                // refresh position every 100 ms
+                const sampler = new TimingObjectSampler(to, function() {
+                    pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
+                }, 100);
+            }
+
+
+            /*
+                Connect buttons        
+            */
+            document.getElementById("play").onclick = function () {
                 to.update({velocity:1});
             };
-
-            pauseBtn.onclick = function () {
+            document.getElementById("pause").onclick = function () {
                 to.update({velocity:0});
+            };
+            document.getElementById("reverse").onclick = function () {
+                to.update({velocity:-1});
+            };
+            document.getElementById("reset").onclick = function () {
+                to.update({position:0, velocity:0};
             };
 
         </script>
@@ -72,6 +104,8 @@
         <div>
             <button id="play">Play</button>
             <button id="pause">Pause</button>
+            <button id="reverse">Reverse</button>
+            <button id="reset">Reset</button>
         </div>
     </body>
 </html>
