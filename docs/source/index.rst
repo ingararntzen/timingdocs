@@ -18,12 +18,12 @@ Welcome to timingsrc's documentation!
    :maxdepth: 1
    :caption: Reference
 
+   events
+   observablemap
+   timingobject
    interval
    cue
-   events
-   cuecollection
    dataset
-   timingobject
    sequencer
 
 

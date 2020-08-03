@@ -13,21 +13,21 @@ Definition
 ------------------------------------------------------------------------
 
 
-*   The sequencer is a :ref:`Cue Collection <cuecollection>`, a
-    **subset** of its source cue collection, the :ref:`dataset`.
+*   The sequencer implements :ref:`observablemap`, and is a
+    **subset** of its source :ref:`dataset`.
 
 *   At any time, the sequencer holds the subset of dataset cues that are
     **active** cues.
 
 *   The sequencer emits **change**, **remove** and **batch** events
-    (see: :ref:`cuecollection`) as cues are **activated** or **deactivated**.
+    (see: :ref:`observablemap`) as cues are **activated** or **deactivated**.
 
 Active cues
     Cues are **active** or **inactive** based on the playback position, and how it compares to the :ref:`cue interval<cue>`, which defines the **validity** of the cue on the timeline. The sequencer may well be an empty collection, if no cues are **active** at a particular time. Any change to the cue collection of the source dataset might cause changes to the subset of active cues.
 
 Precisely timed events
     As *playback position* gradually changes during timed playback, cues must be activated or deactivated at the correct time. The sequencer dynamically manipulates its own cue collection and
-    precisely schedules **change** and **remove** events (see: :ref:`cuecollection`) for activation
+    precisely schedules **change** and **remove** events (see: :ref:`observablemap`) for activation
     and deactivateion of cues.
 
 Flexible timeline navigation and playback
@@ -187,27 +187,27 @@ API
 
     ..  js:attribute:: size
 
-        see :js:meth:`CueCollectionInterface.size`
+        see :js:meth:`ObservableMapInterface.size`
 
     ..  js:method:: has(key)
 
-        see :js:meth:`CueCollectionInterface.has`
+        see :js:meth:`ObservableMapInterface.has`
 
     ..  js:method:: get(key)
 
-        see :js:meth:`CueCollectionInterface.get`
+        see :js:meth:`ObservableMapInterface.get`
 
     ..  js:method:: keys()
 
-        see :js:meth:`CueCollectionInterface.keys`
+        see :js:meth:`ObservableMapInterface.keys`
 
     ..  js:method:: values()
 
-        see :js:meth:`CueCollectionInterface.values`
+        see :js:meth:`ObservableMapInterface.values`
 
     ..  js:method:: entries()
 
-        see :js:meth:`CueCollectionInterface.entries`
+        see :js:meth:`ObservableMapInterface.entries`
 
     ..  js:method:: on (name, callback[, options])
 

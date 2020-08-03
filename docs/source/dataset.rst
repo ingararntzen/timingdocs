@@ -4,7 +4,10 @@
 Dataset
 ========================================================================
 
-:ref:`dataset` is a :ref:`Cue Collection <cuecollection>` with support for flexible and efficient cue modification and lookup, even for very large collections. :ref:`Cues <cue>` are simple Javascript objects:
+:ref:`dataset` manages a collection of cues, and implements the
+:ref:`observablemap` with support for flexible and efficient cue
+modification and lookup, even for very large collections.
+:ref:`Cues <cue>` are simple Javascript objects:
 
 ..  code-block:: javascript
 
@@ -21,10 +24,13 @@ search along the timeline. For instance, the **lookup** method returns all
 *cues* within a given :ref:`interval`.
 
 Dataset is useful for management and visualization of large datasets with timed
-data, represented as :ref:`cues <cue>`. Typical examples of timed data include log data, user comments, sensor measurements, subtitles, images, playlists, transcripts, gps coordinates etc.
+data, represented as :ref:`cues <cue>`. Typical examples of timed data
+include log data, user comments, sensor measurements, subtitles, images,
+playlists, transcripts, gps coordinates etc.
 
 Furthermore, the dataset implementation is carefully designed to support
-*precisely timed playback* of timed data. This is achieved by connecting one or more :ref:`Sequencers <sequencer>` to the :ref:`dataset`.
+*precisely timed playback* of timed data. This is achieved by connecting
+one or more :ref:`Sequencers <sequencer>` to the :ref:`dataset`.
 
 
 ..  note::
@@ -124,7 +130,7 @@ operations (e.g. **lookup**) provide direct access to managed cues.
     In particular, programmers must avoid the pitfall of trying to
     modify a cue (or its data part), by directly modifying the
     existing cue ahead of resubmitting it to **update**.
-    Always create a new cue object with the desired state, then **update**. 
+    Always create a new cue object with the desired state, then **update**.
 
     Rules of thumb:
 
@@ -209,7 +215,7 @@ D      {key: "mykey", interval: ..., data: ...}  interval, data
     Rule of thumb:
 
     -   Avoid cue modification type B if timestamps are part of data.
-    -   Similarly, avoid modification of timestamps in data without modifying the cue interval accordingly (type C). 
+    -   Similarly, avoid modification of timestamps in data without modifying the cue interval accordingly (type C).
 
 
 In summary, the different types of cue arguments are interpreted
@@ -275,7 +281,7 @@ The default equality function used by the dataset is the following:
     }
 
 
-Given that object equality is appropriately specified, **update** may 
+Given that object equality is appropriately specified, **update** may
 safely be repeated, even if data have not changed. This would be practical for instance when an online source of
 timed data is polled repeatedly for updates. Polling results may then be
 fed directly to the **update** operation and the return value
@@ -288,8 +294,8 @@ Update Result
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 The **update** operation returns an array of items describing the effects
-for each cue argument. Result items are identical to event arguments 
-**eArg** defined in :ref:`cuecollection-earg`.
+for each cue argument. Result items are identical to event arguments
+**eArg** defined in :ref:`observablemap-earg`.
 
 ..  code-block:: javascript
 
@@ -445,7 +451,8 @@ The endpoint property is defined in :ref:`interval-endpoint`.
 Events
 ------------------------------------------------------------------------
 
-Dataset supports three events **update**, **change** and **remove**, as defined in :ref:`cuecollection`. 
+Dataset supports three events **update**, **change** and **remove**,
+as defined in :ref:`observablemap`.
 
 
 ..  _dataset-performance:
@@ -562,7 +569,7 @@ API
         :param int mask: match mask
         :returns Array: list of cues
 
-        Returns all cues matching a given interval on dataset. 
+        Returns all cues matching a given interval on dataset.
         Lookup mask specifies the exact meaning of *match*, see :ref:`interval-match`.
 
         Note also that the lookup operation may be used to lookup cues that match a single point on the timeline, simply by defining the lookup interval as a single point, see :ref:`interval-definition`.
@@ -589,27 +596,27 @@ API
 
     ..  js:attribute:: size
 
-        see :js:meth:`CueCollectionInterface.size`
+        see :js:meth:`ObservableMapInterface.size`
 
     ..  js:method:: has(key)
 
-        see :js:meth:`CueCollectionInterface.has`
+        see :js:meth:`ObservableMapInterface.has`
 
     ..  js:method:: get(key)
 
-        see :js:meth:`CueCollectionInterface.get`
+        see :js:meth:`ObservableMapInterface.get`
 
     ..  js:method:: keys()
 
-        see :js:meth:`CueCollectionInterface.keys`
+        see :js:meth:`ObservableMapInterface.keys`
 
     ..  js:method:: values()
 
-        see :js:meth:`CueCollectionInterface.values`
+        see :js:meth:`ObservableMapInterface.values`
 
     ..  js:method:: entries()
 
-        see :js:meth:`CueCollectionInterface.entries`
+        see :js:meth:`ObservableMapInterface.entries`
 
     ..  js:method:: on (name, callback[, options])
 
