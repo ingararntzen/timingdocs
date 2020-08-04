@@ -55,7 +55,7 @@ From the perspective of the programmer, the sequencer is simply a
 
 This makes for a very attractive programming model, where precisely timed
 playback-visualizations of timed data can be achieved simply by
-implementing handlers for sequencer **change** and **remove** events. In 
+implementing handlers for sequencer **change** and **remove** events. In
 other words, the programmer only needs to specify what it means for a cue to
 become active or inactive.
 
@@ -152,7 +152,8 @@ Interval Mode
     Illustrations!
 
 
-The sequencer may be initialized with one or two timing objects, yielding *point-mode* or *interval mode* operation.
+The sequencer may be initialized with one or two timing objects, yielding
+*point mode* or *interval mode* operation.
 
 
 ..  code-block:: javascript

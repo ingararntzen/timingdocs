@@ -21,7 +21,7 @@ detected by subscribers. Events are implemented as defined in :ref:`events`.
 
     :ref:`observablemap` is only **read-only** and does *not* specify any
     mechanisms for modifying the collection of (key, value) pairs.
-    Methods for modification are left for specific implementations of 
+    Methods for modification are left for specific implementations of
     the interface, such as :ref:`dataset` and :ref:`sequencer`.
 
 
@@ -75,6 +75,8 @@ remove
     (**insert**, **modify**, **delete**) instead of two events (**change**, **remove**).
     However, the latter is often more convenient, as **insert** and **modify** events are frequently handled the same way. On the other hand, if the distincion matters the event argument of the *change* event may be used to tell them apart. See :ref:`observablemap-earg`.
 
+
+..  _observablemap-batch:
 
 Batch Event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
