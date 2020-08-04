@@ -13,17 +13,16 @@ Also, the number of (key,value) pairs managed by the observable map is exposed b
 property **size**.
 
 
-The observable map also defines three events: **update**, **change** and
+The observable map also defines three events: **batch**, **change** and
 **remove**. Events allow *modifications* in the observable map to be
-dynamically detected by subscribers. Events are implemented as
-defined in :ref:`events`.
+detected by subscribers. Events are implemented as defined in :ref:`events`.
 
 ..  note::
 
     :ref:`observablemap` is only **read-only** and does *not* specify any
     mechanisms for modifying the collection of (key, value) pairs.
-    Methods for modification are left for specific implementations, such as
-    :ref:`dataset` and :ref:`sequencer`.
+    Methods for modification are left for specific implementations of 
+    the interface, such as :ref:`dataset` and :ref:`sequencer`.
 
 
 Events
@@ -74,7 +73,7 @@ remove
 
     It would also have been possible to expose three events
     (**insert**, **modify**, **delete**) instead of two events (**change**, **remove**).
-    However, the latter is often more convenient, as **insert** and **modify** events are frequently handled the same way. On the other hand, if the disticion matters the event argument of the *change* event may be used to tell them apart. See :ref:`observablemap-earg`.
+    However, the latter is often more convenient, as **insert** and **modify** events are frequently handled the same way. On the other hand, if the distincion matters the event argument of the *change* event may be used to tell them apart. See :ref:`observablemap-earg`.
 
 
 Batch Event
@@ -84,9 +83,7 @@ Observable map additionally defines a **batch** event which delivers
 multiple **change** and **remove** together. This is
 relevant for implementations supporting modification of multiple values in
 one (atomic) operation. If so, the **batch** event makes
-it possible to process concurrent events in one operation.
-:ref:`dataset` supports batch updates (see :ref:`dataset-batch`) and
-:ref:`sequencer` may activate multiple cues in one operation.
+it possible to process *concurrent* events in one operation, and making decisions based on the whole batch, as opposed to single events.
 
 The event argument **eArg** of the **batch** event is simply a list of
 event arguments for individual **change** and **remove** events.
@@ -138,11 +135,11 @@ object with properties **key**, **new** and **old**:
 
 
 key
-    Key
+    key (unique in map)
 old
-    Value *before* modification, or undefined if value was inserted.
+    value *before* modification, or undefined if value was inserted.
 new
-    Value *after* modification, or undefined if value was deleted.
+    value *after* modification, or undefined if value was deleted.
 
 
 This table show values **eArg.old** and **eArg.new**
@@ -182,57 +179,39 @@ Distinguishing between modification types is easy:
 API
 ------------------------------------------------------------------------
 
+..  _JS Map Documentation: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
+
 ..  js:class:: ObservableMapInterface
 
 
     ..  js:attribute:: size
 
-        Number of (key, value) pairs managed by observable map
-
-        :returns int:
-
+        see `JS Map Documentation`_
 
 
     ..  js:method:: has(key)
 
-        Check if key is managed by observable map.
-
-        :param object key: key
-        :returns boolean: true if key exists
-
+        see `JS Map Documentation`_
 
 
     ..  js:method:: get(key)
 
-        Get value by key.
-
-        :param object key: key
-        :returns value: value if key exists, else undefined
-
+        see `JS Map Documentation`_
 
 
     ..  js:method:: keys()
 
-        Iterate all keys of observable map.
-
-        :returns iterable: keys
-
+        see `JS Map Documentation`_
 
 
     ..  js:method:: values()
 
-        Iterate all values in observable map.
-
-        :returns iterable: values
-
+        see `JS Map Documentation`_
 
 
     ..  js:method:: entries()
 
-        Iterate all [key, value] tuples of observable map.
-
-        :returns iterable: [key, value] tuples
-
+        see `JS Map Documentation`_
 
 
     ..  js:method:: on (name, callback[, options])

@@ -106,14 +106,14 @@ In this example, this is done simply by setting or removing the *css* classname 
 .. code-block:: javascript
 
     activeCues.on("change", (eArg, eInfo) => {
-        let el = document.getElementById(`${eArg.key}`);
+        let el = document.getElementById(eArg.key);
         if (el) {
             el.classList.add("active");
         }
     });
 
     activeCues.on("remove", (eArg, eInfo) => {
-        let el = document.getElementById(`${eArg.key}`);
+        let el = document.getElementById(eArg.key);
         if (el) {
             el.classList.remove("active");
         }

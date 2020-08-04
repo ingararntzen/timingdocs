@@ -10,7 +10,7 @@
             import {TimingObject, Dataset, Sequencer, Interval} from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
 
             /*
-                Create TimingObject
+                Create TimingObject, Dataset and Sequencer
             */
             const to = new TimingObject();
             const ds = new Dataset();
@@ -104,14 +104,14 @@
                 Visualize active cues
             */
             activeCues.on("change", (eArg, eInfo) => {
-                let el = document.getElementById(`${eArg.key}`);
+                let el = document.getElementById(eArg.key);
                 if (el) {
                     el.classList.add("active");
                 }
             });
 
             activeCues.on("remove", (eArg, eInfo) => {
-                let el = document.getElementById(`${eArg.key}`);
+                let el = document.getElementById(eArg.key);
                 if (el) {
                     el.classList.remove("active");
                 }

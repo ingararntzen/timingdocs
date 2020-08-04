@@ -16,7 +16,7 @@ simple **Javascript** object.
     };
 
 key
-    Any value or object that may be used as a key with
+    Unique key. Any value or object that may be used as a key with
     ``Map``. The purpose of cue *key* is to uniquely identify a cue object
     within a collection of cue objects.
 
@@ -39,17 +39,12 @@ data
 Cue Creation
 ------------------------------------------------------------------------
 
-Cues are typically created by wrapping **application level
-defined data objects**. These objects often include properties which
-define object uniqueness, within some application specific namespace.
-Property names such as **id**, **key** and **uuid** are often
-used for this purpose. If so, such object identifiers may be
-used as cue keys.
+Cues are typically created by wrapping **application-defined data objects**. These objects often include properties which define object uniqueness, within some application specific namespace. Property names such as **id**, **key** and **uuid** are often used for this purpose. If so, such object identifiers may be used as cue keys.
 
 Additionally, application objects may define timestamps, durations or
 other numerical values indicating the validity of the object in reference
 to a timeline. Property names such as **ts**, **start**, **end** and
-**duration** are often for this purpose. If so, cue interval
+**duration** are often used for this purpose. If so, cue interval
 objects may be created from these values.
 
 ..  code-block:: javascript

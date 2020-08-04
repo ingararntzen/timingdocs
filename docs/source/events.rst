@@ -44,14 +44,15 @@ Event Callback
 Execution
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-When an event is triggered, the execution of event callbacks are always decoupled using ``Promise.then()``. This avoids nested invocation of event callbacks which may be confusing and hard to debug. 
+When an event is triggered, the execution of event callbacks is always decoupled using ``Promise.then()``. This avoids nested invocation of event callbacks which may be confusing and hard to debug. 
 
 
 This
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 It is also possible to control the value of the ``this`` object during
-event callback execution. This is particularly useful when the callback handler is a class method, thus the callback handler must be invoked
+event callback execution. This is useful when the callback handler is a 
+class method, thus the callback handler must be invoked
 with ``this`` set to the class instance. There are at least three ways to
 achieve this.
 
@@ -149,8 +150,7 @@ Initial Events
 
 The traditional semantic of events systems is that events convey **state
 changes**. So, when an event consumer subscribes to an event, there will be no
-event notification until the next event occurs. This yields a common pattern
-when subscribing to *stateful* event providers:
+event notification until the next state change occurs. This yields a common pattern when mirroring *stateful* event providers:
 
 1.  Request a snapshot of the currect state
 2.  Subscribe to future state changes. For each state change, update the snapshot accordingly.
@@ -162,7 +162,7 @@ In code, this might look something like this:
     // event provider
     let ep;
 
-    // refresh UI based on current state
+    // refresh UI based on current state of event provider
     function refresh (state) {...}
 
     // request initial state
@@ -204,11 +204,11 @@ event callback.
     });
 
 
-For this to be correct, the event provider must replay the initial state 
-as event notifications, the go on to deliver events as usual. The **initial events** semantic thus simplifies application code and shifts initialization complexity from the event consumer to the event provider.
+For this to be correct, the event provider must provide the initial state 
+as event notifications, prior to deliver events as usual.
+The **initial events** semantic thus simplifies application code and shifts initialization complexity from the event consumer onto the event provider.
 
-The initial events semantic only affects the :js:class:`EventProviderInterface`
-in a few minor details. Primarily, there are some extra events. The *eInfo.init* parameter of :js:func:`event_callback` is ``true`` for initial
+The initial events semantic only affects a few details in the :js:class:`EventProviderInterface`. Primarily, there are some extra events. The *eInfo.init* parameter of :js:func:`event_callback` is ``true`` for initial
 events. It is also possible to opt out of initial events semantic, by specifying ``{init:false}`` as option to :js:meth:`EventProviderInterface.on`. 
 
 
@@ -219,7 +219,7 @@ API
 
 ..  js:function:: event_callback(eArg, eInfo)
 
-    Callback for event notification, invoked by event provider.
+    Callback function for event notification, invoked by event provider.
 
     :param object eArg: Event argument. 
         Application specific object defined by event provider. 

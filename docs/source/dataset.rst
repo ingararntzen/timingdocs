@@ -4,9 +4,9 @@
 Dataset
 ========================================================================
 
-:ref:`dataset` manages a collection of cues, and implements the
-:ref:`observablemap` with support for flexible and efficient cue
-modification and lookup, even for very large collections.
+:ref:`dataset` manages a collection of cues, implements the
+:ref:`observablemap` and adds support for flexible and efficient cue
+modification and lookup, even for large volumes of cues.
 :ref:`Cues <cue>` are simple Javascript objects:
 
 ..  code-block:: javascript
@@ -19,16 +19,14 @@ modification and lookup, even for very large collections.
 
 
 Dataset maps *keys* to *cues*, like a ``Map``. In addition, :ref:`cues <cue>`
-are also indexed by their positioning on the timeline, allowing efficient
-search along the timeline. For instance, the **lookup** method returns all
-*cues* within a given :ref:`interval`.
+are also indexed by their positioning on the timeline (see :ref:`interval`), allowing efficient search along the timeline. For instance, the **lookup** method returns all cues within a given lookup interval.
 
 Dataset is useful for management and visualization of large datasets with timed
 data, represented as :ref:`cues <cue>`. Typical examples of timed data
 include log data, user comments, sensor measurements, subtitles, images,
 playlists, transcripts, gps coordinates etc.
 
-Furthermore, the dataset implementation is carefully designed to support
+Furthermore, the dataset is carefully designed to support
 *precisely timed playback* of timed data. This is achieved by connecting
 one or more :ref:`Sequencers <sequencer>` to the :ref:`dataset`.
 
@@ -126,22 +124,20 @@ operations (e.g. **lookup**) provide direct access to managed cues.
     If managed cue objects are modified by external code, no guarantees
     can be given concerning functional correctness. Note
     also that the dataset does not implement any protection against
-    cue modification.
+    external cue modification.
 
     The dataset will however throw an exception if a currently managed cue
     object is used as cue argument with the **update** operation.
 
     Rules of thumb:
 
-    -   always create new objects as cue arguments
+    -   always create cue arguments as new object with desired state
     -   never *reuse* previously defined cue objects as arguments to **update**
     -   avoid keeping variables referencing cue objects.
 
-    Unwanted modifications of managed cues may also occur when *cue.data*
-    references objects that are subject to in-place modification by
-    external code. So, in order to modify an aspect of the cue data,
-    create a new data object with the desired state.
-
+    Unwanted modifications of managed cues may also occur if the *cue.data*
+    property is subject to external modification. For instance, it may already be be managed by an application specific data model. If this is the case, one approach would be to copy data objects as part of cue creation. Another approach would be to sequence only references to the data, and then resolving data access directly from the data model, as part of
+    cue rendering.
 
 
 Cue Arguments
@@ -179,18 +175,18 @@ D      {key: "mykey", interval: ..., data: ...}  interval, data
 
 ..  note::
 
-    If a cue interval is derived from timestamps which are also part of
-    cue data, interval update (type B) is possible, but likely not
-    advisable, as it introduces inconsistencies between time values in
-    cue interval and cue data. Though not criticial for the integrity of
-    the dataset, it might be confusing for users, as timeline playback
-    would not match timestamps values in cue data.
+    Cue intervals are often derived from timestamps which are also part of
+    cue data. This implies that inconsistency may be introduced, if the 
+    interval is changed, without also changing the associated timestamps
+    in the data property -- or the other way around.
+
+    Though not criticial for the integrity of the dataset, such inconsistencies might be confusing for users. For instance if timeline playback does not match timestamps in cue data.
 
     Rule of thumb:
 
-    -   Avoid cue modification type B if timestamps are part of data.
-    -   Similarly, avoid modification of timestamps in data without modifying the cue interval accordingly (type C).
-
+    -   Avoid cue type B modification if timestamps are part of data.
+    -   Similarly, avoid type C modification of timestamps in data, if
+        cue intervals are derived from these timestamps.
 
 In summary, the different types of cue arguments are interpreted
 according to the following table.
@@ -210,12 +206,12 @@ Cue Equality
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Cue modification has *no effect* if cue argument is equal to the
-*pre-existing* cue. The dataset will detect equality of cue intervals, and avoid unneccesary reevaluation of internal indexes.
+*pre-existing* cue. The dataset will detect equality of cue intervals and avoid unneccesary reevaluation of internal indexes.
 However, the definition of *object equality* for cue data may be
 application dependent. For this reason the **update** operation allows a
 custom equality function to be specified using the optional parameter
-*equals*. Note that the equality function is evaluated with cue data
-properties as arguments, not the entire cue.
+*equals*. Note that the equality function is evaluated with the cue data
+property as arguments, not the entire cue.
 
 
 ..  code-block:: javascript
@@ -255,10 +251,9 @@ The default equality function used by the dataset is the following:
     }
 
 
-Given that object equality is appropriately specified, **update** may
-safely be repeated, even if data have not changed. This would be practical for instance when an online source of
-timed data is polled repeatedly for updates. Polling results may then be
-fed directly to the **update** operation and the return value
+Given that object equality is appropriately specified, **update** operations may safely be repeated, even if cue data have not changed. For instance, 
+this might be the case when an online source of timed data is polled repeatedly for updates. Results from polling may then be
+forwarded directly to the **update** operation. The return value
 will indicate if any actual modifications occured.
 
 
@@ -277,11 +272,11 @@ for each cue argument. Result items are identical to event arguments
     let item = {key: ..., new: {...}, old: {...}}
 
 key
-    The cue key
+    Unique cue key
 old
-    The cue *before* modification, or undefined if cue was inserted.
+    Cue *before* modification, or undefined if cue was inserted.
 new
-    The cue *after* modification, or undefined if cue was deleted.
+    Cue *after* modification, or undefined if cue was deleted.
 
 
 It is possible with result items where both **item.new** and
@@ -295,7 +290,7 @@ both inserted and deleted as part of a single update operation (see
 Batch Operations
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-The **update(cues)** operation is *batch-oriented*, implying that
+The **update()** operation is *batch-oriented*, implying that
 multiple cue operations can be processed as one atomic operation. A
 single batch may include a mix of **insert**, **modify** and **delete**
 operations.
@@ -328,9 +323,9 @@ entire batch, as opposed to once per cue modification.
 
 ..  warning::
 
-    Repeated invocation of **update** is an **anti-pattern** with respect
-    to performance! Cue operations should if possible be aggregated and
-    applied together as a single batch.
+    Repeated invocation of **update** within a single processing task 
+    is an **anti-pattern** with respect to performance! Cue operations 
+    should if possible be aggregated and applied together as a single batch.
 
     ..  code-block:: javascript
 
@@ -355,7 +350,7 @@ It is possible to include several cue arguments concerning the same key
 in a single batch to **update**. This is called *chained* cue arguments.
 Chained cue arguments will be applied in the given order, and the net effect
 in terms of cue state will be equal to the effect of splitting the cue
-batch into individual invokations of **update**. However, internally,
+batch into individual invokations of **update**. Internally,
 chained cue arguments are collapsed into a single cue operation with the
 same net effect. For instance, if a cue is first inserted and then
 deleted within a single batch, the net effect is *no effect*.
@@ -375,8 +370,7 @@ for *chaining* is true.
 
     If the *chaining* option is set to false, but the cue batch still
     contains chained cue arguments, this violation will not be detected.
-    The consequence is not grave. The *old* value of result items and event arguments will be incorrect for chained
-    cues.
+    The consequences are not grave. The *old* value of result items and event arguments will be incorrect for chained cues.
 
 
 .. _dataset-lookup:
@@ -387,24 +381,17 @@ Lookup
 The operation **lookup(interval, mask)** identifies all cues *matching*
 a specific interval on the timeline. The parameter **interval**
 specifices the target interval and **mask** defines what interval
-relations count as a *match*, see :ref:`interval-match`.
-
-Additionally, dataset provides an operation  **lookup_delete(interval,
-mask)** which deletes all cues matching a given interval. This operation
-is potentially more efficient than  **lookup** followed by cue deletion using
-**update**.
+relations count as a *match*, see :ref:`interval-match`. Similarly, dataset provides an operation  **lookup_delete(interval, mask)** which deletes all cues matching a given interval. This operation is more efficient 
+than  **lookup** followed by cue deletion using **update**.
 
 ..  _dataset-lookup-endpoints:
 
 Lookup endpoints
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-In addition to looking up cues, dataset also supports looking up cue
-endpoints. Cue endpoints correspond to events on the timeline, and the
-operation **lookup_endpoints(interval)** identifies all cue endpoints
-**inside** the given interval, as defined in :ref:`interval-comparison`.
-The operation returns a list of (endpoint, cue) pairs, where endpoint
-is the low or the high endpoint of the cue interval.
+In addition to looking up cues, dataset also supports looking up 
+:ref:`cue endpoints <interval-endpoint>`. The operation **lookup_endpoints(interval)** identifies all cue endpoints **inside** the given interval, as defined in :ref:`interval-comparison`. The operation returns a list of (endpoint, cue) pairs, where endpoint is the *low* or the *high* endpoint 
+of the cue interval.
 
 ..  code-block:: javascript
 
@@ -425,7 +412,7 @@ The endpoint property is defined in :ref:`interval-endpoint`.
 Events
 ------------------------------------------------------------------------
 
-Dataset supports three events **update**, **change** and **remove**,
+Dataset supports three events **batch**, **change** and **remove**,
 as defined in :ref:`observablemap`.
 
 
@@ -436,8 +423,8 @@ Performance
 
 The dataset implementation targets high performance with high volumes
 of cues. In particular, the efficiency of the **lookup** operation is
-important as it is used repeatedly during media playback. For this
-reason the implementation is optimized with respect to fast
+important as it is used repeatedly during media playback. The 
+implementation is therefor optimized with respect to fast
 **lookup**, with the implication that internal costs related to indexing
 are paid by the **update** operation.
 
@@ -447,26 +434,26 @@ reason, **update** performance is ultimately limited by sorting
 performace, i.e. ``Array.sort()``, which is O(NlogN) (see `sorting
 complexity`_). Importantly, support for :ref:`batch operations<dataset-batch>`
 reduces the sorting overhead by ensuring that sorting is
-needed only once for a large batch operation, instead of repeatedly for
-each cue argument. The implementation of **lookup** uses binary search
+needed only once for a each batch operation, instead of repeatedly for
+every cue argument. The implementation of **lookup** uses binary search
 to identify the appropriate cues, yielding O(logN)
 performance. The crux of the lookup algorithm is to resolve the cues
-which COVERS the lookup interval in sub linear time.
+which *COVERS* (see :ref:'interval-comparison') the lookup interval in sub linear time.
 
 
 .. _sorting complexity: https://blog.shovonhasan.com/time-space-complexity-of-array-sort-in-v8/
 
 
 To indicate the performance metrics of the dataset, some measurements have
-been collected for common usage patterns. For this particular test, a
+been collected for common usage patterns. For this particular test a
 standard laptop computer is used (Lenovo ThinkPad T450S, 4 cpu Intel
 Core i5-53000 CPU, Ubuntu 18.04). Tests are run with Chrome and Firefox,
 with similar results. Though results will vary between systems, these
-measurements should give a rough indication.
+measurements should at least give a rough indication.
 
 Update performance depends primarily the size of the cue batch, but also
-a few other factors. The **update** operation is more efficient if the
-dataset is empty ahead of the operation. Also, since the **update**
+a few other factors. The update operation is more efficient if the
+dataset is empty ahead of the operation. Also, since the update
 operation depends on sorting internally, it matters if the cues are
 mostly sorted or random order.
 
@@ -496,10 +483,10 @@ batches, even if the dataset is preloaded with a large volume of cues
 (100.000). In addition, (not evident from this table) **update**
 behaviour is tested up to 1.000.000 cues and appears to scale well with
 sorting costs. However, batch sizes beyond 100.000 are not recommended,
-as this would likely hurt the responsiveness of the Web page too much.
-To maintain responsiveness, it would make sense to divide the batch in
-smaller parts, and spread them out in time. Use cases
-requiring loading of over 100.000 cues might also be rare in practice.
+as this would likely hurt the responsiveness of the webpage too much.
+To maintain responsiveness it would make sense to divide the batch in
+smaller parts and spread them out in time. Use cases requiring loading of
+over 100.000 cues might also be rare in practice.
 
 
 
