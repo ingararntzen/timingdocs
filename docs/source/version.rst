@@ -39,6 +39,10 @@ Minor changes
      *Sequencer(dataset, toA[, toB])*.
    - Sequencers do no longer support primitives for cue manipulation. This is now
      handled exclusively by the dataset, see :ref:`Dataset Update <dataset-update>`.
+   - Sequencer events do no longer contain detailed information about the cause
+     of the event, such as movement direction and entry point.
+   - Sequencer no longer optimises precision of *setTimeout* by *busy-looping*,
+     as was the case in version 2.
    - Version 3 uses modern Javascripts features such as *class*,
      *arrow functions* and *module imports*.
    - Version 3 also brings extensive code cleanup, refactoring, improved code
