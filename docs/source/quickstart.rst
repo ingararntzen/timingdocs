@@ -39,7 +39,7 @@ Setup a webpage and initialise key **timingsrc** concepts:
 Also, unless the timing object is to be remote controlled by an external timing object, the webpage needs to define some playback controls, for instance see: :ref:`example-basic-controls`.
 
 
-Step 2 : Load dataset
+Step 2 : Load cues
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 There are no restrictions regarding data format or data source. As long as data
