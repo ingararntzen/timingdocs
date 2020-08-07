@@ -31,9 +31,15 @@ Furthermore, the dataset is carefully designed to support
 one or more :ref:`Sequencers <sequencer>` to the :ref:`dataset`.
 
 
-..  note::
+..  figure:: images/timed_data.png
 
-    Illustration!
+    This illustrates multiple tracks (different colors) of timed data.
+    Each colored line segment is a cue, with horizontal placement and length
+    indicating cue validity in reference to the timeline.
+    Tracks may simply be different types of cues, e.g. comments,
+    gps-coordinates, videos, images, audio snippets, etc. A single dataset
+    may hold all kinds of cues, collectively defining the state of a
+    media presentation, see :ref:`interval-mediastate`.
 
 
 Example
@@ -176,7 +182,7 @@ D      {key: "mykey", interval: ..., data: ...}  interval, data
 ..  note::
 
     Cue intervals are often derived from timestamps which are also part of
-    cue data. This implies that inconsistency may be introduced, if the 
+    cue data. This implies that inconsistency may be introduced, if the
     interval is changed, without also changing the associated timestamps
     in the data property -- or the other way around.
 
@@ -251,7 +257,7 @@ The default equality function used by the dataset is the following:
     }
 
 
-Given that object equality is appropriately specified, **update** operations may safely be repeated, even if cue data have not changed. For instance, 
+Given that object equality is appropriately specified, **update** operations may safely be repeated, even if cue data have not changed. For instance,
 this might be the case when an online source of timed data is polled repeatedly for updates. Results from polling may then be
 forwarded directly to the **update** operation. The return value
 will indicate if any actual modifications occured.
@@ -323,8 +329,8 @@ entire batch, as opposed to once per cue modification.
 
 ..  warning::
 
-    Repeated invocation of **update** within a single processing task 
-    is an **anti-pattern** with respect to performance! Cue operations 
+    Repeated invocation of **update** within a single processing task
+    is an **anti-pattern** with respect to performance! Cue operations
     should if possible be aggregated and applied together as a single batch.
 
     ..  code-block:: javascript
@@ -381,7 +387,7 @@ Lookup
 The operation **lookup(interval, mask)** identifies all cues *matching*
 a specific interval on the timeline. The parameter **interval**
 specifices the target interval and **mask** defines what interval
-relations count as a *match*, see :ref:`interval-match`. Similarly, dataset provides an operation  **lookup_delete(interval, mask)** which deletes all cues matching a given interval. This operation is more efficient 
+relations count as a *match*, see :ref:`interval-match`. Similarly, dataset provides an operation  **lookup_delete(interval, mask)** which deletes all cues matching a given interval. This operation is more efficient
 than  **lookup** followed by cue deletion using **update**.
 
 ..  _dataset-lookup-endpoints:
@@ -389,8 +395,8 @@ than  **lookup** followed by cue deletion using **update**.
 Lookup endpoints
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-In addition to looking up cues, dataset also supports looking up 
-:ref:`cue endpoints <interval-endpoint>`. The operation **lookup_endpoints(interval)** identifies all cue endpoints **inside** the given interval, as defined in :ref:`interval-comparison`. The operation returns a list of (endpoint, cue) pairs, where endpoint is the *low* or the *high* endpoint 
+In addition to looking up cues, dataset also supports looking up
+:ref:`cue endpoints <interval-endpoint>`. The operation **lookup_endpoints(interval)** identifies all cue endpoints **inside** the given interval, as defined in :ref:`interval-comparison`. The operation returns a list of (endpoint, cue) pairs, where endpoint is the *low* or the *high* endpoint
 of the cue interval.
 
 ..  code-block:: javascript
@@ -423,7 +429,7 @@ Performance
 
 The dataset implementation targets high performance with high volumes
 of cues. In particular, the efficiency of the **lookup** operation is
-important as it is used repeatedly during media playback. The 
+important as it is used repeatedly during media playback. The
 implementation is therefor optimized with respect to fast
 **lookup**, with the implication that internal costs related to indexing
 are paid by the **update** operation.

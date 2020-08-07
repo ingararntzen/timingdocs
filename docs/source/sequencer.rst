@@ -125,36 +125,72 @@ Sequencer Modes
 ------------------------------------------------------------------------
 
 
-The sequencer supports two distinct modes of operation, with different
-definitions for **active** cues.
+The sequencer supports two distinct modes of operation, *point mode*
+and *interval mode*, with different definitions for **active** cues.
+
 
 Point Mode
-    Point mode means that sequencing is based on a *moving sequencing point*.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    The sequencer is controlled by a single timing object and uses the *position* of the timing object as *sequencing point*.
+Point mode means that sequencing is based on a *moving sequencing point*.
 
-    A cue is **active** whenever the *sequencing point* is
-    **inside** the **cue interval**.
+The sequencer is controlled by a single timing object and uses the *position*
+of the timing object as *sequencing point*.
+
+A cue is **active** whenever the *sequencing point* is
+**inside** the **cue interval**.
+
+*Point mode* sequencing is the traditional approach for sequencing timed data
+based on a media clock.
+
+
+..  figure:: images/sequencer_point_mode.png
+
+    The figure illustrates a set of cues and a timing object. The vertical
+    dashed line shows the position of the timing object on the timeline.
+    Cues that are intersected by this line, one green and one purple,
+    are *active*. As the timing object moves to the right, a blue cue
+    will soon be activated to, just before the green cue is deactivated.
+
+Initialise a sequencer in point mode by supplying a single timing object.
+
+..  code-block:: javascript
+
+    // dataset
+    let ds;
+    // timing object
+    let to = new TimingObject();
+    // point mode sequencer
+    let activeCues = new Sequencer(ds, to);
+
 
 Interval Mode
-    Interval mode means that sequencing is based on a *moving sequencing interval*.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    The sequencer is controlled by two timing objects, and
-    the sequencer uses the *positions* of the two timing objects to form the *sequencing interval*.
+Interval mode means that sequencing is based on a *moving sequencing interval*.
 
-    A cue is **active** whenever at least one point **inside** the *sequencing interval* is also **inside** the **cue interval**.
+The sequencer is controlled by two timing objects, and
+the sequencer uses the *positions* of the two timing objects to form the *sequencing interval*.
+
+A cue is **active** whenever at least one point **inside** the *sequencing interval* is also **inside** the **cue interval**.
+
+*Interval mode* is useful for playback of sliding windows of timed data.
+For instance, interval mode sequencing can be used in conjuction with
+point mode sequencing, to prefetch timed data just-in-time for point
+mode sequenced rendering.
+
+..  figure:: images/sequencer_interval_mode.png
+
+    The figure illustrates a set of cues and two timing objects. The vertical
+    dashed lines shows the positions of the timing objects on the timeline.
+    Cues that are visible between these two lines are *active*. In this case,
+    the active cues include 2 gray, 2 light-blue, 2 green, 1 pink, 2 purple,
+    1 yellow and 12 blue cues. As both timing objects move to the right, the
+    first event will be the activation of the blue cue to the right of the
+    second timing object.
 
 
-*Point mode* sequencing is the traditional approach when sequencing timed data based on a media clock. *Interval mode* is useful for playback of sliding windows of timed data. For instance, interval mode sequencing can be used in conjuction with point mode sequencing, to prefetch timed data just-in-time for point mode sequenced rendering.
-
-..  note::
-
-    Illustrations!
-
-
-The sequencer may be initialized with one or two timing objects, yielding
-*point mode* or *interval mode* operation.
-
+Initialise a sequencer in interval mode by supplying two timing objects.
 
 ..  code-block:: javascript
 
@@ -166,12 +202,9 @@ The sequencer may be initialized with one or two timing objects, yielding
 
     /*
         skewconverter
-        creaates timing object 10.0 ahead of to
+        creaate timing object 10.0 ahead of to1
     */
     let to2 = new SkewConverter(to1, 10.0);
-
-    // point mode sequencer
-    let s1 = new Sequencer(ds, to1);
 
     // interval mode sequencer
     let s2 = new Sequencer(ds, to1, to2);
