@@ -49,6 +49,7 @@ objects may be created from these values.
 
 ..  code-block:: javascript
 
+    // application object
     let subtitle = {
         id: 1234,
         text: "This is some text",
@@ -56,7 +57,7 @@ objects may be created from these values.
         end: 28.7
     };
 
-
+    // cue from application object
     let cue = {
         key: subtitle.id,
         interval: new Interval(subtitle.start, subtitle.end);

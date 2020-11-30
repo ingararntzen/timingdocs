@@ -4,6 +4,9 @@
 Install
 ========================================================================
 
+Timingsrc v3 is available as Web page module import.
+
+
 Download
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -12,6 +15,7 @@ Full source
 
 Minified source
     `<https://webtiming.github.io/timingsrc/lib/timingsrc-min-v3.js>`_
+
 
 Webpage Script Include
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
