@@ -58,58 +58,15 @@ the timing object, which emits at 5Hz (every 200 ms), as long as the timingobjec
     });
 
 
-Alternatively, create a custom sampler based on the **change** event.
+Alternatively, use TimingSampler for a custom frequency.
 The sampler is not active when the timingobject is paused.
 
 ..  code-block:: javascript
 
-    class TimingObjectSampler {
-
-        constructor(timingObject, callback, milliseconds) {
-            this._to = timingObject;
-            this._callback = callback;
-            this._ms = milliseconds;
-            this._timeout = undefined;
-            this._sub = this._to.on("change", 
-                                    this._onchange.bind(this));
-        }
-
-        _start_sampling() {
-            this._timeout = setInterval(this._callback, this._ms);
-        }
-
-        _stop_sampling() {
-            clearTimeout(this.timeout);
-            this._timeout = undefined;
-        }
-
-        _onchange () {
-            // sample every time change event is emitted
-            this._callback();
-            // start or stop periodic sampling
-            let v = this._to.vector;
-            let moving = v.velocity != 0 || v.acceleration != 0;
-            if (moving && this._timeout === undefined) {
-                this._start_sampling();
-            } else if (!moving && this._timeout !== undefined) {
-                this._stop_sampling();
-            }
-        };
-
-        /* 
-            terminate sampler 
-        */
-        terminate () {
-            this._to.off("change", this._sub);
-            if (this._timeout) {
-                this._stop_sampling();
-            }
-        }
-    }
-
-    let sampler = new TimingObjectSampler(to, function() {
+    const sampler = new TimingSampler(to, {period:100});
+    sampler.on("change", function() {
         pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
-    }, 100);
+    });
 
 
 Step 3: Connect play and pause buttons

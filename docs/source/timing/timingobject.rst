@@ -1,20 +1,44 @@
+
+
 ..  _timingobject:
-
-
-..  _MediaElement: https://www.w3.org/TR/2011/WD-html5-20110113/video.html
-..  _WebAudio: https://www.w3.org/TR/webaudio/
-..  _WebAnimation: https://www.w3.org/TR/web-animations-1/
-
 
 ================================================================================
 Timing Object
 ================================================================================
 
-The Web is quickly becoming the most important multi-media platform around. For example, the `MediaElement`_ provides playback of audio and video files. `WebAudio`_ provides access to low-level sound control. `WebAnimation`_ is a framework for animations. In addition, there are a host of JavaScript frameworks for various forms of timed rendering.
 
-With so many powerful media frameworks at available, the idea of combining them is quite natural. For instance, Web Audio could be used to supply sound effects to video or other types of animated visuals. Unfortunately, the Web is primarily a platform for **embedding** multi-media, and each embedded media player defines its own independent timeline and its own controls, making precise coordination complicated at best. 
 
-So, the Web lacks a mechanism for precise coordination of timed things, be it media players or frameworks for animated rendering. This gap is filled by the **timing object**. The timing object provides an independent timeline for a media experience. Media players and frameworks connected to a shared timing object will be able to precisely coordinate. By implication, control applied to the timing object will apply equally to all connected media. As such, the purpose of the timing object is to mediate controls between a set of media components.
+.. admonition:: Demo
+
+    .. raw:: html
+        :file: ../demoes/basic_controls.html
+
+
+
+Example
+------------------------------------------------------------------------
+
+
+..  code-block:: javascript
+
+    // create timing object
+    const to = new TimingObject({range:[0,10]});
+
+    // handle change event
+    to.on("change", () => {
+        let v = this._to.vector;
+        let moving = (v.velocity != 0.0 || v.acceleration != 0.0);
+        if (moving) {
+            console.log("moving!");
+        } else {
+            console.log("not moving!");
+        }
+    });
+
+    // use timeupdate event to sample timing object position
+    to.on("timeupdate", function() {
+        console.log(to.query().position);
+    });
 
 
 
