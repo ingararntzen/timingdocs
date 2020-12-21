@@ -26,7 +26,7 @@ Example
 
     // handle change event
     to.on("change", () => {
-        let v = this._to.vector;
+        let v = to.vector;
         let moving = (v.velocity != 0.0 || v.acceleration != 0.0);
         if (moving) {
             console.log("moving!");

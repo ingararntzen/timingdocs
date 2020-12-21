@@ -4,8 +4,14 @@
    contain the root `toctree` directive.
 
 ========================================================================
-Timingsrc Documentation!
+Timingsrc v3
 ========================================================================
+
+.. admonition:: Timingsrc
+
+   A programming model for timed Web applications, based on the Timing Object. Precise timing, synchronization and control enabled for single-device and multi-device Web applications.
+
+
 
 .. toctree::
    :maxdepth: 1
@@ -71,27 +77,35 @@ Timingsrc Documentation!
 
 
 
+
 Welcome to timingsrc v3!
 ------------------------------------------------------------------------
 
-The Web is quickly becoming the most important multi-media platform around. For example, the `MediaElement`_ provides playback of audio and video files. `WebAudio`_ provides access to low-level sound control. `WebAnimation`_ is a framework for animations. In addition, there are a host of JavaScript frameworks for various forms of timed rendering, or simpler types of linear
-navigation (e.g. slide shows, playlists).
+The Web is arguably the most important platform for multi-media, with universal reach and a rich selection of powerful media frameworks, including built-in frameworks such as the `MediaElement`_, `WebAudio`_, `WebGL`_, and `WebAnimation`_, but also a host of external frameworks, extensions, plugins, components or tools for rendering or visualizing all kinds of media types.  
 
-With so many powerful media frameworks at available, the idea of combining them is quite natural. For instance, Web Audio could be used to supply sound effects to video or other types of animated visuals. Or, load an alternative audio track
-for the video, in a different audio element. Unfortunately, the Web is primarily a platform for **embedding** media, and each embedded media player defines its own independent timeline and its own controls, making precise coordination complicated at best. 
+With so many powerful media frameworks at hand, the idea of combining them is both intuitive and highly attractive. After all, simple composition (mash-up) is a defining characteristic of the Web. For example, live coverage of sports car racing might target co-presentation of a number of media types, including camera angles, audio commentary, sound effects, data-driven infographics,  animated maps, social media and more. 
 
-So, the Web lacks a mechanism for precise coordination of timed things. This is exactly the purpose of **timingsrc**, to fill that gap by creating a programming model for timing, synchronization and control on the Web. The :ref:timingobject is the central concept of timingsrc. 
+Unfortunately though, co-presentation of such timed media content requires fairly precise synchronization, and the Web has little support for this. The Web is primarily a platform for **embedding** media frameworks, each with their own timeline and controls. It offers no particular mechanism for precisely **controlling** different media frameworks relative to a common timeline. 
 
+This gap is rather embarrassing though. The Web is a multi-media platform, yet, ironically, it lacks the defining characteristic of a multi-media framework; the ability to orchestrate playback of multiple media types relative to a common timeline.
 
-.. 
-   It provides an independent timeline for a media experience with an API for control. Media players and frameworks connected to a shared timing object will be able to synchronize precisely. Control actions applied to the timing object will apply equally across all connected media. As such, the purpose of the timing object is to mediate timed control between a set of media components.
+The consequences of this gap are also everywhere to be seen. Media providers are eagerly extending their offerings with more data sources and streams, yet without the ability to time-align them correctly, user experiences may be annoying, confusing, or simply broken. For instance, in soccer, goal alerts
+received ahead of the video stream will spoil the experience. 
 
+Streaming providers often claim that ulta-low latency streaming will do away with these issues. This though is naive. For one thing, it requires all data sources to match the latency of the streaming solution, and precludes the use of time comsuming processing steps as part data distribution.
 
+More imporantly, the issue is not with data distribution, but with consistency in user experiences. Refrasing the problem in this context is helpful; User experiences are built from multiple, independent media frameworks, each with their own timeline. So, what is missing is 1) the definition of a common timeline for the user experience, and 2) the alignment of media frameworks relative to this timeline.
+
+So, this is unfortunate. Inconsistencies in user experiences seem to be an industry wide problem, putting a cap on innovation by converting vast potential into complexity and frustration. At the same time, the solution to this problem matches a glaring gap it the Web platform; no support for time control across media frameworks.
+
+This is the motivation for **timingsrc**. **Timingsrc** fills the gap by introducing a programming model for timing, synchronization and control on the Web. The central concept is the :ref:`timingobject`. It provides a generic timeline concept with time-controls. Media frameworks connected to a shared :ref:`timingobject` are precisely aligned and subject to shared media control. As such, the :ref:`timingobject` is the foundation for consistent media experiences on the Web.
 
 
 ..  _MediaElement: https://www.w3.org/TR/2011/WD-html5-20110113/video.html
 ..  _WebAudio: https://www.w3.org/TR/webaudio/
 ..  _WebAnimation: https://www.w3.org/TR/web-animations-1/
+..  _WebGL: https://get.webgl.org/
+
 
 ========================================================================
 Indices and tables
