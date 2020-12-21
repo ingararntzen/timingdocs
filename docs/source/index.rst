@@ -76,10 +76,60 @@ Timingsrc v3
 
 
 
-Welcome to timingsrc v3!
-------------------------------------------------------------------------
+Timing Object
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-:ref:`contrib`
+.. code-block:: js
+
+   let to = new TimingObject();
+
+
+The :ref:`timingobject` is the central core of this programming model. You may think of it as a timeline with controls. If you set velocity, the position will increase in time according to that velocity. The timing object additionally supports behavior like time-shifting, different velocities (including backwards), and acceleration.
+
+
+Timing Converter
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: js
+
+   let c = new SkewConverter(to, 4.0);
+
+A :ref:`timingconverter` is a special kind of timing objects that depends on a *parent* timing object. Timing converters are useful when you need an alternative representations for a timing object. For instance, timing converters may be used to skew or scale the timeline.
+
+Timing Provider
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: js
+
+   let to = new TimingObject({provider: timing_provider});
+
+Timing objects may be connected to external timing resources, i.e. timing resources which live outside the browsing context, for instance online hosted timing resources. This is done by initializing the timing object with a :ref:`timingprovider`. Timing providers are proxy objects to external timing resources, allowing timing objects to be used across different service implementations for timing resources.
+
+
+Dataset and Sequencer
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: js
+
+   let ds = new Dataset();
+   let s = new Sequencer(ds, to);
+
+Consistent playback of timed data is a key use case for the timing object. This is achieved using :ref:`dataset` and :ref:`sequencer`. Dataset allows 
+any type of time data to be represented as cues. Sequencers dynamically 
+provides the set of active cues, always consistent with the timing object. 
+
+MediaSync
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+.. code-block:: js
+
+   let ms = new MediaSync(to, video_element);
+
+
+Another important use case is consistent playback of HTML5 audio and video.
+This is achieved by connecting the video element to the timing object, using the :ref:`MediaSync` wrapper.
+
+
+
 
 ========================================================================
 Indices and tables

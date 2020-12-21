@@ -68,3 +68,19 @@ Programming with Timing Objects
 ------------------------------------------------------------------------
 
 Timing objects are resources used by a Web application, and the programmer may define as many as required. What purposes they serve in the application is up to the programmer. If the application needs a shared, multi-device clock, simply starting a timing object (and never stopping it) might be sufficient. If the clock value should represent milliseconds, set the velocity to 1000 (advances the timing object with 1000 milliseconds per second). If the timing object represents media offset, specify the playback position, the velocity, and perhaps a media duration (range). For videos where offset is measured in seconds or frames, set the velocity accordingly. Or, for musical applications it may be practical to let the timing object represent beats per second. Note also that the timing object may represent time-changes with any kind of floating-point variable. For example, if you have data that is organized according to, say height above sea level, you may want to animate how this data changes as you move vertically. In this case the timing object could represent meters or feet above sea level, and positive and negative velocities would allow you to move gradually both upwards and downwards.
+
+
+
+..  
+
+    1) temporal interoperability
+    very different timing sensitive components could easily be integrated into a single consistent presentation. This would allow the classical fruits of composition, i.e. mash-up, integration, code-reuse, flexibility and extensibility to be fully exploited by timing sensitive Web applications.
+
+    2) multi-device timing
+    timing objects integrate with online timing providers allowing multi-device application to exploit temporal composition in the global scope.
+
+    3) common programming concepts, tools and practices
+    timing challenges can be addressed using the same concepts and tools, across separate application domains (e.g. music, broadcast, Web-media). New concepts and tools building on a standard will apply to a much broader community.
+
+    4) separation of concerns
+    online timing providers may focus on the challenges of distributed timing, while application developers may focus on exploiting timing for the purpose of creating great user experiences.
