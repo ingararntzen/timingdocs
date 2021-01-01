@@ -1,17 +1,90 @@
-
-
 ..  _timingobject:
 
 ================================================================================
 Timing Object
 ================================================================================
 
+The timing object is a simple concept representing timeline state (e.g. media offset) and timeline controls (e.g. play/pause). Similar constructs are found in most media frameworks, yet typically they are internal to each framework. The main purpose of the timing object is rather to provide an generic timeline construct to be used across media frameworks (see `:ref:intro`).
 
-
-.. admonition:: Demo Timing Object
+.. admonition:: Demo
 
     .. raw:: html
         :file: ../demoes/timingobject.html
+
+    `demo link <../_static/timingobject.html>`_
+
+
+As illustrated by the above demo, the timing object is a simple object, essentially an advanced stop watch. If started with a velocity, its position changes predictably in time, until at some point later, it is paused, or perhaps the position is reset. It may be queried for its current position at any time. For example, it should take exactly 2.0 seconds for the position to advance from 3.0 to 5.0, if the velocity is 1.0. The timing object supports discrete jumps on the timeline, which may be useful for controlling slide shows or playlists. Velocity is useful for the control of any linear/timed media, including continuous media such as audio and video. Acceleration may not be commonly required, but it is there if you need it. Crucially, the timing object provides a *change* event, emmitted every time its behavior has been altered. This allows timing sensitive components to quickly detect changes and respond by correcting their behaviour accordingly. 
+
+A `draft specification <https://webtiming.github.io/timingobject/#the-timing-object>`_ for the timing objects has been published with the `W3C <https://www.w3.org/>`_. The timing object concept was first published under the name `Media State Vector <https://dl.acm.org/doi/abs/10.1145/2457413.2457427>`_.
+    
+
+
+Definition
+------------------------------------------------------------------------
+
+Timing objects are defined by an internal clock and a vector.
+
+internal clock
+    The internal clock of a timing object always counts *seconds* since some  shared time origin. In **timingsrc**, the internal clock is based on `Performance.now <https://developer.mozilla.org/en-US/docs/Web/API/Performance/now>`_. The time origin of performance.now relates to the initialization of the Web page, so any timing object created within a single browsing context will use the same internal clock. Note that this internal clock has no relation to any external clock. Note also that 
+    performance.now is measured in **milliseconds**, so values are converted to **seconds** with the timing object implementation.
+    
+internal vector
+    The internal vector describes the initial state of the current movement of the timing object; **(position, velocity, acceleration, timestamp)**. The vector is timestamped relative to the internal clock of the timing object. This way, future states of the timing object may be calculated precisely from initial vector and elapsed time. Furthermore, timing object behaviour may easily be modified simply by supplying a new initial vector.
+
+    ..  code-block:: javascript
+
+        var vector = {
+            position: 12.0,             // position (units)
+            velocity: 1.0,              // velocity (units/second)
+            acceleration : 0.0,	        // acceleration (units/second/second)
+            timestamp : 123652365.234   // timestamp (seconds)
+        };
+
+    Timing objects may serve a variety of purposes within applications, so the **unit** of the timing object **position** is application specific. However, in the context of media applications **position** would typically be the duration since the beginning of some media session. 
+
+
+query
+    The query operation of the timing object is a cheap calculation, useful for periodic sampling. It returns a fresh vector snapshot, calculated from the internal vector.
+
+    .. code-block:: javascript  
+
+        function query(internal_clock, internal_vector) {
+            let pos = internal_vector.position;
+            let vel = internal_vector.velocity;
+            let acc = internal_vector.acceleration;
+            let ts = internal_vector.timestamp;
+            let now = internal_clock.now();
+            let delta = now - ts;
+            return {
+                position : pos + vel*delta + 0.5*acc*delta*delta,
+                velocity : vel + acc*delta,
+                acceleration : acc,
+                timestamp : now           
+            };
+        }
+
+update
+    The update operation of the timing object accepts a vector specifying new values for position, velocity and acceleration, used to reset the internal vector of the timing object. If say **position** is omitted from the new vector, this means to preserve **position** as it is just before the update request is processed.
+
+
+    ..  code-block:: javascript
+
+        // play, resume
+        to.update({velocity:1.0});
+
+        // pause
+        to.update({velocity:0.0});
+
+        // jump to 10 and play from there
+        to.update({position:10.0, velocity:1.0})
+
+        // jump to 10, keep current velocity
+        to.update({position:10.0})
+
+
+
+
 
 
 
@@ -42,12 +115,6 @@ Example
 
 
 
-Definition
-------------------------------------------------------------------------
-
-The timing object is a very simple object, essentially an advanced stop watch. If started with a velocity, its position changes predictably in time, until at some point later, it is paused, or perhaps reset. It may be queried for its current position at any time. For example, it should take exactly 2.0 seconds for the position to advance from 3.0 to 5.0, if the velocity is 1.0. The timing object supports discrete jumps on the timeline, useful for controlling, say a slide show. Velocity is useful for the control of any linear media, including continuous media. Acceleration may not be commonly required, but it is there if you need it. Crucially, the timing object provides a *change* event, emmitted every time its behavior has been altered. This allows timing sensitive components to quickly detect changes and respond by correcting their timing-sensitive behaviour accordingly. 
-
-More about the the timing object in [Timing Object Draft Spec](http://webtiming.github.io/timingobject/#the-timing-object)
 
 
 
