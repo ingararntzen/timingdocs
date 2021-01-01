@@ -26,4 +26,6 @@ Acknowledgements
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Version 1 of timingsrc were developed at `Norut Northern Research Institute <http://norut.no/>`_, now part of `Norwegian Research Centre (NORCE) <www.norceresearch.no>`_, and funded in part by MediaScape, an EU FP7 project.
-Version 2 of timingsrc was developed and maintained across several media projects at NORCE. Version 3 is a private contribution by Ingar Arntzen.  
+Version 2 of timingsrc was developed and maintained across several media projects at NORCE. Version 3 is a private contribution by Ingar Arntzen.
+
+Ingar Arntzen is the main developer for :ref:`timingobject`, :ref:`timingconverter`, :ref:`dataset` and :ref:`sequencer`. Njål Borch is the main developer for :ref:`mediasync`, the adapter for synchronization of HTML5 media elements.
