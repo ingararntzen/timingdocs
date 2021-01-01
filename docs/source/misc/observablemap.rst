@@ -1,17 +1,12 @@
 ..  _observablemap:
 
 ========================================================================
-Observable Map Interface
+Observable Map
 ========================================================================
 
-:ref:`observablemap` specifies an *API* for a map of (key, value) pairs,
-extended with events.
+:ref:`observablemap` specifies an interface for a map of (key, value)pairs, extended with events.
 
-The observable map emulates ``Map`` by defining methods **has()**,
-**get()**, **keys()**, **values()** and **entries()**.
-Also, the number of (key,value) pairs managed by the observable map is exposed by the
-property **size**.
-
+The observable map emulates ``Map`` by defining methods **has()**, **get()**, **keys()**, **values()** and **entries()**. Also, the number of (key,value) pairs managed by the observable map is exposed by the property **size**.
 
 The observable map also defines three events: **batch**, **change** and
 **remove**. Events allow *modifications* in the observable map to be

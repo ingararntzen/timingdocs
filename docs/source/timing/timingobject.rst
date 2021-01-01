@@ -8,10 +8,10 @@ Timing Object
 
 
 
-.. admonition:: Demo
+.. admonition:: Demo Timing Object
 
     .. raw:: html
-        :file: ../demoes/basic_controls.html
+        :file: ../demoes/timingobject.html
 
 
 

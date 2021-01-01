@@ -9,7 +9,7 @@ Timingsrc v3
 
 .. admonition:: Timingsrc
 
-   A programming model for timed Web applications, based on the Timing Object. Precise timing, synchronization and control enabled for single-device and multi-device Web applications.
+   A programming model for time sensitive Web applications, based on the Timing Object. Precise timing, synchronization and control enabled for single-device and multi-device Web applications.
 
 
 
@@ -52,6 +52,13 @@ Timingsrc v3
 
    sync/mediasync
 
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Misc
+
+   misc/events
+   misc/observablemap
 
 .. toctree::
    :maxdepth: 1
@@ -66,13 +73,6 @@ Timingsrc v3
    api/sequencer_api
 
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-   :caption: Util
-
-   util/events
-   util/observablemap
 
 
 
@@ -84,7 +84,7 @@ Timing Object
    let to = new TimingObject();
 
 
-The :ref:`timingobject` is the central core of this programming model. You may think of it as a timeline with controls. If you set velocity, the position will increase in time according to that velocity. The timing object additionally supports behavior like time-shifting, different velocities (including backwards), and acceleration.
+The :ref:`timingobject` is the central concept of the timingsrc programming model. In essence, the timingobject is a timeline with an API for control. If you set velocity, the position on the timeline will increase in time according to that velocity. The timing object additionally supports behavior like time-shifting, different velocities (including backwards), and acceleration.
 
 
 Timing Converter

@@ -1,13 +1,36 @@
 <!DOCTYPE html>
 <html>
     <head>
+
+        <style type="text/css">
+            .ctrl-label {
+                display:inline-block;
+                width:100px;
+            }
+            .ctrl-btn button {
+                width:50px;
+            }
+            .progress {
+                width: 100%; /* Full-width */
+                appearance: none;
+                border-radius: 5px;
+                height: 5px;
+                background: #d3d3d3; /* Grey background */
+            }
+        </style>
+
         <script type="module">
-            import {TimingObject, TimingSampler} from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+            
+            import {
+                TimingObject, 
+                TimingSampler, 
+                TimingProgress
+            } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
 
             /*
                 Create TimingObject
             */
-            const to = new TimingObject();
+            const to = new TimingObject({range:[0,10]});
 
             /*
                 Visualize Timing Object Position
@@ -16,47 +39,100 @@
                 sampling, or create sampler at custom frequency.
             */
             const pos_elem = document.getElementById("position");
-            const use_timeupdate = false;
-            if (use_timeupdate) {            
-                // refresh position every 200 ms
-                to.on("timeupdate", function() {
-                    pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
-                });
-            } else {
-                // refresh position every 100 ms
-                const sampler = new TimingSampler(to, {period:100});
-                sampler.on("change", function () {
-                    pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
-                });
-            }
+            const vel_elem = document.getElementById("velocity");
+            const acc_elem = document.getElementById("acceleration");
+            const rng_elem = document.getElementById("range");
+
+            // refresh position every 100 ms
+            const sampler_options = {period:100};
+            const sampler = new TimingSampler(to, sampler_options);
+            sampler.on("change", function () {
+                let vector = to.query();
+                let rng = to.range;
+                pos_elem.innerHTML = `${vector.position.toFixed(2)}`;
+                vel_elem.innerHTML = `${vector.velocity.toFixed(2)}`;
+                acc_elem.innerHTML = `${vector.acceleration.toFixed(2)}`;
+                rng_elem.innerText = `[${rng}]`;
+            });
+
+            // progress
+            const progress_elem = document.getElementById("progress");
+            const progress = new TimingProgress(to, 
+                                                progress_elem,              sampler_options);
 
             /*
                 Connect buttons        
             */
-            document.getElementById("play").onclick = function () {
-                to.update({velocity:1});
+            document.getElementById("p-").onclick = function () {
+                to.update({position:to.pos-1});
             };
-            document.getElementById("pause").onclick = function () {
+            document.getElementById("p").onclick = function () {
+                to.update({position:0});
+            };
+            document.getElementById("p+").onclick = function () {
+                to.update({position:to.pos+1});
+            };
+
+            document.getElementById("v-").onclick = function () {
+                to.update({velocity:to.vel-1});
+            };
+            document.getElementById("v").onclick = function () {
                 to.update({velocity:0});
             };
-            document.getElementById("reverse").onclick = function () {
-                to.update({velocity:-1});
+            document.getElementById("v+").onclick = function () {
+                to.update({velocity:to.vel+1});
             };
-            document.getElementById("reset").onclick = function () {
-                to.update({position:0, velocity:0});
+            document.getElementById("a-").onclick = function () {
+                to.update({acceleration:to.acc-1});
+            };
+            document.getElementById("a").onclick = function () {
+                to.update({acceleration:0});
+            };
+            document.getElementById("a+").onclick = function () {
+                to.update({acceleration:to.acc+1});
             };
 
         </script>
     </head>
     <body>
-        <div>
-            Timing Object Position: <span id="position"></span>
-        </div>
-        <div>
-            <button id="play">Play</button>
-            <button id="pause">Pause</button>
-            <button id="reverse">Reverse</button>
-            <button id="reset">Reset</button>
-        </div>
+        <p>
+            <div style="font-weight:bold;">State</div>
+            <div>
+                Position: <span id="position" style="color:red;"></span>
+            </div>
+            <div>
+                Velocity: <span id="velocity"></span>
+            </div>
+            <div>
+                Acceleration: <span id="acceleration"></span>
+            </div>
+            <div>
+                Range: <span id="range"></span>
+            </div>
+        </p>
+        <p>
+            <input type="range" min="0" max="100" value="0" id="progress" class="progress">
+        </p>
+        <p >
+            <div style="font-weight:bold;">Controls</div>
+            <div class="ctrl-btn">
+                <span class="ctrl-label">Position:</span>
+                <button id="p-">P-1</button>    
+                <button id="p">P=0</button>    
+                <button id="p+">P+1</button>
+            </div>
+            <div class="ctrl-btn">
+                <span class="ctrl-label">Velocity:</span>
+                <button  id="v-">V-1</button>    
+                <button id="v">V=0</button>    
+                <button id="v+">V+1</button>
+            </div>
+            <div class="ctrl-btn">
+                <span class="ctrl-label">Acceleration:</span>
+                <button id="a-">A-1</button>    
+                <button id="a">A=0</button>    
+                <button id="a+">A+1</button>
+            </div>
+        </p>
     </body>
 </html>
