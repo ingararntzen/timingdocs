@@ -19,7 +19,6 @@ Timingsrc v3
    :caption: Main
 
    main/intro
-   main/perspective
    main/module
    main/quickstart
    main/howto

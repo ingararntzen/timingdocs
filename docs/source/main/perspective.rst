@@ -25,6 +25,11 @@ External Timing
     What we propose instead is a simple model where timing sensitive applications can interface and take direction from an external timing source, a timing object. This way, timing, synchronization and control for heterogeneous components is solved simply sharing the same timing object.
 
 
+Timing Model of the Web
+    How the current one is media centric.
+    How timingsrc fixes this.
+
+
 A unifying API for all things timed
     The timing object defines a common API for timed things. With common programming concepts, tools and practices timing related challenges can be addressed using the same concepts and tools, across separate application domains (e.g. music, broadcast, Web-media). New concepts and tools building on a standard will apply to a much broader community.
         
