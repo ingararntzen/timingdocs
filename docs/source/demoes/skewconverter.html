@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <style type="text/css">
+            .ctrl-label {
+                display:inline-block;
+                width:100px;
+            }
+            .ctrl-btn button {
+                width:80px;
+            }
+            .progress {
+                width: 100%; /* Full-width */
+                appearance: none;
+                border-radius: 5px;
+                height: 5px;
+                background: #d3d3d3; /* Grey background */
+                outline: none;
+            }
+        </style>
+
+        <script type="module">
+            
+            import {
+                TimingObject, 
+                TimingSampler,
+                TimingProgress,
+                SkewConverter
+            } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+
+            const progress_options = {range:[0,13]};
+
+            /*
+                Create TimingObject
+            */
+            const to = new TimingObject({range:[0,10]});
+            const to_pos_elem = document.getElementById("to_pos");
+
+            // progress
+            const to_progress_elem = document.getElementById("to_progress");
+            const to_progress = new TimingProgress(to, 
+                                                   to_progress_elem, progress_options);
+
+            /*
+                Connect buttons        
+            */
+            document.getElementById("to_reset").onclick = function () {
+                to.update({position:0});
+            };
+            document.getElementById("to_pause").onclick = function () {
+                to.update({velocity:0});
+            };
+            document.getElementById("to_play").onclick = function () {
+                to.update({velocity:1});
+            };
+            document.getElementById("to_reverse").onclick = function () {
+                to.update({velocity:-1});
+            };
+
+
+            /*
+                Skew Converter
+            */
+            const c = new SkewConverter(to, 2);
+            const c_pos_elem = document.getElementById("c_pos");
+            const c_skew_elem = document.getElementById("c_skew");
+
+
+            // progress
+            const c_progress_elem = document.getElementById("c_progress");
+            
+            const c_progress = new TimingProgress(c, 
+                                                  c_progress_elem, progress_options);
+            
+            /*
+                Connect buttons        
+            */
+            document.getElementById("c_reset").onclick = function () {
+                c.update({position:0});
+            };
+            document.getElementById("c_pause").onclick = function () {
+                c.update({velocity:0});
+            };
+            document.getElementById("c_play").onclick = function () {
+                c.update({velocity:1});
+            };
+            document.getElementById("c_reverse").onclick = function () {
+                c.update({velocity:-1});
+            };
+
+            // skew
+            document.getElementById("skew_1").onclick = function () {
+                c.skew = 1;
+            };
+            document.getElementById("skew_2").onclick = function () {
+                c.skew = 2;
+            };
+            document.getElementById("skew_3").onclick = function () {
+                c.skew = 3;
+            };
+
+            c.on("skewchange", () => {
+                c_skew_elem.innerHTML = `${c.skew.toFixed(2)}`;
+            });
+
+            /*
+                Sample positions of both timing object and converter
+            */
+            const sampler = new TimingSampler(c, {period:200});
+            sampler.on("change", function () {
+                let to_pos = to.pos;
+                let c_pos = c.pos;
+                to_pos_elem.innerHTML = `${to_pos.toFixed(2)}`;
+                c_pos_elem.innerHTML = `${c_pos.toFixed(2)}`;
+                to_progress.refresh(to_pos);
+                c_progress.refresh(c_pos);
+            });
+
+        </script>
+    </head>
+    <body>
+        <p>
+            <div style="font-weight:bold;">Timing Object</div>
+            <div>
+                <span class="ctrl-label">Position:</span> 
+                <span id="to_pos" style="color:red;"></span>
+            </div>
+            <div class="ctrl-btn">
+                <button id="to_reset">Reset</button>    
+                <button id="to_play">Play</button>    
+                <button id="to_pause">Pause</button>
+                <button id="to_reverse">Reverse</button>
+            </div>  
+            <input type="range" min="0" max="100" value="0" id="to_progress" class="progress">
+        </p>
+        <p>
+            <div style="font-weight:bold;">Skew Converter</div>
+            <div>
+                <span class="ctrl-label">Position:</span> 
+                <span id="c_pos" style="color:red;"></span>
+            </div>
+            <div>
+                <span class="ctrl-label">Skew:</span>
+                <span id="c_skew" style="color:red;"></span>
+            </div>
+            <div class="ctrl-btn">
+                <span class="ctrl-label" > Set skew: </span> 
+                <button id="skew_1">1.0</button>    
+                <button id="skew_2">2.0</button>    
+                <button id="skew_3">3.0</button>
+            </div> 
+
+        </p>
+        <p>
+
+            <div class="ctrl-btn">
+                <button id="c_reset">Reset</button>    
+                <button id="c_play">Play</button>    
+                <button id="c_pause">Pause</button>
+                <button id="c_reverse">Reverse</button>
+            </div>  
+            <input type="range" min="0" max="100" value="0" id="c_progress" class="progress">
+ 
+        </p>
+    </body>
+</html>

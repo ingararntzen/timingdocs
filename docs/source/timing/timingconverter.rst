@@ -7,10 +7,19 @@ Timing Converter
 
 Timing converters are useful when you need an alternative representation for a :ref:`timingobject`. For example, co-presentation of different media sources might be a problem if said media sources refer to different timelines. Given that the relation between the timelines is known, this can be solved by either of the following approaches.
 
-    1) convert all timestamps of media data to match the timeline of the timing object
+    1) convert all timestamps of media sources to match the timeline of the timing object
     2) convert a timing object to match the timeline of each media source
 
-The second approach is often most attractive, as converting timestamps in media data may often be both costly and inconvenient, and undesireable for other reasons too. Simply converting the media clock is typically a much easier solution.
+The second approach is often most attractive, as converting timestamps in media data may often be inconvenient, costrly or otherwise undesireable. Simply converting the media clock is typically a much easier solution.
+
+
+
+.. admonition:: Demo
+
+    .. raw:: html
+        :file: ../demoes/skewconverter.html
+
+    `demo <../_static/skewconverter.html>`_
 
 So, as the name suggests, timing converters **convert** timing objects, for instance by *skewing* or *scaling* the timeline of the original timing object.
 This may be useful in video playback, where the position of a timing object typically represents media offset in seconds. In this case, a timing converter could be used to create and alternative representation based on frame numbers, with playback velocity set to 24 or 25 frames per second (fps), depending on the media format. Or, for music it might be sensible to use beat number as position, and beats per second (bps) as velocity.
