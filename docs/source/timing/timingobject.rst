@@ -16,10 +16,10 @@ The timing object is a simple concept representing timeline state (e.g. media of
     .. raw:: html
         :file: ../demoes/timingobject.html
 
-    `demo link <../_static/timingobject.html>`_
+    `demo <../_static/timingobject.html>`_
 
 
-As illustrated by the above demo, the timing object is a simple object, essentially an advanced stop watch. If started with a velocity, its position changes predictably in time, until at some point later, it is paused, or perhaps the position is reset. It may be queried for its current position at any time. For example, it should take exactly 2.0 seconds for the position to advance from 3.0 to 5.0, if the velocity is 1.0. The timing object supports discrete jumps on the timeline, which may be useful for controlling slide shows or playlists. Velocity is useful for the control of any linear/timed media, including continuous media such as audio and video. Acceleration may not be commonly required, but it is there if you need it. Crucially, the timing object provides a *change* event, emmitted every time its behavior has been altered. This allows timing sensitive components to quickly detect changes and respond by correcting their behaviour accordingly. 
+As illustrated by the above demo, the timing object is similar to an advanced stop watch. If started with a velocity, its position changes predictably in time, until at some point later, it is paused, or perhaps the position is reset. It may be queried for its current position at any time. For example, it should take exactly 2.0 seconds for the position to advance from 3.0 to 5.0, if the velocity is 1.0. The timing object supports discrete jumps on the timeline, which may be useful for controlling slide shows or playlists. Velocity is useful for the control of any linear/timed media, including continuous media such as audio and video. Acceleration may not be commonly required, but it is there if you need it. Crucially, the timing object provides a *change* event, emmitted every time its behavior has been altered. This allows timing sensitive components to quickly detect changes and respond by correcting their behaviour accordingly. 
 
 A `draft specification <https://webtiming.github.io/timingobject/#the-timing-object>`_ for the timing objects has been published with the `W3C <https://www.w3.org/>`_. The timing object concept was first published under the name `Media State Vector <https://dl.acm.org/doi/abs/10.1145/2457413.2457427>`_.
     
