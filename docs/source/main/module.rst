@@ -26,19 +26,19 @@ Import
 
 Timingsrc v3 is available as ES6 module.
 
-    ..  code-block:: html
+..  code-block:: html
 
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <script type="module">
-                    import * as timingsrc from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
-                    console.log(`hello world timingsrc version ${timingsrc.version}!`);
-                </script>
-            </head>
-            <body>
-            </body>
-        </html>
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <script type="module">
+                import * as timingsrc from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                console.log(`hello world timingsrc version ${timingsrc.version}!`);
+            </script>
+        </head>
+        <body>
+        </body>
+    </html>
 
 
 

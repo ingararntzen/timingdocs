@@ -24,6 +24,7 @@ As illustrated by the above demo, the timing object is similar to an advanced st
 A `draft specification <https://webtiming.github.io/timingobject/#the-timing-object>`_ for the timing objects has been published with the `W3C <https://www.w3.org/>`_. The timing object concept was first published under the name `Media State Vector <https://dl.acm.org/doi/abs/10.1145/2457413.2457427>`_.
     
 
+..  _timingobject-definition:
 
 Definition
 ------------------------------------------------------------------------

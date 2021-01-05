@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+        .ctrl-btn button {
+            width:80px;
+        }
+    </style>
+
+    <script type="text/javascript" src="http://www.mcorp.no/lib/mcorp-2.0.js"></script>
+    <script type="module">
+
+        import {TimingObject} from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+
+        const to = new TimingObject();
+
+        // MCorp App
+        const app = MCorp.app("8456579076771837888", {anon:true});        
+        app.ready.then(function() {
+            to.timingsrc = app.motions["shared"];
+        });
+
+        // Hook up buttons UI
+        document.getElementById("reset").onclick = function () {
+            to.update({position:0});
+        };
+        document.getElementById("pause").onclick = function () {
+            to.update({velocity:0});
+        };
+        document.getElementById("play").onclick = function () {
+            to.update({velocity:1});
+        };
+        document.getElementById("reverse").onclick = function () {
+            to.update({velocity:-1});
+        };
+
+        // Hook up text UI
+        let pos_elem = document.getElementById('position');
+        to.on("timeupdate", function () {
+            pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
+        });
+    
+    </script>
+</head>
+<body>
+    <p>
+        <div>
+            Position: <span id="position" style="color:red;"></span>
+        </div>
+        <div class="ctrl-btn">
+            <button id="reset">Reset</button>    
+            <button id="play">Play</button>    
+            <button id="pause">Pause</button>
+            <button id="reverse">Reverse</button>
+        </div>
+    </p>  
+</body>
+</html>

@@ -103,7 +103,7 @@ Timing Provider
 
    let to = new TimingObject({provider: timing_provider});
 
-Timing objects may be connected to external timing resources, i.e. timing resources which live outside the browsing context, for instance online hosted timing resources. This is done by initializing the timing object with a :ref:`timingprovider`. Timing providers are proxy objects to external timing resources, allowing timing objects to be used across different service implementations for timing resources.
+Timing objects may be connected to remote timing resources, i.e. timing resources which live outside the browsing context, for instance online hosted timing resources. This is done by initializing the timing object with a :ref:`timingprovider`. Timing providers are proxy objects to external timing resources, allowing timing objects to be used across different service implementations for timing resources.
 
 
 Dataset and Sequencer
