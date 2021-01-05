@@ -42,6 +42,7 @@ Timingsrc v3
 
    data/interval
    data/cue
+   data/observablemap
    data/dataset
    data/sequencer
 
@@ -58,7 +59,6 @@ Timingsrc v3
    :caption: Misc
 
    misc/events
-   misc/observablemap
 
 .. toctree::
    :maxdepth: 1
@@ -68,12 +68,12 @@ Timingsrc v3
    api/events_api
    api/observablemap_api
    api/timingobject_api
+   api/timingconverter_api
+   api/timingprovider_api
    api/interval_api
    api/dataset_api
    api/sequencer_api
-
-
-
+   api/mediasync_api
 
 
 Timing Object
@@ -83,8 +83,10 @@ Timing Object
 
    let to = new TimingObject();
 
+The *TimingObject* is the central concept of the timingsrc programming model. In essence, the timingobject is a timeline with an API for control. If you set velocity, the position on the timeline will increase in time according to that velocity. The timing object additionally supports behavior like time-shifting, different velocities (including backwards), and acceleration.
 
-The :ref:`timingobject` is the central concept of the timingsrc programming model. In essence, the timingobject is a timeline with an API for control. If you set velocity, the position on the timeline will increase in time according to that velocity. The timing object additionally supports behavior like time-shifting, different velocities (including backwards), and acceleration.
+- :ref:`timingobject` 
+- :ref:`timingobject-api`
 
 
 Timing Converter
@@ -94,7 +96,10 @@ Timing Converter
 
    let c = new SkewConverter(to, 4.0);
 
-A :ref:`timingconverter` is a special kind of timing objects that depends on a *parent* timing object. Timing converters are useful when you need an alternative representations for a timing object. For instance, timing converters may be used to skew or scale the timeline.
+A *TimingConverter* is a special kind of timing objects that depends on a *parent* timing object. Timing converters are useful when you need an alternative representations for a timing object. For instance, timing converters may be used to skew or scale the timeline.
+
+- :ref:`timingconverter` 
+- :ref:`timingconverter-api`
 
 Timing Provider
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -103,8 +108,10 @@ Timing Provider
 
    let to = new TimingObject({provider: timing_provider});
 
-Timing objects may be connected to remote timing resources, i.e. timing resources which live outside the browsing context, for instance online hosted timing resources. This is done by initializing the timing object with a :ref:`timingprovider`. Timing providers are proxy objects to external timing resources, allowing timing objects to be used across different service implementations for timing resources.
+Timing objects may be connected to remote timing resources, i.e. timing resources which live outside the browsing context, for instance hosted by an online timing service. This is done by initializing the timing object with a *TimingProvider*. Timing providers are proxy objects to external timing resources, allowing timing objects to be used across different service implementations for timing resources.
 
+- :ref:`timingprovider` 
+- :ref:`timingprovider-api`
 
 Dataset and Sequencer
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -114,9 +121,17 @@ Dataset and Sequencer
    let ds = new Dataset();
    let s = new Sequencer(ds, to);
 
-Consistent playback of timed data is a key use case for the timing object. This is achieved using :ref:`dataset` and :ref:`sequencer`. Dataset allows 
+Consistent playback of timed data is a key use case for the timing object. This is achieved using *Dataset* and *Sequencer*. Dataset allows 
 any type of time data to be represented as cues. Sequencers dynamically 
-provides the set of active cues, always consistent with the timing object. 
+provides the set of active cues, always consistent with the timing object. Both dataset and sequencer implement the *observable map interface*.
+
+- :ref:`observablemap`
+- :ref:`observablemap-api`
+- :ref:`dataset` 
+- :ref:`dataset-api`
+- :ref:`sequencer` 
+- :ref:`sequencer-api`
+
 
 MediaSync
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -124,11 +139,11 @@ MediaSync
 
    let ms = new MediaSync(to, video_element);
 
-
 Another important use case is consistent playback of HTML5 audio and video.
-This is achieved by connecting the video element to the timing object, using the :ref:`MediaSync` wrapper.
+This is achieved by connecting the video element to the timing object, using the *MediaSync* wrapper.
 
-
+- :ref:`mediasync` 
+- :ref:`mediasync-api`
 
 
 ========================================================================

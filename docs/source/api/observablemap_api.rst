@@ -4,7 +4,7 @@
 Observable Map API
 ========================================================================
 
-The Observable Map API is common to all objects implementing the :ref:`observablemap`.
+The Observable Map API is common to all objects implementing the :ref:`observablemap` interface.
 This includes :ref:`dataset` and :ref:`sequencer`.
 
 

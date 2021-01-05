@@ -4,6 +4,12 @@
 Events
 ========================================================================
 
+All classes in timingsrc uses a custom framework for event notification which supports the :ref:`events-init` pattern.
+
+
+Terminology
+------------------------------------------------------------------------
+
 event provider
     -   defines one or more **named events** 
     -   accepts subscriptions and un-subscriptions of **event callbacks**
@@ -16,6 +22,9 @@ event consumer
         **event provider**
     -   receives **event notification** by **event callback** invocation
 
+
+Subscription and unsubscription
+------------------------------------------------------------------------
 
 Event consumers subscribe and un-subscribe to events using operations **.on()**
 and **.off()** of the event provider. For instance, this is how to
@@ -36,6 +45,23 @@ subscribe to and un-subscribe from a *change* event.
     ep.off("change", sub);
 
 
+It is safe to subscribe or unsubscribe from within an event callback.
+For instance, this can be used to implement **fire once** semantics.
+
+
+..  code-block:: javascript
+
+    // event provider
+    let ep;
+
+    // subscribe
+    let sub = ep.on("change", function() {
+        ep.off("change", sub);
+    });
+
+
+
+
 ..  _events-callback:
 
 Event Callback
@@ -45,6 +71,15 @@ Execution
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 When an event is triggered, the execution of event callbacks is always decoupled using ``Promise.then()``. This avoids nested invocation of event callbacks which may be confusing and hard to debug. 
+
+
+Same Callback
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+It is safe to use the same event callback with multiple subscriptions. For
+instance, in some cases it may be practical to handle different event types
+using only one callback. If needed, the *eInfo* parameter of 
+:js:meth:`event_callback` identifies the source of the event, i.e. the event provider and the event name.
 
 
 This
@@ -111,35 +146,6 @@ Or, you can explicitly specify the ``this`` object as an option with
         // event handler as class method
         onevent(eArg, eInfo) {...}
     }
-
-
-
-Unsubscribe 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-It is safe to subscribe or unsubscribe from within an event callback.
-For instance, this can be used to implement **fire once** semantics.
-
-
-..  code-block:: javascript
-
-    // event provider
-    let ep;
-
-    // subscribe
-    let sub = ep.on("change", function() {
-        ep.off("change", sub);
-    });
-
-
-
-Same Callback
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-It is safe to use the same event callback with multiple subscriptions. For
-instance, in some cases it may be practical to handle different event types
-using only one callback. If needed, the *eInfo* parameter of 
-:js:meth:`event_callback` identifies the source of the event, i.e. the event provider and the event name.
 
 
 

@@ -82,7 +82,7 @@ Shared Motion is provided by `Motion Corporation <http://motioncorporation.com>`
 - **MOTION_NAME**: create a named motion inside your app
 - **APPID**: copy the APPID from your MCorp App
 
-2. Initialise MCorp App object in Web page 
+2. Connect Timing Object to Shared Motion 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  code-block:: html
