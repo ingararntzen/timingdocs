@@ -45,8 +45,7 @@
             const rng_elem = document.getElementById("range");
 
             // refresh position every 100 ms
-            const sampler_options = {period:100};
-            const sampler = new TimingSampler(to, sampler_options);
+            const sampler = new TimingSampler(to, {period:100});
             sampler.on("change", function () {
                 let vector = to.query();
                 let rng = to.range;
@@ -59,7 +58,7 @@
             // progress
             const progress_elem = document.getElementById("progress");
             const progress = new TimingProgress(to, 
-                                                progress_elem,              sampler_options);
+                                                progress_elem,              {sampler:sampler});
 
             /*
                 Connect buttons        
