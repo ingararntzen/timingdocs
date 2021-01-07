@@ -73,12 +73,12 @@ a Web page (without the need for a video).
     });
     ds.update(cues);
 
-    s.on("change", function (eArg) {
+    activeCues.on("change", function (eArg) {
         // activated subtitle
         elem.innerHTML = eArg.new.data.text;
     });
 
-    s.on("remove", function (eArg) {
+    activeCues.on("remove", function (eArg) {
         // deactivate subtitle
         elem.innerHTML = "";
     });

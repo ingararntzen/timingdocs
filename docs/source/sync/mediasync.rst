@@ -5,6 +5,26 @@
 MediaSync
 ================================================================================
 
+..  code-block:: html
+
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <script src="https://mcorp.no/lib/mediasync.js"></script>
+            <script type="module">
+                import {
+                    TimingObject
+                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                const to = new TimingObject({range:[0,100]});
+                const sync = MCorp.mediaSync(document.getElementById('player'), to);
+            </script>
+        </head>
+        <body>
+            <video id="player" autoplay></video>
+        </body>
+    </html>
+
+
 *MediaSync* is JavaScript wrapper for HTML5 media elements, allowing precisly timed playback and control for audio and video on the Web, using the :ref:`timingobject`. This is achived by adjusting the offset of the media element so that it always matches the the timing object. The wrapper code periodically compares *currentTime* property of the media element with the *position* of the timing object. If the difference grows too large, larger adjustments are implemented by *seekTo* operations whereas more gradual corrections are achived by modifications to the playbackrate. 
 
 
@@ -20,7 +40,7 @@ MediaSync
 
 *MediaSync* is a common purpose library. It is not optimised for any particular combination of OS, media codecs or browser implementation. Despite this, and despite a number weaknesses in HTML5 media elements with respect to precisely timed playback, *MediaSync* demonstrates the feasibility of echoless synchronization across the Internet. See for instance this `demonstration <https://www.youtube.com/watch?v=lfoUstnusIE>`_ on YouTube. A technical report evaluating synchronization of HTML5 media elements is available `here <https://docs.google.com/document/d/1d2P3o3RZmilBx1MzMFFDDj5JnF8Yoi-t9EkJKzV90Ak/edit?usp=sharing>`_. 
 
-The MediaSync JavaScript library is maintained by `Motion Corporation <https://www.motioncorporation.com/>`_, and may be downloaded from their site: `download mediasync <https://mcorp.no/lib/mediasync.js>`_.
+The MediaSync JavaScript library is maintained by `Motion Corporation <https://www.motioncorporation.com/>`_ and may be downloaded from their site: `<https://mcorp.no/lib/mediasync.js>`_.
 
 
 Reservations
@@ -30,7 +50,7 @@ Support for precise synchronization of HTML5 media is **experimental** and subje
 
 1) Codecs and format issues are notorious for audio and video on the Web, and certain options/combinations may hurt the ability for precise synchronization.
 
-2) The ability for synchronizing live media streams depends on the player timeline being tied to the media content. In particular, if the media player starts from *currentTime* 0 whenever the viewer session starts, session timeline and content timeline are *independent*. If so, synchronization is not possible, unless the relation between the two timelines may be derived by other means.
+2) The ability to synchronize live media streams depends on the player timeline being tied to the media content. In particular, if the media player starts from *currentTime* 0 whenever the viewer session starts, session timeline and content timeline are *independent*. If so, synchronization is not possible, unless the relation between the two timelines may be derived by other means.
 
 3) Repeated buffering due to limited data access is not a great starting point for precise synchronization.
 
