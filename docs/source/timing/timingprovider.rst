@@ -5,8 +5,6 @@
 Timing Provider
 ================================================================================
 
-A :ref:`timingprovider` is a proxy object for a **remote timing resource**. Remote timing resources exist *outside* the Web page (i.e. browsing context) where the timing object lives. The remote timing resource might live in another process on the same computer or on a remote server. In particular, timingprovider objects allow a :ref:`timingobject` to be connected to an **online timing resource**, opening up for consistent media control in the global scope. This is achieved simply by connecting a timing provider object to the timing object.
-
 ..  code-block:: javascript
 
     // connect timing provider in intialization
@@ -15,6 +13,8 @@ A :ref:`timingprovider` is a proxy object for a **remote timing resource**. Remo
     // alternatively, assign timing provider to timingsrc property
     to.timingsrc = timing_provider;
 
+
+A :ref:`timingprovider` is a proxy object for a **remote timing resource**. Remote timing resources exist *outside* the Web page (i.e. browsing context) where the timing object lives. The remote timing resource might live in another process on the same computer or on a remote server. In particular, timingprovider objects allow a :ref:`timingobject` to be connected to an **online timing resource**, opening up for consistent media control in the global scope. This is achieved simply by connecting a timing provider object to the timing object.
 
 ..  admonition:: Demo
 
@@ -33,11 +33,10 @@ External timing
 The timingsrc programming model is based on the idea that consistency and shared media control is achieved by shared access to timing objects. This idea is the focus of the :ref:`intro`, where timing objects are proposed for consistency across media frameworks within a single Web page. Importantly, with online timing resources, this idea can be extended to globally shared media experiences, without imposing additional complexity on the developers, see `Media Synchronization on the Web <https://link.springer.com/chapter/10.1007/978-3-319-65840-7_17>`_. As such, timing providers extend the scope of the **timingsrc** programming model from local to global.
 
 
-
 Custom Timing Providers
 ------------------------------------------------------------------------
 
-It might be possible to derive a standardized protocol for communication with remote timing services. However, in the interest of future innovation this approach was not recommended by the `Timing Object Draft Specification <http://webtiming.github.io/timingobject/>`_. Instead, the proposal defines an API for timing provider proxy objects, opening up for custom implementations of timing providers. This decoupling between providers of timing services and application code maximizes flexibilty, with the :ref:`timingobject` as a standardized in-between mediator.
+It might be possible to derive a standardized protocol for communication with remote timing services. However, in the interest of future innovation this approach was not recommended by the `Timing Object Draft Specification <http://webtiming.github.io/timingobject/>`_. Instead, the proposal defines an API for timing provider proxy objects, opening up for custom implementations of timing services and assiciated timing providers. This decoupling between specific timing services and application code maximizes flexibilty, with the :ref:`timingobject` as an in-between mediator.
 
 
 Timing Provider Functionality
@@ -86,13 +85,16 @@ Shared Motion is provided by `Motion Corporation <http://motioncorporation.com>`
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  code-block:: html
+    :emphasize-lines: 4,10-13
 
     <!DOCTYPE html>
     <html>
         <head>
             <script type="text/javascript" src="http://www.mcorp.no/lib/mcorp-2.0.js"></script>
             <script type="module">
-                import {TimingObject} from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                import {
+                    TimingObject
+                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
                 const to = new TimingObject();
                 const app = MCorp.app("APPID", {anon:true});        
                 app.ready.then(function() {
@@ -104,3 +106,4 @@ Shared Motion is provided by `Motion Corporation <http://motioncorporation.com>`
         </body>
     </html>
 
+Documentation for MCorp App initialization at `<https://dev.mcorp.no>`_

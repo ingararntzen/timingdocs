@@ -5,6 +5,25 @@
 Timing Converter
 ================================================================================
 
+..  code-block:: html
+    :emphasize-lines: 7,10
+
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <script type="module">
+                import {
+                    TimingObject, 
+                    SkewConverter
+                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                const to = new TimingObject({range:[0,10]});
+                const c = new SkewConverter(to, 2);
+            </script>
+        </head>
+        <body></body>
+    </html>
+
+
 Timing converters are useful when you need an alternative representation for a :ref:`timingobject`. For example, co-presentation of different media sources might be a problem if said media sources refer to different timelines. Given that the relation between the timelines is known, this can be solved by either of the following approaches.
 
     1) convert all timestamps of media sources to match the timeline of the timing object

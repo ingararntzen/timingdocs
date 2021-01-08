@@ -8,10 +8,19 @@ The :ref:`sequencer` implements precisely timed *playback* of *timed data*.
 Playback is controlled using one or two :ref:`TimingObjects <timingobject>`.
 Timed data is represented as :ref:`cues <cue>` managed by a :ref:`dataset`.
 
+
+.. admonition:: Demo
+
+    :ref:`Demo <point-sequencer>` sequencing timed data using a single timing object (see :ref:`sequencer-pointmode`). 
+
+    :ref:`Demo <interval-sequencer>` sequencing timed data using two timing objects (see :ref:`sequencer-intervalmode`). 
+
+    
 ..  _sequencer-mediastate:
 
 Introduction
 ------------------------------------------------------------------------
+
 
 Continuous media experiences require *media state* to be well defined
 along its timeline. For *discrete* media content, cues tied to points or 
@@ -89,7 +98,7 @@ a Web page (without the need for a video).
 
 .. note::
 
-    Note how the application-specific part of this example is only a few lines of code (highlighted lines), limited to making cues from specific data format (20-22) and rendering cues (17, 28, 33).
+    Note how the application-specific part of this example is only a few lines of code (highlighted lines) limited to making cues from specific data format (20-22) and rendering cues (17, 28, 33).
 
 
 
@@ -97,11 +106,7 @@ Programming Model
 ------------------------------------------------------------------------
 
 From the perspective of the programmer, the sequencer is a
-**dynamic, read-only view** into a :ref:`dataset` of cues. The view can *always* 
-be trusted to represent the set of active cues correctly, and to communicate all 
-future changes as **change** and **remove** events, at the correct time.
-This makes for a very attractive programming model, where precisely timed
-playback-visualizations of timed data can be achieved simply by
+**dynamic, read-only view** into a :ref:`dataset` of cues. The view can *always* be trusted to represent the set of active cues correctly, and to communicate all future changes as **change** and **remove** events, at the correct time. This makes for an attractive programming model, where precisely timed playback-visualizations of timed data can be achieved simply by
 implementing handlers for sequencer events. In other words, the programmer only 
 needs to specify what it means for a cue to become active or inactive.
 
@@ -112,7 +117,7 @@ a rich domain with mature practices and a broad set of tools and frameworks to
 go with them. So, the sequencer essentially bridges the gap; allowing 
 timed visualizations to reap the fruits of modern data visualation tools.
 
-    from time-driven to data-driven visualization
+    from data-driven to time-driven visualization
 
 
 
@@ -177,6 +182,7 @@ Sequencer Modes
 The sequencer supports two distinct modes of operation, *point mode*
 and *interval mode*, with different definitions for **active** cues.
 
+..  _sequencer-pointmode:
 
 Point Mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -211,6 +217,14 @@ Initialise a sequencer in point mode by supplying a single timing object.
     let to = new TimingObject();
     // point mode sequencer
     let activeCues = new Sequencer(ds, to);
+
+
+.. admonition:: Demo
+
+    :ref:`Demo <point-sequencer>` sequencing timed data using a single timing object (see :ref:`sequencer-pointmode`).
+
+
+..  _sequencer-intervalmode:
 
 
 Interval Mode
@@ -258,6 +272,11 @@ Initialise a sequencer in interval mode by supplying two timing objects.
 
     // interval mode sequencer
     let s2 = new Sequencer(ds, to1, to2);
+
+
+.. admonition:: Demo
+
+    :ref:`Demo <interval-sequencer>` sequencing timed data using two timing objects (see :ref:`sequencer-intervalmode`). 
 
 
 Cue ordering

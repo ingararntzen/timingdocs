@@ -126,17 +126,3 @@ Ready
 
 Ready to load the page and start controlling the timing object.
 
-.. admonition:: Demo
-
-    .. raw:: html
-        :file: ../demoes/sequencer.html
-
-
-Code
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-.. literalinclude:: ../demoes/sequencer.html
-    :language: html
-
-
-

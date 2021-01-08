@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <style type="text/css">
+            .ctrl-label {
+                display:inline-block;
+                width:100px;
+            }
+            .ctrl-btn button {
+                width:80px;
+            }
+            .progress {
+                width: 100%; /* Full-width */
+                appearance: none;
+                border-radius: 5px;
+                height: 5px;
+                background: #d3d3d3; /* Grey background */
+                outline: none;
+            }
+            .active {color:red}
+            .active-cues {
+                color:red;
+            }
+            
+            #activecues div {
+                display: inline-block;
+            }
+        </style>
+        
+        <script type="module">
+            import {
+                TimingObject, Dataset, Sequencer, Interval,
+                TimingProgress, TimingSampler, SkewConverter,
+                DatasetViewer
+            } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+
+            /*
+                Create TimingObject, Dataset and Sequencer
+            */
+            const to = new TimingObject({range:[0, 30]});
+            const to2 = new SkewConverter(to, 4);
+            const ds = new Dataset();
+            const activeCues = new Sequencer(ds, to, to2);
+
+            /*
+                Visualize Timing Object Position
+            */
+
+            // refresh position every 100 ms
+            const sampler = new TimingSampler(to, {period:100});
+
+            // position
+            const pos_elem = document.getElementById("position");
+            const pos_elem2 = document.getElementById("position2");
+            sampler.on("change", function() {
+                pos_elem.innerHTML = `${to.pos.toFixed(2)}`;
+                pos_elem2.innerHTML = `${to2.pos.toFixed(2)}`;
+            });
+
+            // progress
+            const progress_elem = document.getElementById("progress");
+            const progress2_elem = document.getElementById("progress2");
+            const progress_options = {sampler:sampler, range:[0,34]};
+            const progress = new TimingProgress(to, 
+                                                progress_elem, 
+                                                progress_options);
+                                    
+            const progress2 = new TimingProgress(to2, 
+                                                 progress2_elem,           
+                                                 progress_options);
+ 
+ 
+            /*
+                Connect buttons        
+            */
+            document.getElementById("play").onclick = function () {
+                to.update({velocity:1});
+            };
+            document.getElementById("pause").onclick = function () {
+                to.update({velocity:0});
+            };
+            document.getElementById("reverse").onclick = function () {
+                to.update({velocity:-1});
+            };
+            document.getElementById("reset").onclick = function () {
+                to.update({position:0, velocity:0});
+            };
+
+            /*
+                Mockup Timed Data
+            */
+            const data = [
+                {id:"a", text: 'A', start: 0, end: 1 },
+                {id:"b", text: 'B', start: 2, end: 3 },
+                {id:"c", text: 'C', start: 4, end: 5 },
+                {id:"d", text: 'D', start: 6, end: 7 },
+                {id:"e", text: 'E', start: 8, end: 9 },
+                {id:"f", text: 'F', start: 10, end: 11 },
+                {id:"g", text: 'G', start: 12, end: 13 },
+                {id:"h", text: 'H', start: 14, end: 15 },
+                {id:"i", text: 'I', start: 16, end: 17 },
+                {id:"j", text: 'J', start: 18, end: 19 },
+                {id:"k", text: 'K', start: 20, end: 21 },
+                {id:"l", text: 'L', start: 22, end: 23 },
+                {id:"m", text: 'M', start: 24, end: 25 },
+                {id:"n", text: 'N', start: 26, end: 27 },
+                {id:"o", text: 'O', start: 28, end: 29 }
+            ];
+
+            /*
+                Load timed cues into dataset
+            */
+            const cues = data.map(item => {
+                return {
+                    key: item.id,
+                    interval: new Interval(item.start, item.end),
+                    data: item
+                };
+            });
+            ds.update(cues);
+
+            /*
+                Visualize cues in dataset
+            */
+
+            class CuesViewer extends DatasetViewer {
+
+                constructor(ds, activeCues, elem) {
+                    super(ds, elem);
+                    this._activeCues = activeCues;
+
+                    // listen for click events on root element
+                    elem.addEventListener("click", e => {
+                        // find cue key from div wrapping button
+                        let key = e.path[1].id;
+                        e.stopPropagation();
+                        ds.removeCue(key);
+                    })
+                }
+
+                cue2string(cue) {
+                    let key = cue.key;
+                    let text = JSON.stringify(cue.data);
+                    if (this._activeCues.has(cue.key)) {
+                        return `
+                            <div id=${key} class="active">
+                                <button>X</button>
+                                <span>${text}</span>
+                            </div>`;
+                    } else {
+                        return `
+                            <div id=${key}>
+                                <button>X</button>
+                                <span>${text}</span>
+                            </div>`;
+                    }
+                }
+            }
+            let cues_elem = document.getElementById("cues");
+            let cues_viewer = new CuesViewer(ds, activeCues, cues_elem);
+
+
+            /*
+                Visualize active cues in dataset
+            */
+            activeCues.on("change", (eArg, eInfo) => {
+                let el = document.getElementById(eArg.key);
+                if (el) {
+                    el.classList.add("active");
+                }
+            });
+
+            activeCues.on("remove", (eArg, eInfo) => {
+                let el = document.getElementById(eArg.key);
+                if (el) {
+                    el.classList.remove("active");
+                }
+            });
+
+            /*
+                Visualize list of active cues
+            */
+            class ActiveCuesViewer extends DatasetViewer {
+                cue2string(cue) {
+                    return `${cue.data.text}`;
+                }
+            }
+            let active_cues_elem = document.getElementById("activecues");
+            let active_cues_viewer = new ActiveCuesViewer(activeCues, active_cues_elem);
+
+        </script>
+
+    </head>
+    <body>
+        <p>
+            <div>
+                <span class="ctrl-label">Position 1:</span> 
+                <span class="active" id="position"></span>
+            </div>
+            <div>
+                <span class="ctrl-label">Position 2:</span> 
+                <span class="active" id="position2"></span>
+            </div>
+            <div>
+                <span class="ctrl-label">Active:</span>
+                <span class="active-cues" id="activecues"></span>
+            </div>
+        </p>
+        <p>
+            <div class="ctrl-btn">
+                <button id="reset">Reset</button>    
+                <button id="play">Play</button>    
+                <button id="pause">Pause</button>
+                <button id="reverse">Reverse</button>
+            </div> 
+        </p>
+        <p>
+            <input type="range" min="0" max="100" value="0" id="progress" class="progress">
+            <input type="range" min="0" max="100" value="0" id="progress2" class="progress">
+        </p> 
+        <p>
+          <div id="cues"></div>
+        </p>
+    </body>
+</html>

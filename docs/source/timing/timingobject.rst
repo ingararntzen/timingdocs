@@ -4,10 +4,21 @@
 Timing Object
 ================================================================================
 
-..  code-block:: javascript
+..  code-block:: html
+    :emphasize-lines: 6,8
 
-    // create timing object
-    const to = new TimingObject({range:[0,10]});
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <script type="module">
+                import {
+                    TimingObject
+                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                const to = new TimingObject({range:[0,10]});
+            </script>
+        </head>
+        <body></body>
+    </html>
 
 The timing object is a simple concept representing timeline state (e.g. media offset) and timeline controls (e.g. play/pause). Similar constructs can be found in most media frameworks, yet typically they are internal to each framework. The main purpose of the timing object is rather to provide a generic timeline construct to be used across media frameworks (see :ref:`intro`).
 

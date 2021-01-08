@@ -45,6 +45,8 @@ Timingsrc v3
    data/observablemap
    data/dataset
    data/sequencer
+   data/point_sequencer
+   data/interval_sequencer
 
 .. toctree::
    :maxdepth: 1
