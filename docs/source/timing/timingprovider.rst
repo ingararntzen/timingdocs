@@ -7,10 +7,7 @@ Timing Provider
 
 ..  code-block:: javascript
 
-    // connect timing provider in intialization
-    let to = new TimingObject({provider: timing_provider});
-
-    // alternatively, assign timing provider to timingsrc property
+    // assign timing provider to timingsrc property
     to.timingsrc = timing_provider;
 
 

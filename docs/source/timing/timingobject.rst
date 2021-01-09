@@ -60,6 +60,7 @@ internal vector
 
     Timing objects may serve a variety of purposes within an application, so the **value** and **unit** of the timing object **position** is application specific. However, in the context of media applications **position** would typically be the duration since the beginning of some media session, in seconds. 
 
+..  _timingobject-query:
 
 query
     The query operation of the timing object is a cheap calculation useful for periodic sampling. It returns a fresh vector snapshot, calculated from the internal vector.
@@ -81,6 +82,8 @@ query
             };
         }
 
+..  _timingobject-update:
+
 update
     The update operation of the timing object accepts a vector specifying new values for position, velocity and acceleration, used to reset the internal vector of the timing object. If say **position** is omitted from the new vector, this means to preserve **position** as it was just before the update request was processed.
 
@@ -99,6 +102,8 @@ update
         // jump to 10, keep current velocity
         to.update({position:10.0})
 
+..  _timingobject-change:
+
 change event
     Whenever a timing object is updated, a **change** event is emitted from the
     timing object. The change event represents the start of a new movement. By subscribing to **change** events, media frameworks and components may monitor the timinig object and implement timely reactions to changes in timing object behavior.
@@ -115,6 +120,8 @@ change event
                 console.log("not moving!");
             }
         });
+
+..  _timingobject-timeupdate:
 
 timeupdate event
     For convencience, timing objects also provide an event for periodic sampling of the timing object. The **timeupdate** event is emitted at 5Hz (every 200 milliseconds) whenever the velocity (or acceleration) of the timing object is non-zero. So, if the timing object is paused, no events are emmitted util the timing object is unpaused.
