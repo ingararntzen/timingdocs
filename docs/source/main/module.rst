@@ -11,7 +11,7 @@ Source code
 Timingsrc at `GitHub <https://github.com/webtiming/timingsrc>`_.
 
 
-Include as Script
+Include as script
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  code-block:: html
@@ -38,7 +38,7 @@ Minified source
 
 
 
-Include as ES6 Module 
+Include as ES6 module 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  code-block:: html

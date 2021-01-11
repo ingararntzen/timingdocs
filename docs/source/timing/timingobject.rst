@@ -143,6 +143,12 @@ timeupdate event
         });
 
 
+..  _timingobject-rangechange:
+
+rangechange event
+    Event triggeres whenever the range is changed.
+
+
 
 Programming with Timing Objects
 ------------------------------------------------------------------------

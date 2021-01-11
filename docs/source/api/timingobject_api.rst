@@ -23,6 +23,7 @@ Timing Object API
 
     ..  js:attribute:: range
 
+        :param Array range: new range : [low, high]
         :returns Array: range : [low, high]
 
     ..  js:attribute:: ready
@@ -71,7 +72,7 @@ Timing Object API
 
         see :js:meth:`EventProviderInterface.on`
 
-        see :ref:`Change Event <timingobject-change>` and :ref:`Timeupdate Event <timingobject-timeupdate>`
+        see :ref:`Change Event <timingobject-change>`, :ref:`Timeupdate Event <timingobject-timeupdate>` and :ref:`Rangechange Event <timingobject-rangechange>`
 
     ..  js:method:: off (name, subscription)
 
