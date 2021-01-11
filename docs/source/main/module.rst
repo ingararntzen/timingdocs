@@ -11,8 +11,24 @@ Source code
 Timingsrc at `GitHub <https://github.com/webtiming/timingsrc>`_.
 
 
-Download
+Include as Script
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+..  code-block:: html
+
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <script type="text/javascript" src="https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js">
+            </script>
+            <script type="text/javascript">
+                console.log(`hello world timingsrc version ${TIMINGSRC.version}!`);            
+            </script>
+        </head>
+        <body>
+        </body>
+    </html>
+
 
 Full source
     `<https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js>`_
@@ -21,10 +37,9 @@ Minified source
     `<https://webtiming.github.io/timingsrc/lib/timingsrc-min-v3.js>`_
 
 
-Import
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Timingsrc v3 is available as ES6 module.
+Include as ES6 Module 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 ..  code-block:: html
 
@@ -32,13 +47,20 @@ Timingsrc v3 is available as ES6 module.
     <html>
         <head>
             <script type="module">
-                import * as timingsrc from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
-                console.log(`hello world timingsrc version ${timingsrc.version}!`);
+                import * as TIMINGSRC from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                console.log(`hello world timingsrc version ${TIMINGSRC.version}!`);
             </script>
         </head>
         <body>
         </body>
     </html>
+
+Full source
+    `<https://webtiming.github.io/timingsrc/lib/timingsrc-module-v3.js>`_
+
+Minified source
+    `<https://webtiming.github.io/timingsrc/lib/timingsrc-module-min-v3.js>`_
+
 
 
 

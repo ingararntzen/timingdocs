@@ -13,7 +13,7 @@ Timing Object
             <script type="module">
                 import {
                     TimingObject
-                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-module-v3.js";
                 const to = new TimingObject({range:[0,10]});
             </script>
         </head>

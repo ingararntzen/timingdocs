@@ -91,7 +91,7 @@ Shared Motion is provided by `Motion Corporation <http://motioncorporation.com>`
             <script type="module">
                 import {
                     TimingObject
-                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-module-v3.js";
                 const to = new TimingObject();
                 const app = MCorp.app("APPID", {anon:true});        
                 app.ready.then(function() {

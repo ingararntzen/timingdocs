@@ -22,7 +22,7 @@ Setup a webpage and initialise key **timingsrc** concepts:
     <html>
         <head>
             <script type="module">
-                import {TimingObject, Dataset, Sequencer, Interval} from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                import {TimingObject, Dataset, Sequencer, Interval} from "https://webtiming.github.io/timingsrc/lib/timingsrc-module-v3.js";
                 const to = new TimingObject();
                 const ds = new Dataset();
                 const activeCues = new Sequencer(ds, to);

@@ -15,7 +15,7 @@ Timing Converter
                 import {
                     TimingObject, 
                     SkewConverter
-                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-module-v3.js";
                 const to = new TimingObject({range:[0,10]});
                 const c = new SkewConverter(to, 2);
             </script>
