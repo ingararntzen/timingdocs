@@ -98,7 +98,7 @@ Welcome to timingsrc!
 
 **Timingsrc** is a programming model for precisely timed Web applications. The model is based on the :ref:`timingobject`, which allows precise synchronization and control across multiple media sources, media types, UI components and media frameworks.
 
-For **online** timing support, connect an online :ref:`timingprovider` to the :ref:`timingobject`. The :ref:`timingprovider-sharedmotion` provides millisecond precise timing **globally** for Web clients and is open for non-commercial experimentation.
+For **online** timing support, connect an online :ref:`timingprovider` to the :ref:`timingobject`. The :ref:`timingprovider-sharedmotion` is hosted online and provides millisecond precise timing **globally** for Web clients and is open for non-commercial experimentation.
 
 Need to synchronize HTML5 video? 
 	Check out :ref:`demo-mediasync`
