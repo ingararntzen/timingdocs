@@ -18,7 +18,7 @@ Sequencing timed data using two :ref:`timingobject` (see :ref:`sequencer-interva
     .. raw:: html
         :file: ../_demoes/interval_sequencer.html
 
-    `demo file <../_demoes/interval_sequencer.html>`_
+    `demofile <../_demoes/interval_sequencer.html>`_
 
 
 Code

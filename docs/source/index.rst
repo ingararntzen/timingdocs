@@ -4,8 +4,11 @@
    contain the root `toctree` directive.
 
 ========================================================================
-Timingsrc v3
+Timingsrc v3 Documentation
 ========================================================================
+
+Timingsrc is hosted at `GitHub <https://github.com/webtiming/timingsrc>`_.
+
 
 .. admonition:: Timingsrc
 
@@ -108,6 +111,7 @@ Need to synchronized timed data?
 
 Need to go online? 
 	Check out :ref:`demo-timingprovider`
+
 
 
 Timing Object
