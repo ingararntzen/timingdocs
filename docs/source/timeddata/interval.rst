@@ -4,6 +4,15 @@
 Interval
 ========================================================================
 
+
+.. contents::
+    :depth: 2
+
+
+Introduction
+------------------------------------------------------------------------
+
+
 :ref:`interval` is used by :ref:`dataset` and :ref:`sequencer` to define the
 validity of objects or values in relation to a timeline. Intervals
 describe either a *continuous line segment* or a *singular point*. In
@@ -32,11 +41,6 @@ infinite values are always closed.
 
     e.g.: **[a, Infinity]  [-Infinity, a]  [-Infinity, Infinity]**.
 
-
-Examples
-------------------------------------------------------------------------
-
-How to create intervals.
 
 .. code-block:: javascript
 

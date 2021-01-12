@@ -5,6 +5,14 @@
 Timing Converter
 ================================================================================
 
+
+.. contents::
+    :depth: 2
+
+
+Introduction
+------------------------------------------------------------------------
+
 ..  code-block:: html
     :emphasize-lines: 7,10
 
@@ -35,10 +43,7 @@ The second approach is often most attractive, as converting timestamps in media 
 
 .. admonition:: Demo
 
-    .. raw:: html
-        :file: ../demoes/skewconverter.html
-
-    `demo <../_static/skewconverter.html>`_
+    See :ref:`demo-timingconverter`
 
 So, as the name suggests, timing converters **convert** timing objects, for instance by *skewing* or *scaling* the timeline of the original timing object.
 This may be useful in video playback, where the position of a timing object typically represents media offset in seconds. In this case, a timing converter could be used to create and alternative representation based on frame numbers, with playback velocity set to 24 or 25 frames per second (fps), depending on the media format. Or, for music it might be sensible to use beat number as position, and beats per second (bps) as velocity.

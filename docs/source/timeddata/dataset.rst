@@ -4,6 +4,13 @@
 Dataset
 ========================================================================
 
+.. contents::
+    :depth: 2
+
+
+Introduction
+------------------------------------------------------------------------
+
 :ref:`dataset` manages a collection of cues, implements the
 :ref:`observablemap` and adds support for flexible and efficient cue
 modification and lookup, even for large volumes of cues.

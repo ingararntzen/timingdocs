@@ -4,6 +4,13 @@
 Basic Timing Object Controls
 ========================================================================
 
+.. contents::
+    :depth: 2
+
+
+Introduction
+------------------------------------------------------------------------
+
 This demonstrates how to make a Webpage with basic control elements
 for a :ref:`timingobject`. More advanced controls may use this
 as a starting point.
@@ -117,9 +124,9 @@ Ready to load the page and start controlling the timing object.
 Code
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-.. literalinclude:: ../demoes/basic_controls.html
+.. literalinclude:: ../_demoes/basic_controls.html
     :language: html
 
-:download:`the script <../demoes/basic_controls.html>`
+`demofile <../_demoes/basic_controls.html>`_
 
 

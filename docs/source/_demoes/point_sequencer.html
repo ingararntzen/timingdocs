@@ -141,25 +141,6 @@
             let cues_elem = document.getElementById("cues");
             let cues_viewer = new CuesViewer(ds, activeCues, cues_elem);
 
-
-            /*
-                Visualize cues in dataset
-            */
-            /*
-            let html = [...ds.values()]
-                .map(function(cue){
-                    let key = cue.key;
-                    let text = JSON.stringify(cue.data);
-                    if (activeCues.has(cue.key)) {
-                        return `<div id=${key} class="active">${text}</div>`;
-                    } else {
-                        return `<div id=${key}>${text}</div>`;
-                    }
-                })
-                .join("\n");
-            document.getElementById("cues").innerHTML = html;
-            */
-
             /*
                 Visualize active cues
             */
@@ -171,7 +152,6 @@
                 }
                 active_elem.innerText = `${eArg.new.data.text}`;
             });
-
             activeCues.on("remove", (eArg, eInfo) => {
                 let el = document.getElementById(eArg.key);
                 if (el) {

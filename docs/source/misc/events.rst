@@ -4,6 +4,13 @@
 Events
 ========================================================================
 
+.. contents::
+    :depth: 2
+
+
+Introduction
+------------------------------------------------------------------------
+
 All classes in timingsrc uses a custom framework for event notification which supports the :ref:`events-init` pattern.
 
 

@@ -4,6 +4,13 @@
 Sequencer
 ========================================================================
 
+.. contents::
+    :depth: 2
+
+
+Introduction
+------------------------------------------------------------------------
+
 The :ref:`sequencer` implements precisely timed *playback* of *timed data*.
 Playback is controlled using one or two :ref:`TimingObjects <timingobject>`.
 Timed data is represented as :ref:`cues <cue>` managed by a :ref:`dataset`.
@@ -11,16 +18,15 @@ Timed data is represented as :ref:`cues <cue>` managed by a :ref:`dataset`.
 
 .. admonition:: Demo
 
-    :ref:`Demo <point-sequencer>` sequencing timed data using a single timing object (see :ref:`sequencer-pointmode`). 
+    :ref:`demo-point-sequencer` sequencing timed data using a single timing object (see :ref:`sequencer-pointmode`). 
 
-    :ref:`Demo <interval-sequencer>` sequencing timed data using two timing objects (see :ref:`sequencer-intervalmode`). 
+    :ref:`demo-interval-sequencer` sequencing timed data using two timing objects (see :ref:`sequencer-intervalmode`). 
 
     
 ..  _sequencer-mediastate:
 
-Introduction
+Linear Media State
 ------------------------------------------------------------------------
-
 
 Continuous media experiences require *media state* to be well defined
 along its timeline. For *discrete* media content, cues tied to points or 
@@ -45,79 +51,6 @@ the correct time and in the correct order.
 The sequencer encapsulates all of this, leaving the programmer to specify appropriate
 actions as cues become active and inactive, by implementing handlers for 
 sequencer **change** and **remove** events.
-
-
-Example
-------------------------------------------------------------------------
-
-As a trivial example, this demonstrates playback of subtitles in
-a Web page (without the need for a video).
-
-..  code-block:: javascript
-    :linenos:
-    :emphasize-lines: 17, 21-22, 28, 33
-
-    /*
-        Simplistic subtitle playback
-
-        const subtitles = [{
-            id: "1234",
-            start: 123.70,
-            end: 128.21,
-            text: "This is a subtitle"
-        }, ...]
-    */
-
-    let ds = new Dataset();
-    let to = new TimingObject();
-    let activeCues = new Sequencer(ds, to);
-
-    // subtitle DOM element
-    let elem = document.getElementById("subtitle");
-
-    // create and load cues
-    let cues = subtitles.map(sub => {
-        let itv = new Interval(sub.start, sub.end);
-        return {key: sub.key, interval: itv, data: sub};
-    });
-    ds.update(cues);
-
-    activeCues.on("change", function (eArg) {
-        // activated subtitle
-        elem.innerHTML = eArg.new.data.text;
-    });
-
-    activeCues.on("remove", function (eArg) {
-        // deactivate subtitle
-        elem.innerHTML = "";
-    });
-
-    // start playback !
-    to.update({velocity:1});
-
-
-.. note::
-
-    Note how the application-specific part of this example is only a few lines of code (highlighted lines) limited to making cues from specific data format (20-22) and rendering cues (17, 28, 33).
-
-
-
-Programming Model
-------------------------------------------------------------------------
-
-From the perspective of the programmer, the sequencer is a
-**dynamic, read-only view** into a :ref:`dataset` of cues. The view can *always* be trusted to represent the set of active cues correctly, and to communicate all future changes as **change** and **remove** events, at the correct time. This makes for an attractive programming model, where precisely timed playback-visualizations of timed data can be achieved simply by
-implementing handlers for sequencer events. In other words, the programmer only 
-needs to specify what it means for a cue to become active or inactive.
-
-As such, the sequencer encapsulates all the timing-related complexity, and 
-transforms the challenge of *time-driven visualization* into a challenge of 
-*data-driven visualization*. Reactive data visualization is already 
-a rich domain with mature practices and a broad set of tools and frameworks to 
-go with them. So, the sequencer essentially bridges the gap; allowing 
-timed visualizations to reap the fruits of modern data visualation tools.
-
-    from data-driven to time-driven visualization
 
 
 
@@ -172,6 +105,77 @@ Sequence of timed events
 
 
 
+Programming Model
+------------------------------------------------------------------------
+
+From the perspective of the programmer, the sequencer is a
+**dynamic, read-only view** into a :ref:`dataset` of cues. The view can *always* be trusted to represent the set of active cues correctly, and to communicate all future changes as **change** and **remove** events, at the correct time. This makes for an attractive programming model, where precisely timed playback-visualizations of timed data can be achieved simply by
+implementing handlers for sequencer events. In other words, the programmer only 
+needs to specify what it means for a cue to become active or inactive.
+
+As such, the sequencer encapsulates all the timing-related complexity, and 
+transforms the challenge of *time-driven visualization* into a challenge of 
+*data-driven visualization*. Reactive data visualization is already 
+a rich domain with mature practices and a broad set of tools and frameworks to 
+go with them. So, the sequencer essentially bridges the gap; allowing 
+timed visualizations to reap the fruits of modern data visualation tools.
+
+    from data-driven to time-driven visualization
+
+
+As a trivial example, this demonstrates playback of subtitles in
+a Web page (without the need for a video).
+
+..  code-block:: javascript
+    :linenos:
+    :emphasize-lines: 17, 21-22, 28, 33
+
+    /*
+        Simplistic subtitle playback
+
+        const subtitles = [{
+            id: "1234",
+            start: 123.70,
+            end: 128.21,
+            text: "This is a subtitle"
+        }, ...]
+    */
+
+    let ds = new Dataset();
+    let to = new TimingObject();
+    let activeCues = new Sequencer(ds, to);
+
+    // subtitle DOM element
+    let elem = document.getElementById("subtitle");
+
+    // create and load cues
+    let cues = subtitles.map(sub => {
+        let itv = new Interval(sub.start, sub.end);
+        return {key: sub.key, interval: itv, data: sub};
+    });
+    ds.update(cues);
+
+    activeCues.on("change", function (eArg) {
+        // activated subtitle
+        elem.innerHTML = eArg.new.data.text;
+    });
+
+    activeCues.on("remove", function (eArg) {
+        // deactivate subtitle
+        elem.innerHTML = "";
+    });
+
+    // start playback !
+    to.update({velocity:1});
+
+
+.. note::
+
+    Note how the application-specific part of this example is only a few lines of code (highlighted lines) limited to making cues from specific data format (20-22) and rendering cues (17, 28, 33).
+
+
+
+
 ..  _sequencer-modes:
 
 
@@ -221,7 +225,7 @@ Initialise a sequencer in point mode by supplying a single timing object.
 
 .. admonition:: Demo
 
-    :ref:`Demo <point-sequencer>` sequencing timed data using a single timing object (see :ref:`sequencer-pointmode`).
+    :ref:`demo-point-sequencer` sequencing timed data using a single timing object (see :ref:`sequencer-pointmode`).
 
 
 ..  _sequencer-intervalmode:
@@ -276,7 +280,7 @@ Initialise a sequencer in interval mode by supplying two timing objects.
 
 .. admonition:: Demo
 
-    :ref:`Demo <interval-sequencer>` sequencing timed data using two timing objects (see :ref:`sequencer-intervalmode`). 
+    :ref:`demo-interval-sequencer` sequencing timed data using two timing objects (see :ref:`sequencer-intervalmode`). 
 
 
 Cue ordering

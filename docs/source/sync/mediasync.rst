@@ -5,6 +5,14 @@
 MediaSync
 ================================================================================
 
+
+.. contents::
+    :depth: 2
+
+
+Introduction
+------------------------------------------------------------------------
+
 ..  code-block:: html
     :emphasize-lines: 4,10,14
 
@@ -30,13 +38,8 @@ MediaSync
 
 
 ..  admonition:: Demo
-
-    This is a demo of HTML5 video synchronization using the :ref:`timingobject`. 
     
-    .. raw:: html
-        :file: ../demoes/mediasync.html
-
-    `demo <../demoes/mediasync.html>`_
+    See :ref:`demo-mediasync`
 
 
 *MediaSync* is a common purpose library. It is not optimised for any particular combination of OS, media codecs or browser implementation. Despite this, and despite a number weaknesses in HTML5 media elements with respect to precisely timed playback, *MediaSync* demonstrates the feasibility of echoless synchronization across the Internet. See for instance this `demonstration <https://www.youtube.com/watch?v=lfoUstnusIE>`_ on YouTube. A technical report evaluating synchronization of HTML5 media elements is available `here <https://docs.google.com/document/d/1d2P3o3RZmilBx1MzMFFDDj5JnF8Yoi-t9EkJKzV90Ak/edit?usp=sharing>`_. 

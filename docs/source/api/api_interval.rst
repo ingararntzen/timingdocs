@@ -4,7 +4,6 @@
 Interval API
 ========================================================================
 
-
 ..  js:class:: Interval(low[, high[, lowInclude[, highInclude]]])
 
     :param float low: leftmost endpoint of interval

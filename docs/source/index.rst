@@ -11,8 +11,6 @@ Timingsrc v3
 
    A programming model for time sensitive Web applications, based on the Timing Object. Precise timing, synchronization and control enabled for single-device and multi-device Web applications.
 
-
-
 .. toctree::
    :maxdepth: 1
    :hidden:
@@ -21,10 +19,21 @@ Timingsrc v3
    main/intro
    main/module
    main/quickstart
-   main/howto
    main/version
-   main/contributions
    main/standardization
+   main/contributions
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Demoes
+
+   demoes/demo_timingobject
+   demoes/demo_timingconverter
+   demoes/demo_timingprovider
+   demoes/demo_mediasync
+   demoes/demo_point_sequencer
+   demoes/demo_interval_sequencer
 
 .. toctree::
    :maxdepth: 1
@@ -38,22 +47,21 @@ Timingsrc v3
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Timed Data
+   :caption: Media Sync
 
-   data/interval
-   data/cue
-   data/observablemap
-   data/dataset
-   data/sequencer
-   data/point_sequencer
-   data/interval_sequencer
+   sync/mediasync
 
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Media Sync
+   :caption: Timed Data
 
-   sync/mediasync
+   timeddata/interval
+   timeddata/cue
+   timeddata/observablemap
+   timeddata/dataset
+   timeddata/sequencer
+
 
 .. toctree::
    :maxdepth: 1
@@ -62,20 +70,44 @@ Timingsrc v3
 
    misc/events
 
+
 .. toctree::
    :maxdepth: 1
    :hidden:
    :caption: API
    
-   api/events_api
-   api/observablemap_api
-   api/timingobject_api
-   api/timingconverter_api
-   api/timingprovider_api
-   api/interval_api
-   api/dataset_api
-   api/sequencer_api
-   api/mediasync_api
+
+
+
+   api/api_events
+   api/api_observablemap
+   api/api_timingobject
+   api/api_timingconverter
+   api/api_timingprovider
+
+   api/api_interval
+   api/api_dataset
+   api/api_sequencer
+
+
+
+   api/api_mediasync
+
+Welcome to timingsrc!
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+**Timingsrc** is a programming model for precisely timed Web applications. The model is based on the :ref:`timingobject`, which allows precise synchronization and control across multiple media sources, media types, UI components and media frameworks.
+
+For **online** timing support, connect an online :ref:`timingprovider` to the :ref:`timingobject`. The :ref:`timingprovider-sharedmotion` provides millisecond precise timing **globally** for Web clients and is open for non-commercial experimentation.
+
+Need to synchronize HTML5 video? 
+	Check out :ref:`demo-mediasync`
+
+Need to synchronized timed data? 
+	Check out :ref:`demo-point-sequencer`
+
+Need to go online? 
+	Check out :ref:`demo-timingprovider`
 
 
 Timing Object

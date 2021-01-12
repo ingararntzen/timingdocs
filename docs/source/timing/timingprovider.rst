@@ -1,3 +1,5 @@
+
+
 ..  _timingprovider:
 
 
@@ -5,22 +7,24 @@
 Timing Provider
 ================================================================================
 
+.. contents::
+    :depth: 2
+
+Introduction
+------------------------------------------------------------------------
+
+
 ..  code-block:: javascript
 
-    // assign timing provider to timingsrc property
+    // assign timing provider to timingsrc property of timing object
     to.timingsrc = timing_provider;
 
 
-A :ref:`timingprovider` is a proxy object for a **remote timing resource**. Remote timing resources exist *outside* the Web page (i.e. browsing context) where the timing object lives. The remote timing resource might live in another process on the same computer or on a remote server. In particular, timingprovider objects allow a :ref:`timingobject` to be connected to an **online timing resource**, opening up for consistent media control in the global scope. This is achieved simply by connecting a timing provider object to the timing object.
+A :ref:`timingprovider` is a proxy object for a **remote timing resource**. Remote timing resources exist *outside* the Web page (i.e. browsing context) of the timing object. The remote timing resource might live in another process on the same computer or on a remote server. By acting as proxy, timingprovider objects allow a :ref:`timingobject` to be *connected* to a remote timing resource. If the remote timing resource is hosted online, this opens up for consistent media control in the global scope.
 
 ..  admonition:: Demo
 
-    This is a demo of online synchronization, based on the :ref:`timingprovider-sharedmotion`. Try opening this page on multiple devices (or browser tabs) simultaneously to verify consistency. Also try reloading the demo on one device/tab while the demo is running on others. Since *Shared Motion* is an online timing resource, others might be playing with the demo too.
-
-    .. raw:: html
-        :file: ../demoes/timingprovider.html
-
-    `demo <../_static/timingprovider.html>`_
+    See :ref:`demo-timingprovider`
 
 
 

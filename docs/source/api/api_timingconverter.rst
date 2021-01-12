@@ -4,9 +4,17 @@
 Timing Converter API
 ========================================================================
 
-..  contents::
+.. contents::
+    :depth: 2
+
+
+Introduction
+------------------------------------------------------------------------
 
 All timing converters implement the :ref:`timingobject-api`.
+
+
+
 
 ..  _skewconverter-api:
 
@@ -27,10 +35,6 @@ Skew Converter API
 
         :param float skew: new skew
         :returns float skew: current skew 
-
-
-
-
 
 
 ..  _scaleconverter-api:

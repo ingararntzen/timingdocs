@@ -4,7 +4,6 @@
 Sequencer API
 ========================================================================
 
-
 ..  js:class:: Sequencer(dataset, to_A[, to_B])
 
     :param Dataset dataset: source dataset of sequencer
