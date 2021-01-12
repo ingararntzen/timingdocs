@@ -20,7 +20,7 @@ Sequencing timed data using a single :ref:`timingobject` (see :ref:`sequencer-po
     .. raw:: html
         :file: ../_demoes/point_sequencer.html
 
-    `demo file <../_demoes/point_sequencer.html>`_
+    `demofile <../_demoes/point_sequencer.html>`_
 
 
 Code
