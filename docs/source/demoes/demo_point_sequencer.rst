@@ -1,7 +1,7 @@
 ..  _demo-point-sequencer:
 
 ========================================================================
-Demo Point Sequencer
+Demo Sequencer Point Mode
 ========================================================================
 
 Sequencing timed data using a single :ref:`timingobject` (see :ref:`sequencer-pointmode`). 

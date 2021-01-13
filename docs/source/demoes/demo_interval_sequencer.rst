@@ -1,7 +1,7 @@
 ..  _demo-interval-sequencer:
 
 ========================================================================
-Demo Interval Sequencer
+Demo Sequencer Interval Mode
 ========================================================================
 
 Sequencing timed data using two :ref:`timingobject` (see :ref:`sequencer-intervalmode`). 
