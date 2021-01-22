@@ -28,7 +28,7 @@ Dataset API
 
         - options.chaining: support chaining
 
-            See :ref:`dataset-chaining`
+            See :ref:`dataset-chaining`.
 
 
     ..  js:method:: addCue(key, interval, data)
