@@ -4,9 +4,12 @@
 Dataset API
 ========================================================================
 
-..  js:class:: Dataset()
+..  js:class:: Dataset(options)
+
+    :param object options.order: see :ref:`cuecollection-order`
 
     Creates an empty dataset.
+
 
 
     ..  js:method:: update (cues[, options])
@@ -89,6 +92,10 @@ Dataset API
     ..  js:method:: entries()
 
         see :js:meth:`ObservableMapInterface.entries`
+
+    ..  js:method:: cues(options)
+
+        see :js:meth:`CueCollection.cues`
 
     ..  js:method:: on (name, callback[, options])
 

@@ -12,7 +12,7 @@ Introduction
 ------------------------------------------------------------------------
 
 :ref:`dataset` manages a collection of cues, implements the
-:ref:`observablemap` and adds support for flexible and efficient cue
+:ref:`cuecollection` and adds support for flexible and efficient cue
 modification and lookup, even for large volumes of cues.
 :ref:`Cues <cue>` are simple Javascript objects:
 
@@ -277,7 +277,7 @@ Update Result
 
 The **update** operation returns an array of items describing the effects
 for each cue argument. Result items are identical to event arguments
-**eArg** defined in :ref:`observablemap-earg`.
+**eArg** defined in :ref:`cuecollection-earg`.
 
 ..  code-block:: javascript
 
@@ -426,7 +426,13 @@ Events
 ------------------------------------------------------------------------
 
 Dataset supports three events **batch**, **change** and **remove**,
-as defined in :ref:`observablemap`.
+as defined in :ref:`cuecollection`.
+
+
+Cue Ordering
+------------------------------------------------------------------------
+
+See :ref:`cuecollection-ordering`.
 
 
 ..  _dataset-performance:

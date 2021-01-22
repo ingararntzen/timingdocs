@@ -61,7 +61,7 @@ Timingsrc is hosted at `GitHub <https://github.com/webtiming/timingsrc>`_.
 
    timeddata/interval
    timeddata/cue
-   timeddata/observablemap
+   timeddata/cuecollection
    timeddata/dataset
    timeddata/sequencer
 
@@ -79,11 +79,8 @@ Timingsrc is hosted at `GitHub <https://github.com/webtiming/timingsrc>`_.
    :hidden:
    :caption: API
    
-
-
-
    api/api_events
-   api/api_observablemap
+   api/api_cuecollection
    api/api_timingobject
    api/api_timingconverter
    api/api_timingprovider
@@ -161,10 +158,10 @@ Dataset and Sequencer
 
 Consistent playback of timed data is a key use case for the timing object. This is achieved using *Dataset* and *Sequencer*. Dataset allows 
 any type of time data to be represented as cues. Sequencers dynamically 
-provides the set of active cues, always consistent with the timing object. Both dataset and sequencer implement the *observable map interface*.
+provides the set of active cues, always consistent with the timing object. Both dataset and sequencer implement the :ref`cuecollection` interface.
 
-- :ref:`observablemap`
-- :ref:`observablemap-api`
+- :ref:`cuecollection`
+- :ref:`cuecollection-api`
 - :ref:`dataset` 
 - :ref:`dataset-api`
 - :ref:`sequencer` 

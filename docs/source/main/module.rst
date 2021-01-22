@@ -76,7 +76,7 @@ Namespace
     export {default as endpoint} from './util/endpoint.js';
     export {default as eventify} from './util/eventify.js';
     export {default as Interval} from './util/interval.js';
-    export {default as ObservableMap} from './util/observablemap.js';
+    export {default as CueCollection} from './dataset/cuecollection.js';
     export {default as Timeout} from './util/timeout.js';
 
     // timing object
