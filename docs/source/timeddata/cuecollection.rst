@@ -180,7 +180,7 @@ Distinguishing between modification types is easy:
 
 
 
-..  _cuecollection-order:
+..  _cuecollection-ordering:
 
 Cue Ordering
 ------------------------------------------------------------------------

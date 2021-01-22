@@ -99,6 +99,7 @@ exists in the dataset, the *pre-existing* cue will be **modified** to
 match the provided cue argument. If a cue argument includes a key but no
 interval and no data, this means to **delete** the *pre-existing* cue.
 
+See also special convenience methods build on top of the basic update primitive :ref:`dataset-convenience`.
 
 ..  code-block:: javascript
 
@@ -384,6 +385,34 @@ for *chaining* is true.
     If the *chaining* option is set to false, but the cue batch still
     contains chained cue arguments, this violation will not be detected.
     The consequences are not grave. The *old* value of result items and event arguments will be incorrect for chained cues.
+
+
+..  _dataset-convenience:
+
+Update Convenience Methods
+------------------------------------------------------------------------
+
+The dataset defines a few extra update methods for convencience, implemented on top of the basic update primitive.
+
+Operations on a single cue may use **addCue** for inserting or modifying a cue, and **removeCue** to delete a cue. 
+
+..  code-block:: javascript
+
+    ds.addCue("key_1", new Interval(1,2), data);
+
+    ds.removeCue("key_2");
+
+As noted in :ref:`dataset-batch`, it is not recommended to use these methods repeateadly, say in a `for ... loop`. Instead, an argument builder is available to aid the construction of update batches.
+
+
+..  code-block:: javascript
+
+    ds.builder
+        .addCue("key_1", new Interval(1,2), data)
+        .removeCue("key_2")
+        .addCue("key_3", new Interval(2,3), data)
+        .submit()
+        
 
 
 .. _dataset-lookup:

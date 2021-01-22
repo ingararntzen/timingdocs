@@ -31,6 +31,32 @@ Dataset API
             See :ref:`dataset-chaining`
 
 
+    ..  js:method:: addCue(key, interval, data)
+
+        Add or replace a single cue. See :ref:`dataset-convenience`.
+
+        :param object key: cue key
+        :param Interval interval: cue interval
+        :param object data: cue data
+        :returns object res: change item
+
+    ..  js:method:: removeCue(key)
+
+        Remove a single cue. See :ref:`dataset-convenience`.
+
+        :param object key: cue key
+        :returns object res: change item
+
+    ..  js:attribute:: builder
+
+        Get update argument builder. See :ref:`dataset-convenience`.
+
+        :returns object builder: update argument builder
+        
+            - builder.addCue(key, interval, data)
+            - builder.removeCue(key)
+            - builder.submit()
+
     ..  js:method:: clear()
 
         :returns Array: list of change items: cue changes caused by the operation
