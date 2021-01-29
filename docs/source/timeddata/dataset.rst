@@ -392,27 +392,65 @@ for *chaining* is true.
 Update Convenience Methods
 ------------------------------------------------------------------------
 
-The dataset defines a few extra update methods for convencience, implemented on top of the basic update primitive.
-
-Operations on a single cue may use **addCue** for inserting or modifying a cue, and **removeCue** to delete a cue. 
-
-..  code-block:: javascript
-
-    ds.addCue("key_1", new Interval(1,2), data);
-
-    ds.removeCue("key_2");
-
-As noted in :ref:`dataset-batch`, it is not recommended to use these methods repeateadly, say in a `for ... loop`. Instead, an argument builder is available to aid the construction of update batches.
+The dataset defines a few convenience methods for updating the dataset implemented on top of the basic update primitive. Single cue operations **addCue** for inserting or modifying a cue and **removeCue** to delete a cue. These operations support :ref:`dataset-batch` through repeated invocation. Cue arguments will be buffered by an internal **builder** object and submitted as a **single** update operation on the dataset, just after the current JS task has completed. The result from the update operation is availble on a **updateDone** promise. 
 
 
 ..  code-block:: javascript
 
-    ds.builder
+    ds
         .addCue("key_1", new Interval(1,2), data)
         .removeCue("key_2")
-        .addCue("key_3", new Interval(2,3), data)
-        .submit()
-        
+        .addCue("key_1", new Interval(1,3), data);
+
+    ds.updateDone.then((result) => {console.log(result)});
+
+
+..  note::
+
+    Once resolved, the **updateDone** promise is replaced by a new promise for the next update operation, but still available on the same **updateDon** property. So, for later update results just access the **updateDone** getter property again.
+
+
+    ..  code-block:: javascript
+
+        function show_result(update_result) {
+            console.log("update result");
+        }
+
+        ds.updateDone.then(show_result);
+        ds.addCue("k", new Interval(612, 10000), "k")
+
+        setTimeout(() => {
+            ds.addCue("l",  new Interval(614, 10000), "l");
+            ds.updateDone.then(show_result);
+        }, 1000);
+
+
+
+To specify **options** for :ref:`dataset-batch` use a custom **builder** object.
+
+
+..  code-block:: javascript
+
+    let options;
+    let builder = ds.makeBuilder(options);
+
+    builder.updateDone.then(()=>{console.log("result")});
+    builder
+        .addCue("key_1", new Interval(1,2), data);
+        .removeCue("key_2");
+        .clear();
+
+
+
+..  tip::
+
+    For interactive use **_addCue** and **_removeCue** avoid buffering cue arguments by using the update primitive directly.
+
+    
+    ..  code-block:: javascript
+
+        let update_result = ds._addCue("key_1", new Interval(1,2), data);
+
 
 
 .. _dataset-lookup:
@@ -461,7 +499,7 @@ as defined in :ref:`cuecollection`.
 Cue Ordering
 ------------------------------------------------------------------------
 
-See :ref:`cuecollection-ordering`.
+See :ref:`cuecollection-order`.
 
 
 ..  _dataset-performance:

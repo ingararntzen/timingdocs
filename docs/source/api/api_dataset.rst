@@ -38,24 +38,34 @@ Dataset API
         :param object key: cue key
         :param Interval interval: cue interval
         :param object data: cue data
-        :returns object res: change item
+        :returns Dataset dataset: dataset
 
     ..  js:method:: removeCue(key)
 
         Remove a single cue. See :ref:`dataset-convenience`.
 
         :param object key: cue key
-        :returns object res: change item
+        :returns Dataset dataset: dataset
 
-    ..  js:attribute:: builder
+    ..  js:attribute: updateDone
 
-        Get update argument builder. See :ref:`dataset-convenience`.
+        Returns current promise for update result. See :ref:`dataset-convenience`.
 
-        :returns object builder: update argument builder
+        :returns Promise promise: updateDone
+
+
+    ..  js:method:: makeBuilder(options)
+
+        Make cue argument builder object with options. See :ref:`dataset-convenience`.
+
+        :params object options: update options (see :js:meth:`Dataset.update`)
+        :returns object builder: cue argument update builder
         
             - builder.addCue(key, interval, data)
             - builder.removeCue(key)
-            - builder.submit()
+
+
+
 
     ..  js:method:: clear()
 

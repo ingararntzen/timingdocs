@@ -104,7 +104,7 @@ Need to synchronize HTML5 video?
 	Check out :ref:`demo-mediasync`
 
 Need to synchronized timed data? 
-	Check out :ref:`demo-point-sequencer`
+	Check out :ref:`demo-point-sequencer` or :ref:`demo-interval-sequencer`
 
 Need to go online? 
 	Check out :ref:`demo-timingprovider`
