@@ -41,7 +41,7 @@ Timingsrc is hosted at `GitHub <https://github.com/webtiming/timingsrc>`_.
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Timing Object
+   :caption: Timing
 
    timing/timingobject
    timing/timingconverter
@@ -50,7 +50,7 @@ Timingsrc is hosted at `GitHub <https://github.com/webtiming/timingsrc>`_.
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Media Sync
+   :caption: Timed Media
 
    sync/mediasync
 
