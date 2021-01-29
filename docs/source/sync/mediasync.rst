@@ -60,11 +60,11 @@ Support for precise synchronization of HTML5 media is **experimental** and subje
 
 4) Media capabilities vary accross platforms, and platform specific media issues may impact the support for precise synchronization. For instance, IOS devices have issues with the implementation of variable playbackrate.
 
-5) Stricter autoplay policies in Web browsers may require user involvement becore synchronized playback can start.
+5) Stricter autoplay policies in Web browsers may require user involvement becore any playback can start.
 
 6) Capability for precisely time controlled playback is currently not required (or even recommended) by W3C standards. For this reason, synchronization performance is not evaluated and new browser versions may therefore include sudden changes that affect synchronization (for better or worse).
 
-7) Timed media playback requires a shore initializion fase before precise and stable playback can be achieved. This is expected to take 1-3 seconds, and allows the media element to load data and home in on the correct playback offset. If precicely timed playback is needed from the very start, one trick could be to pad the media content with a preamble, allowing synchronization to be started a little earlier. In this case it might be attractive to hide the media element until the original starting point is reached. 
+7) Timed media playback requires a short initializion phase before precise and stable playback can be achieved. This is expected to take 0-3 seconds, and allows the media element to load data and home in on the correct playback offset. If precicely timed playback is needed from the very start, one trick could be to pad the media content with a preamble, allowing synchronization to be started a little earlier. In this case it might be attractive to hide the media element until the original starting point is reached. 
     
 
 
