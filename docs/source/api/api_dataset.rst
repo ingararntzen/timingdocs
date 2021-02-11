@@ -22,18 +22,28 @@ Dataset API
         to construct cue parameters see :ref:`dataset-update`. For details on
         return value see :ref:`dataset-update-result`.
 
-        - options.equals: custom equality function for cue data
+        - options.equals: custom equality function for cue data.
 
             See :ref:`dataset-cue-equality`.
 
-        - options.chaining: support chaining
+        - options.chaining: support chaining. True by default.
 
             See :ref:`dataset-chaining`.
+        
+        - options.safe: safe mode. False by default.
+
+            See :ref:`dataset-cuemanagement`.
+
+        - options.debug: debug mode. False by default.
+
+            Performs integrity testing of internal datastructures after each update operation, throwing exceptions if not passed.
+
+
 
 
     ..  js:method:: addCue(key, interval, data)
 
-        Add or replace a single cue. See :ref:`dataset-convenience`.
+        Add or replace a single cue. See :ref:`dataset-update-convenience`.
 
         :param object key: cue key
         :param Interval interval: cue interval
@@ -42,7 +52,7 @@ Dataset API
 
     ..  js:method:: removeCue(key)
 
-        Remove a single cue. See :ref:`dataset-convenience`.
+        Remove a single cue. See :ref:`dataset-update-convenience`.
 
         :param object key: cue key
         :returns Dataset dataset: dataset
@@ -56,7 +66,7 @@ Dataset API
 
     ..  js:method:: makeBuilder(options)
 
-        Make cue argument builder object with options. See :ref:`dataset-convenience`.
+        Make cue argument builder object with options. See :ref:`dataset-update-convenience`.
 
         :params object options: update options (see :js:meth:`Dataset.update`)
         :returns object builder: cue argument update builder
