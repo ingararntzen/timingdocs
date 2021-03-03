@@ -47,7 +47,7 @@ Include as ES6 module
     <html>
         <head>
             <script type="module">
-                import * as TIMINGSRC from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                import * as TIMINGSRC from "https://webtiming.github.io/timingsrc/lib/timingsrc-module-v3.js";
                 console.log(`hello world timingsrc version ${TIMINGSRC.version}!`);
             </script>
         </head>
