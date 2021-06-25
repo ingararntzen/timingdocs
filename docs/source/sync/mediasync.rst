@@ -23,7 +23,7 @@ Introduction
             <script type="module">
                 import {
                     TimingObject
-                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-module-v3.js";
+                } from "https://webtiming.github.io/timingsrc/lib/timingsrc-esm-v3.js";
                 const to = new TimingObject({range:[0,100]});
                 const sync = MCorp.mediaSync(document.getElementById('player'), to);
             </script>

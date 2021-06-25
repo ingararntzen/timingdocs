@@ -28,7 +28,7 @@ of the the timingobject, and two buttons **pause** and **play**.
     <html>
         <head>
             <script type="module">
-                import {TimingObject} from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                import {TimingObject} from "https://webtiming.github.io/timingsrc/lib/timingsrc-esm-v3.js";
                 // create a timing object
                 const to = new TimingObject();
                 // add logic here
