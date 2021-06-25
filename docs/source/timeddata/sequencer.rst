@@ -311,4 +311,4 @@ as defined in :ref:`cuecollection`.
 Cue Ordering
 ------------------------------------------------------------------------
 
-See :ref:`cuecollection-ordering`.
+See :ref:`cuecollection-order`.
