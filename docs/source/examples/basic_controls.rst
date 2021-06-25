@@ -118,7 +118,7 @@ Ready to load the page and start controlling the timing object.
 .. admonition:: Demo
 
     .. raw:: html
-        :file: ../demoes/basic_controls.html
+        :file: ../_demoes/basic_controls.html
 
 
 Code
