@@ -17,6 +17,7 @@
             display:inline;
         }
     </style>
+    <script type="text/javascript" src="https://www.mcorp.no/lib/mcorp-2.0.js"></script>
     <script src="https://mcorp.no/lib/mediasync.js"></script>
 
     <script type="module">
@@ -29,6 +30,12 @@
 
         // timing object
         const to = new TimingObject({range:[0,100]});
+
+        // MCorp App
+        const app = MCorp.app("8456579076771837888", {anon:true});        
+        app.ready.then(function() {
+            to.timingsrc = app.motions["shared"];
+        });
 
         // Hook up buttons UI
         document.getElementById("reset").onclick = function () {
