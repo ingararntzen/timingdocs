@@ -103,7 +103,7 @@ For **online** timing support, connect an online :ref:`timingprovider` to the :r
 Need to synchronize HTML5 video? 
 	Check out :ref:`demo-mediasync`
 
-Need to synchronized timed data? 
+Need to synchronize timed data? 
 	Check out :ref:`demo-point-sequencer` or :ref:`demo-interval-sequencer`
 
 Need to go online? 
