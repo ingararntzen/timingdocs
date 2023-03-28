@@ -28,7 +28,7 @@ of the the timingobject, and two buttons **pause** and **play**.
     <html>
         <head>
             <script type="module">
-                import {TimingObject} from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                import {TimingObject} from "https://webtiming.github.io/timingsrc/lib/timingsrc-esm-v3.js";
                 // create a timing object
                 const to = new TimingObject();
                 // add logic here
@@ -118,7 +118,7 @@ Ready to load the page and start controlling the timing object.
 .. admonition:: Demo
 
     .. raw:: html
-        :file: ../demoes/basic_controls.html
+        :file: ../_demoes/basic_controls.html
 
 
 Code

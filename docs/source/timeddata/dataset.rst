@@ -12,7 +12,7 @@ Introduction
 ------------------------------------------------------------------------
 
 :ref:`dataset` manages a collection of cues, implements the
-:ref:`observablemap` and adds support for flexible and efficient cue
+:ref:`cuecollection` and adds support for flexible and efficient cue
 modification and lookup, even for large volumes of cues.
 :ref:`Cues <cue>` are simple Javascript objects:
 
@@ -102,19 +102,19 @@ interval and no data, this means to **delete** the *pre-existing* cue.
 
 ..  code-block:: javascript
 
-    let ds = new timingsrc.Dataset();
+    let ds = new Dataset();
 
     // insert
     ds.update({
-        key: "mykey",
-        interval: new timingsrc.Interval(2.2, 4.31),
+        key: "key1",
+        interval: new Interval(2.2, 4.31),
         data: "foo"
     });
 
     // modify
     ds.update({
-        key: "mykey",
-        interval: new timingsrc.Interval(4.4, 6.9),
+        key: "key2",
+        interval: new Interval(4.4, 6.9, false, false),
         data: "bar"
     });
 
@@ -122,10 +122,27 @@ interval and no data, this means to **delete** the *pre-existing* cue.
     ds.update({key: "mykey"})
 
 
+
+For convenience, intervals in cue arguments may also be specified as an array, leaving it to the dataset to create :ref:`interval` objects for internal use. Also, **addCue** and **removeCue** methods provide shorthand access to **update**. For instance, the above code example may be rewritten as follows:
+
+    ..  code-block:: javascript
+
+        let ds = new Dataset();
+        ds.addCue("key1", [2.2, 4.31], "foo");
+        ds.addCue("key2", [4.4, 6.9, false, false], "bar");
+
+
+See also :ref:`dataset-update-convenience` for more details.
+
+
+..  _dataset-cuemanagement:
+
+Cue Management
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 When a cue is inserted into the dataset, it will be managed
-until it is deleted at some later point. Cue modification is implemented as
-*in-place* modification of the *pre-existing* cue. All cue access
-operations (e.g. **lookup**) provide direct access to managed cues.
+until it is deleted at some later point. All cue access
+operations (e.g. **cues**, **lookup**) provide direct access to managed cues.
 
 
 ..  warning::
@@ -134,23 +151,28 @@ operations (e.g. **lookup**) provide direct access to managed cues.
     **never** be modified directly by application code. Always use the
     **update** operation to implement cue modification.
 
-    If managed cue objects are modified by external code, no guarantees
-    can be given concerning functional correctness. Note
-    also that the dataset does not implement any protection against
-    external cue modification.
 
-    The dataset will however throw an exception if a currently managed cue
-    object is used as cue argument with the **update** operation.
+If managed cue objects are modified by external code, no guarantees
+can be given concerning functional correctness. By default, the dataset does not offer any protection against external cue modification. However,
+in safe mode `Object.freeze()` is applied to all cues, implying that attempted modification should throw an exception (strict mode). This is useful for evaluation but should likely be turned off in production, as use of `Object.freeze()` comes with a performance penalty.
 
-    Rules of thumb:
+..  code-block:: javascript
 
-    -   always create cue arguments as new object with desired state
-    -   never *reuse* previously defined cue objects as arguments to **update**
-    -   avoid keeping variables referencing cue objects.
+    let ds = new Dataset({safe:true})
 
-    Unwanted modifications of managed cues may also occur if the *cue.data*
-    property is subject to external modification. For instance, it may already be be managed by an application specific data model. If this is the case, one approach would be to copy data objects as part of cue creation. Another approach would be to sequence only references to the data, and then resolving data access directly from the data model, as part of
-    cue rendering.
+
+
+
+..  important::
+
+    -   **always** create cue arguments as new objects with desired state
+    -   **never** reuse managed cue objects as arguments to update
+
+The dataset will throw an exception if a currently managed cue
+object is used as cue argument with the **update** operation.
+
+Unwanted modifications of managed cues may also occur if the *cue.data*
+property is subject to external modification. `Object.freeze()` does not protect against this. For instance, the data object may a reference to an object which is managed by an application specific data model. If this is the case one approach would be to copy data objects as part of cue creation. Another approach is to add one level of indirection, adding only immutable object id's to the dataset. This though would imply that data changes can not be detected by the dataset.
 
 
 Cue Arguments
@@ -277,7 +299,7 @@ Update Result
 
 The **update** operation returns an array of items describing the effects
 for each cue argument. Result items are identical to event arguments
-**eArg** defined in :ref:`observablemap-earg`.
+**eArg** defined in :ref:`cuecollection-earg`.
 
 ..  code-block:: javascript
 
@@ -386,6 +408,72 @@ for *chaining* is true.
     The consequences are not grave. The *old* value of result items and event arguments will be incorrect for chained cues.
 
 
+..  _dataset-update-convenience:
+
+Update Convenience Methods
+------------------------------------------------------------------------
+
+The dataset defines a few convenience methods for updating the dataset implemented on top of the basic update primitive. Single cue operations **addCue** for inserting or modifying a cue and **removeCue** to delete a cue. These operations support :ref:`dataset-batch` through repeated invocation. Cue arguments will be buffered by an internal **builder** object and submitted as a **single** update operation on the dataset, just after the current JS task has completed. The result from the update operation is availble on a **updateDone** promise. 
+
+
+..  code-block:: javascript
+
+    ds
+        .addCue("key_1", new Interval(1,2), data)
+        .removeCue("key_2")
+        .addCue("key_1", new Interval(1,3), data);
+
+    ds.updateDone.then((result) => {console.log(result)});
+
+
+..  note::
+
+    Once resolved, the **updateDone** promise is replaced by a new promise for the next update operation, but still available on the same **updateDone** property. So, for later update results just access the **updateDone** getter property again.
+
+
+    ..  code-block:: javascript
+
+        function show_result(update_result) {
+            console.log("update result");
+        }
+
+        ds.updateDone.then(show_result);
+        ds.addCue("k", new Interval(612, 10000), "k")
+
+        setTimeout(() => {
+            ds.addCue("l",  new Interval(614, 10000), "l");
+            ds.updateDone.then(show_result);
+        }, 1000);
+
+
+
+To specify **options** for :ref:`dataset-batch` use a custom **builder** object.
+
+
+..  code-block:: javascript
+
+    let options;
+    let builder = ds.makeBuilder(options);
+
+    builder.updateDone.then(()=>{console.log("result")});
+    builder
+        .addCue("key_1", new Interval(1,2), data);
+        .removeCue("key_2");
+        .clear();
+
+
+
+..  tip::
+
+    For interactive use **_addCue** and **_removeCue** avoid buffering cue arguments by using the update primitive directly.
+
+    
+    ..  code-block:: javascript
+
+        let update_result = ds._addCue("key_1", new Interval(1,2), data);
+
+
+
 .. _dataset-lookup:
 
 Lookup
@@ -426,7 +514,13 @@ Events
 ------------------------------------------------------------------------
 
 Dataset supports three events **batch**, **change** and **remove**,
-as defined in :ref:`observablemap`.
+as defined in :ref:`cuecollection`.
+
+
+Cue Ordering
+------------------------------------------------------------------------
+
+See :ref:`cuecollection-order`.
 
 
 ..  _dataset-performance:

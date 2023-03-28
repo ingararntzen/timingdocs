@@ -26,7 +26,7 @@ Minor changes
 
     - Unsubscribe from events :js:meth:`EventProviderInterface.off` is changed so that it takes a subscription handle returned by :js:meth:`EventProviderInterface.on`.
 
-    - Event type **events** in v2 is renamed to **batch**, see :ref:`observablemap-batch`.
+    - Event type **events** in v2 is renamed to **batch**, see :ref:`cuecollection-batch`.
 
     - The sequencer constructor signature changed from *Sequencer(toA[, toB])* to *Sequencer(dataset, toA[, toB])*.
 

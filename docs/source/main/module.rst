@@ -47,7 +47,7 @@ Include as ES6 module
     <html>
         <head>
             <script type="module">
-                import * as TIMINGSRC from "https://webtiming.github.io/timingsrc/lib/timingsrc-v3.js";
+                import * as TIMINGSRC from "https://webtiming.github.io/timingsrc/lib/timingsrc-esm-v3.js";
                 console.log(`hello world timingsrc version ${TIMINGSRC.version}!`);
             </script>
         </head>
@@ -56,10 +56,10 @@ Include as ES6 module
     </html>
 
 Full source
-    `<https://webtiming.github.io/timingsrc/lib/timingsrc-module-v3.js>`_
+    `<https://webtiming.github.io/timingsrc/lib/timingsrc-esm-v3.js>`_
 
 Minified source
-    `<https://webtiming.github.io/timingsrc/lib/timingsrc-module-min-v3.js>`_
+    `<https://webtiming.github.io/timingsrc/lib/timingsrc-min-esm-v3.js>`_
 
 
 
@@ -76,7 +76,7 @@ Namespace
     export {default as endpoint} from './util/endpoint.js';
     export {default as eventify} from './util/eventify.js';
     export {default as Interval} from './util/interval.js';
-    export {default as ObservableMap} from './util/observablemap.js';
+    export {default as CueCollection} from './dataset/cuecollection.js';
     export {default as Timeout} from './util/timeout.js';
 
     // timing object

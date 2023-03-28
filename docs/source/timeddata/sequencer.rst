@@ -58,14 +58,14 @@ Definition
 ------------------------------------------------------------------------
 
 
-*   The sequencer implements :ref:`observablemap` and holds a
+*   The sequencer implements :ref:`cuecollection` and holds a
     **subset** of the cues managed by its source :ref:`dataset`.
 
 *   At any time, the sequencer holds the particular subset of cues that are
     **active** cues.
 
 *   The sequencer emits **change**, **remove** and **batch** events
-    (see: :ref:`observablemap`) as cues are **activated** or **deactivated**
+    (see: :ref:`cuecollection`) as cues are **activated** or **deactivated**
     during playback.
 
 Active cues
@@ -78,7 +78,7 @@ Precisely timed events
     As *playback position* gradually changes during timed playback, cues must be 
     activated or deactivated at the correct time. The sequencer dynamically manipulates 
     its own cue collection and precisely schedules **change** and **remove** events 
-    (see: :ref:`observablemap`) for activation and deactivation of cues.
+    (see: :ref:`cuecollection`) for activation and deactivation of cues.
 
 Flexible timeline navigation and playback
     Sequencers have full support for all kinds of navigation and playback allowed by 
@@ -305,4 +305,10 @@ Events
 ------------------------------------------------------------------------
 
 Sequencer supports three events **batch**, **change** and **remove**,
-as defined in :ref:`observablemap`.
+as defined in :ref:`cuecollection`.
+
+
+Cue Ordering
+------------------------------------------------------------------------
+
+See :ref:`cuecollection-order`.

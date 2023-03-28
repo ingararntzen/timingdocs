@@ -4,9 +4,12 @@
 Dataset API
 ========================================================================
 
-..  js:class:: Dataset()
+..  js:class:: Dataset(options)
+
+    :param object options.order: see :ref:`cuecollection-order`
 
     Creates an empty dataset.
+
 
 
     ..  js:method:: update (cues[, options])
@@ -19,13 +22,59 @@ Dataset API
         to construct cue parameters see :ref:`dataset-update`. For details on
         return value see :ref:`dataset-update-result`.
 
-        - options.equals: custom equality function for cue data
+        - options.equals: custom equality function for cue data.
 
             See :ref:`dataset-cue-equality`.
 
-        - options.chaining: support chaining
+        - options.chaining: support chaining. True by default.
 
-            See :ref:`dataset-chaining`
+            See :ref:`dataset-chaining`.
+        
+        - options.safe: safe mode. False by default.
+
+            See :ref:`dataset-cuemanagement`.
+
+        - options.debug: debug mode. False by default.
+
+            Performs integrity testing of internal datastructures after each update operation, throwing exceptions if not passed.
+
+
+
+
+    ..  js:method:: addCue(key, interval, data)
+
+        Add or replace a single cue. See :ref:`dataset-update-convenience`.
+
+        :param object key: cue key
+        :param Interval interval: cue interval
+        :param object data: cue data
+        :returns Dataset dataset: dataset
+
+    ..  js:method:: removeCue(key)
+
+        Remove a single cue. See :ref:`dataset-update-convenience`.
+
+        :param object key: cue key
+        :returns Dataset dataset: dataset
+
+    ..  js:attribute: updateDone
+
+        Returns current promise for update result. See :ref:`dataset-convenience`.
+
+        :returns Promise promise: updateDone
+
+
+    ..  js:method:: makeBuilder(options)
+
+        Make cue argument builder object with options. See :ref:`dataset-update-convenience`.
+
+        :params object options: update options (see :js:meth:`Dataset.update`)
+        :returns object builder: cue argument update builder
+        
+            - builder.addCue(key, interval, data)
+            - builder.removeCue(key)
+
+
 
 
     ..  js:method:: clear()
@@ -89,6 +138,10 @@ Dataset API
     ..  js:method:: entries()
 
         see :js:meth:`ObservableMapInterface.entries`
+
+    ..  js:method:: cues(options)
+
+        see :js:meth:`CueCollection.cues`
 
     ..  js:method:: on (name, callback[, options])
 

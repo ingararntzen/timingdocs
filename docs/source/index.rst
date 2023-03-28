@@ -41,7 +41,7 @@ Timingsrc is hosted at `GitHub <https://github.com/webtiming/timingsrc>`_.
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Timing Object
+   :caption: Timing
 
    timing/timingobject
    timing/timingconverter
@@ -50,7 +50,7 @@ Timingsrc is hosted at `GitHub <https://github.com/webtiming/timingsrc>`_.
 .. toctree::
    :maxdepth: 1
    :hidden:
-   :caption: Media Sync
+   :caption: Timed Media
 
    sync/mediasync
 
@@ -61,7 +61,7 @@ Timingsrc is hosted at `GitHub <https://github.com/webtiming/timingsrc>`_.
 
    timeddata/interval
    timeddata/cue
-   timeddata/observablemap
+   timeddata/cuecollection
    timeddata/dataset
    timeddata/sequencer
 
@@ -79,11 +79,8 @@ Timingsrc is hosted at `GitHub <https://github.com/webtiming/timingsrc>`_.
    :hidden:
    :caption: API
    
-
-
-
    api/api_events
-   api/api_observablemap
+   api/api_cuecollection
    api/api_timingobject
    api/api_timingconverter
    api/api_timingprovider
@@ -106,8 +103,8 @@ For **online** timing support, connect an online :ref:`timingprovider` to the :r
 Need to synchronize HTML5 video? 
 	Check out :ref:`demo-mediasync`
 
-Need to synchronized timed data? 
-	Check out :ref:`demo-point-sequencer`
+Need to synchronize timed data? 
+	Check out :ref:`demo-point-sequencer` or :ref:`demo-interval-sequencer`
 
 Need to go online? 
 	Check out :ref:`demo-timingprovider`
@@ -161,10 +158,10 @@ Dataset and Sequencer
 
 Consistent playback of timed data is a key use case for the timing object. This is achieved using *Dataset* and *Sequencer*. Dataset allows 
 any type of time data to be represented as cues. Sequencers dynamically 
-provides the set of active cues, always consistent with the timing object. Both dataset and sequencer implement the *observable map interface*.
+provides the set of active cues, always consistent with the timing object. Both dataset and sequencer implement the :ref`cuecollection` interface.
 
-- :ref:`observablemap`
-- :ref:`observablemap-api`
+- :ref:`cuecollection`
+- :ref:`cuecollection-api`
 - :ref:`dataset` 
 - :ref:`dataset-api`
 - :ref:`sequencer` 
