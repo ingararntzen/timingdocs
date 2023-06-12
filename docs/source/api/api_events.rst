@@ -52,9 +52,8 @@ This includes :ref:`dataset` and :ref:`sequencer`.
             to cancel subscription with :js:meth:`off`.
 
 
-    ..  js:method:: off (name, subscription)
+    ..  js:method:: off (subscription)
 
-        Un-register a callback for given event type.
+        Un-register a callback for given subscription handle.
 
-        :param string name: event name
         :param object subscription: subscription handle from :js:meth:`on`
